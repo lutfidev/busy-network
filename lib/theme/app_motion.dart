@@ -1,0 +1,28 @@
+import 'package:flutter/animation.dart';
+
+/// Token gerak (kartu "Elevasi & gerak").
+abstract final class AppMotion {
+  /// Tombol ditekan / dilepas.
+  static const press = Duration(milliseconds: 120);
+
+  /// Panel naik dari bawah.
+  static const sheetIn = Duration(milliseconds: 300);
+
+  /// Pindah sorotan tutorial.
+  static const spotlight = Duration(milliseconds: 350);
+
+  /// Trafik normal: titik tiap 18 px, maju 36 px per 1,4 s.
+  static const trafficFlow = Duration(milliseconds: 1400);
+  static const double trafficGap = 18;
+  static const double trafficAdvance = 36;
+
+  /// Trafik macet: titik tiap 9 px, 3,2 s.
+  static const trafficJam = Duration(milliseconds: 3200);
+  static const double trafficJamGap = 9;
+
+  /// Kabel penuh berkedip.
+  static const alarmBlink = Duration(milliseconds: 700);
+
+  static const Curve standard = Curves.easeOut;
+  static const Curve pop = Cubic(0.2, 1.4, 0.4, 1);
+}
