@@ -1,5 +1,5 @@
 name: busy_network
-description: "A new Flutter project."
+description: "Jaringan Sibuk — game puzzle jaringan RT/RW Net (Flutter + Flame)."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -7,8 +7,12 @@ environment:
   sdk: ^3.13.4
 
 dependencies:
+  flame: ^1.38.2
   flutter:
     sdk: flutter
+  go_router: ^18.1.0
+  google_fonts: ^9.0.0
+  intl: ^0.20.3
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +21,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    # Font Fredoka & Nunito dibundel supaya google_fonts tidak perlu
+    # mengunduh saat runtime (offline-friendly, dan test jadi deterministik).
+    - assets/google_fonts/
+

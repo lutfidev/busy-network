@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MainApp());
 }
 
@@ -10,7 +13,8 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+      title: 'Jaringan Sibuk',
+      home: Scaffold(body: Center(child: Text('Jaringan Sibuk'))),
     );
   }
 }
