@@ -92,6 +92,20 @@ abstract final class AppMotion {
   /// Pose statis tangan seret: di titik awal, sudah terlihat (12%).
   static const handDragStill = Duration(milliseconds: 288);
 
+  /// Latar Beranda: trafik kota maju [trafficAdvance] per siklus
+  /// (js-flow & js-flow-slow).
+  static const homeFlow = Duration(milliseconds: 1800);
+  static const homeFlowSlow = Duration(milliseconds: 3400);
+
+  /// Seluruh peta kota bergeser pelan bolak-balik (js-drift, alternate).
+  static const homeDrift = Duration(seconds: 16);
+  static const homeDriftOffset = Offset(-14, -20);
+  static const homeDriftAmount = Keyframes([(0, 0), (1, 1)]);
+
+  /// Rumah macet di latar berkedip (js-blink).
+  static const homeBlink = Duration(milliseconds: 2400);
+  static const homeBlinkOpacity = Keyframes([(0, 1), (0.5, 0.35), (1, 1)]);
+
   static const Curve standard = Curves.easeOut;
   static const Curve pop = Cubic(0.2, 1.4, 0.4, 1);
 }

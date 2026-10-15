@@ -1,9 +1,11 @@
 import 'package:busy_network/app/app.dart';
 import 'package:busy_network/app/routes.dart';
+import 'package:busy_network/screens/home/home_painters.dart';
 import 'package:busy_network/screens/level_map/level_map_screen.dart';
 import 'package:busy_network/screens/result_success/result_success_screen.dart';
 import 'package:busy_network/screens/tutorial/tutorial_overlay.dart';
 import 'package:busy_network/theme/theme.dart';
+import 'package:busy_network/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -138,6 +140,31 @@ void main() {
       await pumpApp(tester, location: step(2));
       expect(shift(tester), Offset.zero);
       expect(tester.widget<Opacity>(inHand(Opacity)).opacity, 1);
+    });
+  });
+
+  group('latar Beranda', () {
+    Finder painter() => find.descendant(
+      of: find.byType(HomeBackdrop),
+      matching: find.byType(CustomPaint),
+    );
+
+    testWidgets('terus bergerak', (tester) async {
+      await pumpAnimated(tester, AppRoutes.home);
+      final sketch =
+          tester.widget<CustomPaint>(painter()).painter! as SketchPainter;
+      var repaints = 0;
+      sketch.addListener(() => repaints++);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(repaints, 2);
+      expect(tester.binding.hasScheduledFrame, isTrue);
+    });
+
+    testWidgets('animasi mati → diam', (tester) async {
+      setScreenSize(tester, const Size(390, 844));
+      await pumpApp(tester);
+      expect(tester.binding.hasScheduledFrame, isFalse);
     });
   });
 }

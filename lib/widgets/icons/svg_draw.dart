@@ -84,7 +84,7 @@ abstract final class SvgDraw {
     }
   }
 
-  /// Titik trafik sepanjang path SVG.
+  /// Titik trafik sepanjang path SVG, digeser maju sejauh [phase] px.
   static void traffic(
     Canvas canvas,
     String d,
@@ -92,11 +92,12 @@ abstract final class SvgDraw {
     double gap = 18,
     double width = 4,
     bool glow = true,
+    double phase = 0,
   }) {
     final p = path(d);
     final dots = <Offset>[];
     for (final m in p.computeMetrics()) {
-      for (var t = 0.0; t <= m.length; t += gap) {
+      for (var t = phase % gap; t <= m.length; t += gap) {
         final tan = m.getTangentForOffset(t);
         if (tan != null) dots.add(tan.position);
       }
@@ -116,9 +117,15 @@ abstract final class SvgDraw {
   }
 }
 
-/// Painter dari closure, untuk ilustrasi statis berkoordinat desain.
+/// Painter dari closure, untuk ilustrasi berkoordinat desain. Beri
+/// [repaint] (mis. jam `LoopClock`) bila ilustrasinya bergerak.
 class SketchPainter extends CustomPainter {
-  const SketchPainter(this.draw, {required this.designSize, this.id = ''});
+  const SketchPainter(
+    this.draw, {
+    required this.designSize,
+    this.id = '',
+    super.repaint,
+  });
 
   final void Function(Canvas canvas) draw;
 
