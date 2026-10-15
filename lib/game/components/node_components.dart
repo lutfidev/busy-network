@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 
 import '../../theme/theme.dart';
@@ -9,9 +12,13 @@ import '../render/map_renderer.dart';
 /// Node peta (router, rumah, junction). Seperti kabel, digambar dan diuji
 /// sentuh langsung di koordinat peta (390×472), jadi [MapRenderer] dipanggil
 /// apa adanya dan hasilnya sama persis dengan `drawScene`.
+///
+/// Tarikan kabel dimulai dengan menyeret node; `NetworkGame` yang
+/// meneruskannya ke `GameState`.
 sealed class MapNodeComponent extends Component
-    with HasGameReference<NetworkGame> {
-  MapNodeComponent(this.node, {required this.hitRadius});
+    with HasGameReference<NetworkGame>, DragCallbacks {
+  MapNodeComponent(this.node, {required double radius})
+    : hitRadius = math.max(radius, AppSizes.mapTouchRadius);
 
   factory MapNodeComponent.of(MapNode node) => switch (node.kind) {
     NodeKind.router => RouterComponent(node),
@@ -21,16 +28,40 @@ sealed class MapNodeComponent extends Component
 
   MapNode node;
 
-  /// Jari-jari bidang sentuh di sekitar `node.position` (untuk tarik kabel).
+  /// Jari-jari bidang sentuh di sekitar `node.position`: sebesar gambarnya,
+  /// minimal [AppSizes.mapTouchRadius].
   final double hitRadius;
 
   @override
   bool containsLocalPoint(Vector2 point) =>
       (point.toOffset() - node.position).distance <= hitRadius;
+
+  @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    game.startPull(node.id, event);
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) => game.movePull(event);
+
+  @override
+  void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
+    game.endPull(event.pointerId);
+  }
+
+  /// Batal dulu: bawaan mixin meneruskan batal sebagai [onDragEnd], yang
+  /// akan memasang kabel bila sedang menempel.
+  @override
+  void onDragCancel(DragCancelEvent event) {
+    game.cancelPull(event.pointerId);
+    super.onDragCancel(event);
+  }
 }
 
 class RouterComponent extends MapNodeComponent {
-  RouterComponent(super.node) : super(hitRadius: AppSizes.routerSize / 2);
+  RouterComponent(super.node) : super(radius: AppSizes.routerSize / 2);
 
   @override
   void render(Canvas canvas) {
@@ -47,7 +78,7 @@ class RouterComponent extends MapNodeComponent {
 }
 
 class HouseComponent extends MapNodeComponent {
-  HouseComponent(super.node) : super(hitRadius: AppSizes.houseRadius);
+  HouseComponent(super.node) : super(radius: AppSizes.houseRadius);
 
   @override
   void render(Canvas canvas) {
@@ -57,12 +88,13 @@ class HouseComponent extends MapNodeComponent {
       game.scene.theme,
       snapColor: game.snapColor,
       alarmOpacity: game.motion.alarmOpacity,
+      snapOpacity: game.motion.snapOpacity,
     );
   }
 }
 
 class JunctionComponent extends MapNodeComponent {
-  JunctionComponent(super.node) : super(hitRadius: MapRenderer.junctionRadius);
+  JunctionComponent(super.node) : super(radius: MapRenderer.junctionRadius);
 
   @override
   void render(Canvas canvas) {

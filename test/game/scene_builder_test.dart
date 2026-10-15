@@ -5,6 +5,7 @@ import 'package:busy_network/game/model/model.dart';
 import 'package:busy_network/game/scene_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'design_pull.dart';
 import 'legacy_scenes.dart';
 import 'model/cable_checks.dart';
 import 'scene_matchers.dart';
@@ -36,15 +37,15 @@ void main() {
       );
     });
 
+    // Tarikan sungguhan (router → (195, 300) → (255, 360)) = desain.
     for (final kind in CableKind.values) {
       test('fase rancang (${kind.name})', () {
-        expectSame(DummyStates.design(kind), LegacyScenes.design(kind));
+        expectSame(designPull(kind: kind), LegacyScenes.design(kind));
       });
     }
 
     test('fase rancang setelah ganti kabel', () {
-      final state = DummyStates.design(CableKind.lan)
-        ..selectCable(CableKind.fiber);
+      final state = designPull()..selectCable(CableKind.fiber);
       expectSame(state, LegacyScenes.design(CableKind.fiber));
     });
 
@@ -69,8 +70,37 @@ void main() {
     expect(scene.nodes.where((n) => n.snapTarget), isEmpty);
   });
 
+  test('tarikan menempel: kabel masuk rumah, cincin tetap, tanpa jari', () {
+    final scene = SceneBuilder.fromState(
+      designPull()..dragCable(const Offset(312, 386)),
+    );
+    expect(scene.dragHandle, isNull);
+    final draft = scene.cables.singleWhere(
+      (c) => c.state == CableState.drafting,
+    );
+    expect(draft.id, isNull);
+    expect(draft.points.last, const Offset(295, 390));
+    expect(scene.nodes.singleWhere((n) => n.snapTarget).id, 'r5');
+    expect(scene.hasMotion, isTrue, reason: 'js-march & js-snap');
+  });
+
+  test('kabel terpasang membawa id-nya; rumah baru tersambung', () {
+    final state = designPull()..dragCable(const Offset(312, 386));
+    state.endCable();
+    final scene = SceneBuilder.fromState(state);
+    expect(
+      [for (final c in scene.cables) c.id],
+      [for (final c in state.cables) c.id],
+    );
+    expect(
+      scene.nodes.singleWhere((n) => n.id == 'r5').state,
+      HouseState.connected,
+    );
+    expect(scene.hasMotion, isFalse);
+  });
+
   test('awal hari: rumah tanpa data frame tampil polos, tanpa trafik', () {
-    final state = DummyStates.design(CableKind.lan)..startDay();
+    final state = designPull()..startDay();
     final scene = SceneBuilder.fromState(state);
     expect(scene.theme, MapTheme.night);
     expect(scene.dragHandle, isNull);
@@ -84,7 +114,7 @@ void main() {
   });
 
   test('fase hasil digambar siang tanpa draft', () {
-    final state = DummyStates.design(CableKind.lan)
+    final state = designPull()
       ..startDay()
       ..finishDay();
     final scene = SceneBuilder.fromState(state);

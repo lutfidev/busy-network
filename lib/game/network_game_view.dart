@@ -17,6 +17,8 @@ import 'network_game.dart';
 /// bila setelan "hapus animasi" (`MediaQuery.disableAnimations`) aktif atau
 /// rutenya tertutup rute lain (`TickerMode` mati; loop Flame tidak ikut
 /// `TickerMode` sendiri). Peta tidak bisa difokus: hanya sentuhan.
+///
+/// [interactive] = pemain bisa menarik dan membongkar kabel (Fase Rancang).
 class NetworkGameView extends StatefulWidget {
   const NetworkGameView({
     super.key,
@@ -24,19 +26,24 @@ class NetworkGameView extends StatefulWidget {
     this.overlays = const [],
     this.semanticLabel,
     this.alignment = Alignment.center,
+    this.interactive = false,
   });
 
   final GameState state;
   final List<Widget> overlays;
   final String? semanticLabel;
   final AlignmentGeometry alignment;
+  final bool interactive;
 
   @override
   State<NetworkGameView> createState() => _NetworkGameViewState();
 }
 
 class _NetworkGameViewState extends State<NetworkGameView> {
-  late final NetworkGame _game = NetworkGame(state: widget.state);
+  late final NetworkGame _game = NetworkGame(
+    state: widget.state,
+    interactive: widget.interactive,
+  );
 
   @override
   void didChangeDependencies() {
@@ -49,7 +56,9 @@ class _NetworkGameViewState extends State<NetworkGameView> {
   @override
   void didUpdateWidget(NetworkGameView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _game.state = widget.state;
+    _game
+      ..state = widget.state
+      ..interactive = widget.interactive;
   }
 
   @override

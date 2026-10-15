@@ -99,6 +99,7 @@ abstract final class SceneBuilder {
         ? TrafficState.flow
         : TrafficState.none;
     return MapCable(
+      id: c.id,
       points: c.points,
       kind: c.kind,
       state: full ? CableState.overloaded : CableState.normal,

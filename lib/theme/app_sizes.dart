@@ -47,6 +47,12 @@ abstract final class AppSizes {
   static const double houseRadius = 20;
   static const double routerSize = 48;
 
+  /// Bidang sentuh minimum node peta (jari-jari, px peta): 48 px diameter.
+  static const double mapTouchRadius = 24;
+
+  /// Jarak ketuk dari garis kabel yang masih dihitung kena (mode Hapus).
+  static const double cableTouchSlop = 12;
+
   // Progress
   static const double progressThin = 6;
   static const double progress = 8;

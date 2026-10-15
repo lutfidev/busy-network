@@ -4,16 +4,10 @@ import 'package:busy_network/game/map_scene.dart';
 import 'package:busy_network/game/model/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../design_pull.dart';
 import 'cable_checks.dart';
 
 const _router = LevelDef.routerId;
-
-/// Tarikan di desain Fase Rancang: router → (195, 300) → (255, 360).
-GameState designPull({CableKind kind = CableKind.lan, int? budget}) =>
-    GameState(Levels.level5, selectedCable: kind, budget: budget)
-      ..beginCable(_router)
-      ..dragCable(const Offset(197, 296))
-      ..dragCable(const Offset(252, 362));
 
 int notifications(GameState s, void Function() action) {
   var n = 0;
@@ -62,6 +56,7 @@ void main() {
   group('tarikan desain', () {
     test('sama dengan desain: 3 segmen, cincin di Rumah 5, jari di grid', () {
       final s = designPull();
+      expect(s.pulling, isTrue);
       final d = s.draft!;
       expect(d.from, _router);
       expect(d.points, const [
@@ -90,6 +85,15 @@ void main() {
       expect(s.draft, isNull);
       expect(s.cables, Levels.level5.cables);
       expect(s.budget, 850000);
+    });
+
+    test('jari tidak tepat di titik grid: ujung kabel tetap di grid', () {
+      final s = GameState(Levels.level5)
+        ..beginCable(_router)
+        ..dragCable(const Offset(197, 296))
+        ..dragCable(const Offset(252, 362));
+      expect(s.draft!.points, designPull().draft!.points);
+      expect(s.draft!.handle, const Offset(255, 360));
     });
 
     test('jauh dari rumah mana pun: tanpa cincin snap', () {
