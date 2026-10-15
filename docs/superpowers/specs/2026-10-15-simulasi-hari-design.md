@@ -60,8 +60,10 @@ potret Fase Jalan (langkah 7); level lain (langkah 8); suara (langkah 9).
    62%). Tanpa ini level selesai dengan tidak menyambung siapa pun.
    Konsekuensi: tutorial level 1 dengan 1/2 rumah maksimal 50% (< 60%);
    dibereskan di langkah 7.
-8. **Komplain** muncul saat rumah **menjadi** macet, paling sering sekali
-   per rumah tiap 2 jam permainan. Komplain **menjeda hari** sampai
+8. **Komplain** sekali per **masa macet** tiap rumah, paling sering sekali
+   per rumah tiap 2 jam permainan. Rumah yang macet bersamaan komplain
+   bergiliran (satu per menit, setelah yang sebelumnya dijawab); rumah
+   yang mulai macet saat masih jeda komplain begitu jedanya habis. Komplain **menjeda hari** sampai
    dijawab: "Atur antrean" membuka panel, "Abaikan" menutup pop-up dan
    hari lanjut (bukan lagi ke layar gagal). Jumlah komplain dicatat untuk
    langkah 6. Teks komplain per rumah ada di data level; desain hanya

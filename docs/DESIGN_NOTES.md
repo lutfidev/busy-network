@@ -44,8 +44,10 @@ Gagal · Design token & komponen.
   Kepuasan = rata-rata sabar semua rumah (belum tersambung = 0), dibulatkan
   ke bawah. 24:00 → Hasil Berhasil bila kepuasan ≥ target, selain itu
   Hasil Gagal (angka hasil masih dummy sampai langkah 6).
-- **Komplain** muncul saat rumah baru macet (paling sering sekali per rumah
-  tiap 2 jam) dan menjeda hari sampai dijawab. "Abaikan" menutup pop-up
+- **Komplain**: sekali per masa macet tiap rumah, paling sering sekali per
+  rumah tiap 2 jam (rumah yang macet bersamaan bergiliran; yang macet saat
+  masih jeda menyusul begitu jedanya habis). Komplain menjeda hari sampai
+  dijawab; jam juga berhenti begitu Panel Antrean mulai meluncur masuk. "Abaikan" menutup pop-up
   dan hari lanjut (bukan ke Hasil Gagal seperti tautan prototipe). Teks
   komplain selain milik Bu Sri adalah copy baru.
 - **Panel Atur Antrean** dari hari yang berjalan: "Terapkan" menyimpan,
