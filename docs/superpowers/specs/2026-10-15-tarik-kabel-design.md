@@ -38,8 +38,9 @@ suara/getar (langkah 9).
    desain = 3 segmen.
 5. **Cincin snap** = tujuan terdekat dari jari dalam 90 px (desain: jari
    67 px dari Rumah 5): rumah yang belum tersambung, atau junction yang
-   putus. Jari masuk cincin (≤ 30 px dari pusatnya) → jalur menempel: kabel putus-putus masuk rumah,
-   lingkaran jari hilang, tooltip = biaya yang akan dibayar. Lepas saat
+   putus. Jari masuk cincin (≤ 30 px dari pusatnya) → jalur menempel:
+   kabel putus-putus masuk ke tujuan, lingkaran jari hilang, tooltip =
+   biaya yang akan dibayar. Lepas saat
    menempel → kabel terpasang; lepas di tempat lain → tarikan batal.
 6. **Anggaran kurang**: selama menarik, tooltip merah bila biaya > sisa.
    Lepas di rumah dengan anggaran kurang → kabel tidak dipasang dan banner
@@ -67,7 +68,7 @@ suara/getar (langkah 9).
     memakai tarikan sungguhan.
 11. **Tooltip** ikut jari: (−33, −72) dari ujung tarikan (desain: jari
     (255, 360) → tooltip (222, 288)), dijepit di dalam peta. Saat menempel,
-    acuannya pusat rumah.
+    acuannya pusat tujuan.
 12. **Animasi** kabel ditarik dari desain sekarang hidup: `js-march` (garis
     putus-putus maju 36 px/s) dan `js-snap` (cincin 0,9 ↔ 0,25, 1,1 s). Pose
     diam = gambar desain. Kabel dipandu di tutorial langkah 2 juga

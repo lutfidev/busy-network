@@ -87,6 +87,32 @@ void main() {
       expect(find.text(banner), findsNothing);
     });
 
+    testWidgets('fiber Warung dibongkar → j1 disambung lagi dari router', (
+      tester,
+    ) async {
+      setScreenSize(tester, const Size(390, 844));
+      await pumpApp(tester, location: AppRoutes.design);
+      await tester.tap(find.text('Hapus'));
+      await tester.pumpAndSettle();
+      await tester.tapAt(mapToScreen(tester, const Offset(195, 190)));
+      await tester.pumpAndSettle();
+      expect(find.text('Rp 1.000.000'), findsOneWidget);
+      expect(find.text('1/7 rumah tersambung'), findsOneWidget);
+
+      await tester.tap(find.text('LAN'));
+      await tester.pumpAndSettle();
+      final gesture = await dragOnMap(tester, const [
+        Offset(195, 240),
+        Offset(195, 190),
+        Offset(196, 153),
+      ], release: false);
+      expect(find.text('2 segmen · Rp 30.000'), findsOneWidget);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(find.text('Rp 970.000'), findsOneWidget);
+      expect(find.text('3/7 rumah tersambung'), findsOneWidget);
+    });
+
     testWidgets('mode hapus: tidak bisa menarik kabel', (tester) async {
       setScreenSize(tester, const Size(390, 844));
       await pumpApp(tester, location: AppRoutes.design);

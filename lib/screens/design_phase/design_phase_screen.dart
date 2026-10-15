@@ -42,12 +42,12 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
 
   void _onGameChanged() => setState(() {});
 
-  /// Ujung tarikan tempat tooltip menempel: jari, atau rumah yang
+  /// Ujung tarikan tempat tooltip menempel: jari, atau rumah/junction yang
   /// ditempeli.
   Offset _tip(CableDraft draft) =>
       draft.handle ??
       (draft.target != null
-          ? _game.level.house(draft.target!).position
+          ? _game.positionOf(draft.target!)
           : draft.points.last);
 
   @override
