@@ -2,6 +2,7 @@ import 'package:busy_network/app/app.dart';
 import 'package:busy_network/app/routes.dart';
 import 'package:busy_network/screens/level_map/level_map_screen.dart';
 import 'package:busy_network/screens/result_success/result_success_screen.dart';
+import 'package:busy_network/screens/tutorial/tutorial_overlay.dart';
 import 'package:busy_network/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -86,6 +87,57 @@ void main() {
       setScreenSize(tester, const Size(390, 844));
       await pumpApp(tester, location: AppRoutes.successWithStars(2));
       expect(opacities(tester), [1, 1]);
+    });
+  });
+
+  group('tangan tutorial', () {
+    String step(int n) => '${AppRoutes.tutorial}?${AppRoutes.stepParam}=$n';
+    Finder inHand(Type type) => find.descendant(
+      of: find.byType(TutorialHand),
+      matching: find.byType(type),
+    );
+    Offset shift(WidgetTester tester) {
+      final m = tester.widget<Transform>(inHand(Transform).first).transform;
+      return Offset(m.getTranslation().x, m.getTranslation().y);
+    }
+
+    testWidgets('langkah 2: menyeret ke Rumah 1 lalu memudar', (tester) async {
+      await pumpAnimated(tester, step(2));
+      await tester.pump(const Duration(milliseconds: 16));
+      final start = shift(tester);
+      await tester.pump(const Duration(milliseconds: 1000));
+      final moved = shift(tester);
+      expect(moved.dx, greaterThan(start.dx + 50));
+      expect(moved.dy, lessThan(start.dy - 50));
+
+      var minOpacity = 1.0;
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+        final o = tester.widget<Opacity>(inHand(Opacity)).opacity;
+        if (o < minOpacity) minOpacity = o;
+      }
+      expect(minOpacity, lessThan(0.5));
+    });
+
+    testWidgets('langkah 1 & 3: mengangguk', (tester) async {
+      for (final n in [1, 3]) {
+        await pumpAnimated(tester, step(n));
+        await tester.pump(const Duration(milliseconds: 16));
+        final start = shift(tester);
+        await tester.pump(const Duration(milliseconds: 500));
+        final down = shift(tester);
+        expect(down.dy, greaterThan(start.dy + 3), reason: 'langkah $n');
+        expect(down.dx, greaterThan(start.dx), reason: 'langkah $n');
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(shift(tester).dy, lessThan(down.dy), reason: 'langkah $n');
+      }
+    });
+
+    testWidgets('animasi mati → tangan diam di titik awal', (tester) async {
+      setScreenSize(tester, const Size(390, 844));
+      await pumpApp(tester, location: step(2));
+      expect(shift(tester), Offset.zero);
+      expect(tester.widget<Opacity>(inHand(Opacity)).opacity, 1);
     });
   });
 }

@@ -67,6 +67,31 @@ abstract final class AppMotion {
     (1, 1),
   ], curve: starPopCurve);
 
+  /// Tangan tutorial mengangguk ke [handBobOffset] lalu kembali (js-bob).
+  static const handBob = Duration(milliseconds: 1200);
+  static const handBobOffset = Offset(4, 8);
+  static const handBobAmount = Keyframes([(0, 0), (0.5, 1), (1, 0)]);
+
+  /// Tangan menyeret sejauh [handDragOffset] (router → Rumah 1), lalu
+  /// memudar dan mengulang (js-drag).
+  static const handDrag = Duration(milliseconds: 2400);
+  static const handDragOffset = Offset(150, -150);
+  static const handDragAmount = Keyframes([
+    (0, 0),
+    (0.12, 0),
+    (0.72, 1),
+    (1, 1),
+  ]);
+  static const handDragOpacity = Keyframes([
+    (0, 0),
+    (0.12, 1),
+    (0.88, 1),
+    (1, 0),
+  ]);
+
+  /// Pose statis tangan seret: di titik awal, sudah terlihat (12%).
+  static const handDragStill = Duration(milliseconds: 288);
+
   static const Curve standard = Curves.easeOut;
   static const Curve pop = Cubic(0.2, 1.4, 0.4, 1);
 }
