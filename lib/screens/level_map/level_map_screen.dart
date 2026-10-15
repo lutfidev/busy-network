@@ -167,17 +167,24 @@ class LevelMapScreen extends StatelessWidget {
   }
 }
 
-/// Cincin di sekitar level aktif. Statis dulu (desain: membesar 1→1,55
-/// sambil memudar, 1,8 s); animasi menyusul bersama game loop.
+/// Cincin di sekitar level aktif: membesar 1→1,55 sambil memudar tiap
+/// 1,8 s. Diam di [AppMotion.ringStill] bila animasi dimatikan.
 class _PulseRing extends StatelessWidget {
   const _PulseRing();
 
   @override
   Widget build(BuildContext context) {
-    return Transform.scale(
-      scale: 1.2,
-      child: Opacity(
-        opacity: 0.45,
+    return LoopClock(
+      still: AppMotion.ringStill,
+      builder: (context, clock) => ValueListenableBuilder<double>(
+        valueListenable: clock,
+        builder: (context, seconds, ring) {
+          final t = Keyframes.loop(seconds, AppMotion.ringPulse);
+          return Transform.scale(
+            scale: AppMotion.ringScale.at(t),
+            child: Opacity(opacity: AppMotion.ringOpacity.at(t), child: ring),
+          );
+        },
         child: Container(
           width: AppSizes.levelNodeCurrent,
           height: AppSizes.levelNodeCurrent,

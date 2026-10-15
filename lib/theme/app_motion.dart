@@ -27,6 +27,20 @@ abstract final class AppMotion {
   static const alarmBlink = Duration(milliseconds: 700);
   static const alarmOpacity = Keyframes([(0, 1), (0.5, 0.25), (1, 1)]);
 
+  /// Cincin level aktif membesar 1 → 1,55 sambil memudar (js-ring).
+  static const ringPulse = Duration(milliseconds: 1800);
+  static const ringScale = Keyframes([
+    (0, 1),
+    (1, 1.55),
+  ], curve: Curves.easeOut);
+  static const ringOpacity = Keyframes([
+    (0, 0.7),
+    (1, 0),
+  ], curve: Curves.easeOut);
+
+  /// Pose statis cincin: sedang membesar (skala ±1,2), seperti referensi.
+  static const ringStill = Duration(milliseconds: 450);
+
   static const Curve standard = Curves.easeOut;
   static const Curve pop = Cubic(0.2, 1.4, 0.4, 1);
 }

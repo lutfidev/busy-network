@@ -6,11 +6,16 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   late ValueListenable<double> clock;
 
-  Widget subject({bool enabled = true, bool disableAnimations = false}) {
+  Widget subject({
+    bool enabled = true,
+    bool disableAnimations = false,
+    Duration still = Duration.zero,
+  }) {
     return MediaQuery(
       data: MediaQueryData(disableAnimations: disableAnimations),
       child: LoopClock(
         enabled: enabled,
+        still: still,
         builder: (context, seconds) {
           clock = seconds;
           return const SizedBox();
@@ -44,6 +49,24 @@ void main() {
     await tester.pumpWidget(subject(disableAnimations: true));
     expect(clock.value, 0);
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('animasi mati → diam di detik [still]', (tester) async {
+    const still = Duration(milliseconds: 450);
+    await tester.pumpWidget(subject(disableAnimations: true, still: still));
+    await tester.pump(const Duration(seconds: 1));
+    expect(clock.value, closeTo(0.45, 1e-9));
+  });
+
+  testWidgets('jam mulai berjalan dari [still]', (tester) async {
+    const still = Duration(milliseconds: 450);
+    await tester.pumpWidget(subject(still: still));
+    expect(clock.value, closeTo(0.45, 1e-9));
+    await tester.pump(const Duration(milliseconds: 100));
+    final first = clock.value;
+    expect(first, greaterThan(0.45));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(clock.value, closeTo(first + 0.3, 1e-6));
   });
 
   testWidgets('enabled: false → diam', (tester) async {
