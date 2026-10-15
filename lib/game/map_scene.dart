@@ -3,11 +3,10 @@ import 'dart:ui';
 /// Model data statis peta jaringan (posisi dalam koordinat desain).
 ///
 /// Area peta di desain berukuran 390×472 dengan grid 30 px. Semua
-/// koordinat di sini mengacu ke ruang itu; widget/komponen Flame yang
-/// menggambar peta yang bertugas menskalakan ke layar.
+/// koordinat di sini mengacu ke ruang itu; kamera `NetworkGame` yang
+/// menskalakan ke layar.
 ///
-/// Sesi ini peta masih statis. Logika game (tarik kabel, simulasi trafik)
-/// nanti mengisi/menurunkan [MapScene] dari state game.
+/// [MapScene] diturunkan dari state game oleh `SceneBuilder`.
 
 enum MapTheme { day, night }
 

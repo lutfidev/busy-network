@@ -5,7 +5,7 @@ import '../../app/routes.dart';
 import '../../data/dummy_data.dart';
 import '../../data/dummy_states.dart';
 import '../../game/model/model.dart';
-import '../../game/scene_builder.dart';
+import '../../game/network_game_view.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'complaint_popup.dart';
@@ -50,8 +50,8 @@ class _RunPhaseScreenState extends State<RunPhaseScreen> {
                 child: Stack(
                   children: [
                     Positioned.fill(
-                      child: NetworkMapView(
-                        scene: SceneBuilder.fromState(_game),
+                      child: NetworkGameView(
+                        state: _game,
                         alignment: Alignment.topCenter,
                         semanticLabel:
                             'Peta jaringan malam hari. Kabel router ke '
