@@ -44,8 +44,17 @@ Gagal · Design token & komponen.
   ia terbungkus karena mepet tepi).
 - **Kartu kabel** tingginya minimal 88 px dan boleh bertambah supaya
   "Kapasitas 20 Mbps · murah" tidak terpotong (di desain teks itu terpotong).
-- **Animasi** (aliran trafik, cincin level aktif, kedip alarm, bintang
-  muncul, tangan tutorial) digambar statis dulu.
+- **Animasi** yang sudah hidup: trafik Fase Jalan (js-flow/js-jam),
+  kedip alarm (js-alarm), cincin level aktif (js-ring), bintang hasil
+  (js-star), tangan tutorial (js-bob/js-drag), latar Beranda
+  (js-flow, js-drift, js-blink). Panel antrean naik lewat transisi rute.
+  Kecepatan trafik macet mengikuti CSS: titik tiap 9 px, maju 18 px per
+  3,2 s. Belum: js-march & js-snap (kabel ditarik), js-pop (komplain),
+  js-float (konfeti), js-twinkle & js-flow di Peta Babak, js-walk/js-drip/
+  js-flow di Hasil Gagal.
+- **Animasi mati** (`MediaQuery.disableAnimations`): tiap animasi diam di
+  pose yang mewakili referensi (cincin sedang membesar, tangan seret di
+  titik awal, bintang sudah muncul), bukan pose 0% yang kadang kosong.
 - **Glyph**: Fredoka tidak punya `≥` → cadangan Nunito. `→` ("Kabel Router →
   Rumah 4") tidak ada di kedua font; di Android jatuh ke font sistem (sama
   seperti browser di desain), tapi tampil kotak di screenshot `flutter test`.

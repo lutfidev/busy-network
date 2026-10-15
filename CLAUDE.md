@@ -30,7 +30,12 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `ChunkyButton`, `CircleIconButton`, badge/pill, `StarRating`, `AppCard`,
   `StatTile`, `ProgressBar`, `LevelNode`, `CableOptionCard`,
   `LevelHeaderCard`, `BottomPanel`, `NetworkMapView`, `DesignStage`,
-  `GameIcon` (path SVG asli dari desain), `FillScrollView`.
+  `GameIcon` (path SVG asli dari desain), `FillScrollView`, `LoopClock`
+  (jam animasi berulang).
+- Animasi: `@keyframes` desain disalin jadi token `Keyframes` di
+  `AppMotion` (persen + easing per segmen, persis CSS), digerakkan
+  `LoopClock` (detik berjalan → pose). Pose peta di
+  `game/render/map_motion.dart`.
 - `lib/game/` — `map_scene.dart` (model peta statis) dan
   `render/map_renderer.dart` (gambar rumah/router/kabel/trafik di atas
   `Canvas`; dipakai CustomPainter sekarang, dan bisa dipanggil dari
@@ -55,8 +60,12 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   tambahkan ke daftar di test itu dan di `test/screenshots/`.
 - Tombol/kontrol kustom: bungkus `Semantics(container: true, button: true,
   label: ...)`.
-- Animasi tak berujung membuat `pumpAndSettle` macet. Hormati
-  `MediaQuery.disableAnimations` / sediakan saklar supaya test tetap stabil.
+- Animasi tak berujung membuat `pumpAndSettle` macet. Animasi berulang
+  wajib lewat `LoopClock` (berhenti di pose `still` bila
+  `MediaQuery.disableAnimations`); animasi sekali jalan langsung ke akhir.
+  Test memompa app lewat `pumpApp`/`disableAnimations` di
+  `test/test_helpers.dart`; uji gerakannya di
+  `test/screens/animation_test.dart` (tanpa `pumpAndSettle`).
 - Peta: koordinat desain diskalakan seragam lewat `DesignStage`
   (padanan `FixedResolutionViewport` Flame).
 - Commit kecil per langkah, pesan bahasa Inggris singkat
