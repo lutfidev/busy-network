@@ -36,24 +36,29 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `AppMotion` (persen + easing per segmen, persis CSS), digerakkan
   `LoopClock` (detik berjalan → pose). Pose peta di
   `game/render/map_motion.dart`, digerakkan `update(dt)` `NetworkGame`.
-- `lib/game/` — `model/` (`LevelDef`, `HouseDef`, `Cable`/`CableSpec`/
-  `CableDraft`, `Network` topologi & beban, `GameState` fase
-  rancang/jalan/hasil), `levels/levels.dart` (data level),
+- `lib/game/` — `model/` (`LevelDef` + geometri grid (`snap`, `Cell`),
+  `HouseDef`, `Cable`/`CableSpec`/`CableDraft`, `CableWalk` +
+  `cablePolyline` (jalur tarikan di grid), `Network` topologi & beban,
+  `GameState` fase rancang/jalan/hasil, anggaran, tarik kabel
+  `beginCable`/`dragCable`/`endCable`, `removeCable`, mode hapus),
+  `levels/levels.dart` (data level),
   `scene_builder.dart` (`SceneBuilder.fromState(state)` → `MapScene`),
   `map_scene.dart` (model gambar), `render/map_renderer.dart` (gambar
   rumah/router/kabel/trafik di atas `Canvas`, per lapisan),
   `network_game.dart` (`NetworkGame`: `FlameGame`, kamera
   `withFixedResolution(390, 472)`, mendengarkan `GameState` dan
-  menyamakan komponen), `components/` (`GroundComponent`,
+  menyamakan komponen; bila `interactive`, node menerima drag = tarik
+  kabel dan kabel menerima ketuk = bongkar), `components/` (`GroundComponent`,
   `CableComponent`, `TrafficComponent`, `RouterComponent`/`HouseComponent`/
   `JunctionComponent`, `BadgeComponent`, `DragHandleComponent`; semuanya
   menggambar lewat `MapRenderer`), `network_game_view.dart`
   (`NetworkGameView`: `GameWidget` + overlay widget berkoordinat peta;
-  dipakai Tutorial/Rancang/Jalan).
+  dipakai Tutorial/Rancang/Jalan; hanya Rancang yang `interactive`).
 - `lib/screens/<layar>/` — satu folder per layar (8 layar).
 - `lib/app/` — `routes.dart` (path), `router.dart` (go_router, bersarang),
   `app.dart`.
-- `lib/data/` — `dummy_states.dart` (snapshot `GameState` per layar) dan
+- `lib/data/` — `dummy_states.dart` (snapshot `GameState` Tutorial &
+  Jalan; Rancang memakai state asli) dan
   `dummy_data.dart` (angka yang belum dihitung game: progres, jam,
   komplain, hasil).
 - `lib/core/format.dart` — `IdFormat`: `Rp 850.000`, `8,5 Mbps`, `20:15`.
@@ -89,7 +94,12 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `MapRenderer.drawScene`.
 - Peta digambar dari state: ubah data level / `GameState`, bukan
   `MapScene` atau komponen langsung. `test/game/scene_builder_test.dart` menjaga snapshot
-  tetap identik dengan desain.
+  tetap identik dengan desain (Fase Rancang: tarikan sungguhan
+  `test/game/design_pull.dart`).
+- Input peta: logika (snap, rute, biaya, bongkar) di `GameState`, diuji
+  tanpa Flutter; komponen Flame hanya uji sentuh lalu memanggil API
+  berbasis id. Widget test menyeret peta lewat `dragOnMap`/`mapToScreen`
+  di `test/test_helpers.dart`.
 - Commit kecil per langkah, pesan bahasa Inggris singkat
   (`feat(scope): ...`, `fix: ...`, `test: ...`).
 

@@ -47,9 +47,10 @@ Gagal · Design token & komponen.
 - **Animasi** yang sudah hidup: trafik Fase Jalan (js-flow/js-jam),
   kedip alarm (js-alarm), cincin level aktif (js-ring), bintang hasil
   (js-star), tangan tutorial (js-bob/js-drag), latar Beranda
-  (js-flow, js-drift, js-blink). Panel antrean naik lewat transisi rute.
+  (js-flow, js-drift, js-blink), kabel ditarik & cincin snap (js-march,
+  js-snap). Panel antrean naik lewat transisi rute.
   Kecepatan trafik macet mengikuti CSS: titik tiap 9 px, maju 18 px per
-  3,2 s. Belum: js-march & js-snap (kabel ditarik), js-pop (komplain),
+  3,2 s. Belum: js-pop (komplain),
   js-float (konfeti), js-twinkle & js-flow di Peta Babak, js-walk/js-drip/
   js-flow di Hasil Gagal.
 - **Peta pakai Flame** (`NetworkGame`): komponen menggambar di koordinat
@@ -68,10 +69,27 @@ Gagal · Design token & komponen.
 - **Level 5 sudah punya jaringan** saat dimulai (Rumah 1, Warung, Rumah 3,
   Rumah 4 + junction atas); Rp 850.000 = sisa untuk memperluas.
 - **Grid level 5 bergeser 15 px vertikal** dari titik grid yang digambar
-  (node di y = 60, 90, 240, …). `LevelDef.gridOrigin` mencatatnya; snap
-  kabel (langkah 4) harus ke grid level.
+  (node di y = 60, 90, 240, …). `LevelDef.gridOrigin` mencatatnya; kabel
+  yang ditarik snap ke grid level.
 - **Segmen kabel** = panjang dalam langkah grid 30 px (diagonal = 1),
   dibulatkan: kabel yang sedang ditarik di desain = 3 segmen.
+- **Tarik kabel** (rincian di
+  `docs/superpowers/specs/2026-10-15-tarik-kabel-design.md`): mulai dari
+  router, junction, atau rumah yang sudah tersambung (Fase Jalan di desain
+  punya kabel Rumah 4 → Rumah 5). Jalur = langkah 8 arah di grid level
+  mengikuti jari; ujung kabel dipotong di tepi node (router 24 px, rumah
+  20 px), persis kabel level 5 di desain. Cincin snap = rumah belum
+  tersambung terdekat dalam 90 px; jari masuk cincin (30 px) → kabel
+  menempel, lepas = pasang. Lepas di tempat lain = batal.
+- **Tooltip biaya** mengikuti jari (−33, −72) dan dijepit di dalam lebar
+  peta: di bingkai desain ia bergeser sedikit ke kiri dari x = 222.
+- **Anggaran kurang** (belum ada di desain): tooltip merah, lalu banner
+  "Anggaran kurang: kabel ini Rp X, sisa Rp Y." bila dilepas di rumah.
+- **Bongkar** berlaku juga untuk kabel bawaan level; uang kembali 50%.
+  Kabel hilir tidak ikut dibongkar, rumahnya saja yang putus.
+- **Fase Rancang mulai kosong** (tanpa tarikan). Screenshot
+  `04-fase-rancang` menarik kabel sungguhan lalu memotret sambil jari
+  menempel.
 - **Bar sabar Rumah 4** di Fase Jalan memakai 15% (sesuai label), bukan
   7/40 seperti gambar desain (beda 1 px).
 - **Pelanggan/paket Rumah 1–2 level 1** belum ada di desain; nilainya
