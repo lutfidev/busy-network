@@ -72,12 +72,7 @@ class LevelHeaderCard extends StatelessWidget {
                         letterSpacing: 0.4,
                       ),
                     ),
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.titleSmall,
-                    ),
+                    Text(title, style: AppTypography.titleSmall),
                   ],
                 ),
               ),

@@ -3,6 +3,9 @@ import 'package:flutter/widgets.dart';
 import '../theme/theme.dart';
 
 /// Bar progres bulat dengan penanda target opsional.
+///
+/// Digambar dengan [CustomPaint] (bukan LayoutBuilder) supaya aman dipakai
+/// di dalam `IntrinsicHeight`/[FillScrollView].
 class ProgressBar extends StatelessWidget {
   const ProgressBar({
     super.key,
@@ -29,56 +32,70 @@ class ProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final v = value.clamp(0.0, 1.0);
-    final bar = LayoutBuilder(
-      builder: (context, c) {
-        final w = c.maxWidth;
-        return SizedBox(
-          height: height,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: trackColor,
-                    borderRadius: AppRadius.pillAll,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: w * v,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: AppRadius.pillAll,
-                  ),
-                ),
-              ),
-              if (marker != null)
-                Positioned(
-                  left: w * marker!.clamp(0.0, 1.0),
-                  top: -3,
-                  width: 3,
-                  height: height + 6,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: markerColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
     return Semantics(
       label: semanticLabel,
       value: '${(v * 100).round()}%',
-      child: bar,
+      child: CustomPaint(
+        size: Size.fromHeight(height),
+        painter: _ProgressPainter(
+          value: v,
+          color: color,
+          trackColor: trackColor,
+          marker: marker?.clamp(0.0, 1.0),
+          markerColor: markerColor,
+        ),
+      ),
     );
   }
+}
+
+class _ProgressPainter extends CustomPainter {
+  _ProgressPainter({
+    required this.value,
+    required this.color,
+    required this.trackColor,
+    required this.marker,
+    required this.markerColor,
+  });
+
+  final double value;
+  final Color color;
+  final Color trackColor;
+  final double? marker;
+  final Color markerColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = Radius.circular(size.height / 2);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Offset.zero & size, r),
+      Paint()..color = trackColor,
+    );
+    if (value > 0) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & Size(size.width * value, size.height),
+          r,
+        ),
+        Paint()..color = color,
+      );
+    }
+    if (marker != null) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(size.width * marker!, -3, 3, size.height + 6),
+          const Radius.circular(2),
+        ),
+        Paint()..color = markerColor,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ProgressPainter old) =>
+      old.value != value ||
+      old.color != color ||
+      old.trackColor != trackColor ||
+      old.marker != marker ||
+      old.markerColor != markerColor;
 }

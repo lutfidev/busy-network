@@ -90,6 +90,7 @@ class ChunkyButton extends StatefulWidget {
     this.height,
     this.textStyle,
     this.iconSize,
+    this.leadingIconColor,
     this.semanticLabel,
   });
 
@@ -104,6 +105,9 @@ class ChunkyButton extends StatefulWidget {
   final double? height;
   final TextStyle? textStyle;
   final double? iconSize;
+
+  /// Warna ikon depan bila beda dari teks (mis. centang hijau "Tersimpan").
+  final Color? leadingIconColor;
   final String? semanticLabel;
 
   @override
@@ -152,15 +156,22 @@ class _ChunkyButtonState extends State<ChunkyButton> {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (widget.leadingIcon != null) ...[
-          GameIcon(widget.leadingIcon!, size: iconSize, color: fg),
+          GameIcon(
+            widget.leadingIcon!,
+            size: iconSize,
+            color: widget.leadingIconColor ?? fg,
+          ),
           SizedBox(width: s.gap),
         ],
         Flexible(
-          child: Text(
-            widget.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: baseStyle.copyWith(color: fg),
+          // Mengecil (bukan terpotong) bila layar sempit, copy tetap utuh.
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              widget.label,
+              maxLines: 1,
+              style: baseStyle.copyWith(color: fg),
+            ),
           ),
         ),
         if (widget.trailingIcon != null) ...[
@@ -189,7 +200,11 @@ class _ChunkyButtonState extends State<ChunkyButton> {
             curve: AppMotion.standard,
             height: widget.height ?? s.height,
             transform: Matrix4.translationValues(0, pressedShift, 0),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+            padding: EdgeInsets.symmetric(
+              horizontal: s == ChunkySize.small
+                  ? AppSpacing.s20
+                  : AppSpacing.s12,
+            ),
             decoration: BoxDecoration(
               color: enabled ? bg : bg.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(s.radius),
@@ -198,8 +213,8 @@ class _ChunkyButtonState extends State<ChunkyButton> {
                   ? null
                   : AppElevation.solid(shadow, depth - pressedShift),
             ),
-            alignment: Alignment.center,
-            child: content,
+            // widthFactor 1 → tombol selebar isinya bila tidak di-stretch.
+            child: Center(widthFactor: 1, child: content),
           ),
         ),
       ),

@@ -58,12 +58,14 @@ abstract final class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      sliderTheme: const SliderThemeData(
+      sliderTheme: SliderThemeData(
         activeTrackColor: AppColors.primary,
         inactiveTrackColor: AppColors.track,
         thumbColor: AppColors.primary,
         overlayColor: AppColors.primaryOverlay,
         trackHeight: 6,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+        tickMarkShape: SliderTickMarkShape.noTickMark,
         showValueIndicator: ShowValueIndicator.never,
       ),
       tooltipTheme: TooltipThemeData(

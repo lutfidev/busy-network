@@ -24,6 +24,9 @@ abstract final class AppTypography {
       height: height,
       letterSpacing: letterSpacing,
       fontFeatures: _tabular,
+    ).copyWith(
+      // Fredoka tidak punya glyph seperti "≥"; pakai Nunito sebagai cadangan.
+      fontFamilyFallback: [GoogleFonts.nunito(fontWeight: weight).fontFamily!],
     );
   }
 

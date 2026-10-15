@@ -106,11 +106,13 @@ class StatTile extends StatelessWidget {
         crossAxisAlignment: align,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.small.copyWith(color: labelColor),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: AppTypography.small.copyWith(color: labelColor),
+            ),
           ),
           if (centered) const SizedBox(height: AppSpacing.s2),
           FittedBox(
