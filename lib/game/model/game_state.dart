@@ -335,13 +335,6 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Jalan → hasil (hari diakhiri lebih awal).
-  void finishDay() {
-    _expectPhase(GamePhase.run);
-    _phase = GamePhase.result;
-    notifyListeners();
-  }
-
   // ── Bantuan ─────────────────────────────────────────────────────────
   void _setCables(List<Cable> cables) {
     _cables = List.unmodifiable(cables);

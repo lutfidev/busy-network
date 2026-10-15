@@ -13,7 +13,9 @@ abstract final class SceneBuilder {
 
   static MapScene fromState(GameState s) {
     final level = s.level;
-    final run = s.phase == GamePhase.run;
+    // Fase hasil = potret terakhir hari itu (peta Fase Jalan yang sedang
+    // keluar layar saat 24:00), bukan kembali ke siang.
+    final run = s.phase != GamePhase.design;
     final frame = run ? s.frame : null;
     final draft = s.phase == GamePhase.design ? s.draft : null;
     final usage = frame?.demand ?? const <String, double>{};

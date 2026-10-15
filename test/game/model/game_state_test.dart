@@ -161,23 +161,18 @@ void main() {
       expect(countNotifications(s, s.dismissComplaint), 0);
     });
 
-    test('finishDay: jalan → hasil', () {
-      final s = level5()..startDay();
-      expect(countNotifications(s, s.finishDay), 1);
-      expect(s.phase, GamePhase.result);
-    });
-
     test('transisi tidak sah ditolak', () {
       final s = level5();
-      expect(s.finishDay, throwsStateError);
       expect(() => s.advanceDay(1), throwsStateError);
       expect(
         () => s.setQueue(limits: const {}, priority: const {}),
         throwsStateError,
       );
+      expect(s.dismissComplaint, throwsStateError);
       s
         ..startDay()
-        ..finishDay();
+        ..advanceDay(SimClock.secondsPerDay);
+      expect(s.phase, GamePhase.result);
       expect(s.startDay, throwsStateError);
       expect(() => s.setDraft(draft), throwsStateError);
     });
