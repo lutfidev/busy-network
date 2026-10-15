@@ -45,7 +45,8 @@ class QueueModel {
   );
 
   /// Panel untuk kabel paling sesak (rasio beban/kapasitas tertinggi) di
-  /// fase jalan; rumah ditampilkan sesuai [order].
+  /// fase jalan; rumah ditampilkan sesuai [order]. Tanpa kabel: judul
+  /// kosong & kapasitas 0.
   factory QueueModel.fromState(
     GameState state, {
     required List<String> order,
@@ -53,12 +54,26 @@ class QueueModel {
   }) {
     final usage = state.frame?.usage ?? const <String, double>{};
     final net = state.network;
-    double ratio(Cable c) => net.cableLoad(c, usage) / c.spec.capacityMbps;
-    final cable = state.cables.reduce((a, b) => ratio(b) > ratio(a) ? b : a);
-    final served = net.housesBelow(cable.stops[1]);
     final level = state.level;
-    String name(String id) =>
-        id == LevelDef.routerId ? 'Router' : level.house(id).label;
+    double ratio(Cable c) => net.cableLoad(c, usage) / c.spec.capacityMbps;
+    final Cable? cable = state.cables.isEmpty
+        ? null
+        : state.cables.reduce((a, b) => ratio(b) > ratio(a) ? b : a);
+    final served = cable == null
+        ? const <String>{}
+        : net.housesBelow(cable.stops[1]);
+    final houseIds = {for (final h in level.houses) h.id};
+    // Junction tidak bernama: pakai router/rumah terdekat di hulunya.
+    String name(String id) {
+      var node = id;
+      while (node != LevelDef.routerId && !houseIds.contains(node)) {
+        final up = net.parentOf(node);
+        if (up == null) return 'Router';
+        node = up.from;
+      }
+      return node == LevelDef.routerId ? 'Router' : level.house(node).label;
+    }
+
     final houses = [
       for (final id in order)
         QueueHouse(
@@ -75,8 +90,10 @@ class QueueModel {
       houses: houses,
       limits: {for (final h in houses) h.id: h.initialLimit},
       priority: {...priority},
-      capacityMbps: cable.spec.capacityMbps,
-      cableLabel: 'Kabel ${name(cable.from)} → ${name(cable.to)}',
+      capacityMbps: cable?.spec.capacityMbps ?? 0,
+      cableLabel: cable == null
+          ? ''
+          : 'Kabel ${name(cable.from)} → ${name(cable.to)}',
     );
   }
 

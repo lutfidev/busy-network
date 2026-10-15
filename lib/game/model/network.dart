@@ -68,8 +68,17 @@ class Network {
     return result;
   }
 
-  double hopLoad(Hop hop, Map<String, double> usage) =>
-      housesBelow(hop.to).fold(0.0, (sum, id) => sum + (usage[id] ?? 0));
+  /// Beban [hop]: pemakaian rumah di hilirnya. Hop di luar pohon (kabel
+  /// paralel, kabel balik, kabel dari node lepas) tidak mengalirkan apa pun.
+  double hopLoad(Hop hop, Map<String, double> usage) {
+    final feeding = _parent[hop.to];
+    if (feeding == null ||
+        feeding.cable.id != hop.cable.id ||
+        feeding.from != hop.from) {
+      return 0;
+    }
+    return housesBelow(hop.to).fold(0.0, (sum, id) => sum + (usage[id] ?? 0));
+  }
 
   /// Beban hop terberat di [cable].
   double cableLoad(Cable cable, Map<String, double> usage) =>

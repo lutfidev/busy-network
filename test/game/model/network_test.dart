@@ -113,5 +113,35 @@ void main() {
     expect(net.parentOf('r4')!.cable.id, 'a');
     expect(net.parentOf(LevelDef.routerId), isNull);
     expect(net.cableLoad(loop.first, usage), 25);
+    // Kabel balik tidak mengalirkan apa pun.
+    expect(net.cableLoad(loop[2], usage), 0);
+    expect(net.isOverloaded(loop[2], usage), isFalse);
+    expect(net.cableLoad(loop[3], usage), 0);
+    expect(net.isOverloaded(loop[3], usage), isFalse);
+  });
+
+  test('kabel di luar pohon tidak ikut beban', () {
+    const step = [Offset.zero, Offset(30, 0)];
+    const main = Cable(
+      id: 'a',
+      from: LevelDef.routerId,
+      to: 'r4',
+      points: step,
+    );
+    const parallel = Cable(
+      id: 'b',
+      from: LevelDef.routerId,
+      to: 'r4',
+      points: step,
+    );
+    const fromLoose = Cable(id: 'c', from: 'r7', to: 'r4', points: step);
+    final net = Network(
+      level: level,
+      cables: const [main, parallel, fromLoose],
+    );
+    expect(net.cableLoad(main, usage), 16);
+    expect(net.cableLoad(parallel, usage), 0);
+    expect(net.cableLoad(fromLoose, usage), 0);
+    expect(net.isJammed(fromLoose, usage), isFalse);
   });
 }

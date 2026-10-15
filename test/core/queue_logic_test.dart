@@ -81,6 +81,43 @@ void main() {
       expect(m.overloaded, isFalse);
     });
 
+    test('kabel tersesak berpangkal di junction: nama dari hulunya', () {
+      final state = GameState(
+        Levels.level5,
+        phase: GamePhase.run,
+        frame: const SimFrame(
+          houses: {
+            'r3': HouseLive(state: HouseState.ok, patience: 1, usageMbps: 19),
+          },
+        ),
+      );
+      final m = QueueModel.fromState(
+        state,
+        order: const ['r3'],
+        priority: const {},
+      );
+      expect(m.cableLabel, 'Kabel Router → Rumah 3');
+      expect(m.houses.single.onOverloadedCable, isTrue);
+    });
+
+    test('tanpa kabel sama sekali: panel tetap terbentuk', () {
+      final state = GameState(
+        Levels.level5,
+        phase: GamePhase.run,
+        junctions: const [],
+        cables: const [],
+        frame: const SimFrame(houses: {}),
+      );
+      final m = QueueModel.fromState(
+        state,
+        order: const ['r4'],
+        priority: const {},
+      );
+      expect(m.cableLabel, isEmpty);
+      expect(m.houses.single.onOverloadedCable, isFalse);
+      expect(m.overloaded, isFalse);
+    });
+
     test('ubah batas mempertahankan judul kabel', () {
       final m = QueueModel.initial().withLimit('r4', 8).togglePriority('r1');
       expect(m.cableLabel, 'Kabel Router → Rumah 4');
