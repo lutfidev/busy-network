@@ -3,18 +3,34 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../data/dummy_data.dart';
-import '../../data/dummy_scenes.dart';
+import '../../data/dummy_states.dart';
+import '../../game/model/model.dart';
+import '../../game/scene_builder.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'complaint_popup.dart';
 import 'run_status_card.dart';
 
 /// 5 · Fase Jalan – Level 5, jam sibuk.
-class RunPhaseScreen extends StatelessWidget {
+class RunPhaseScreen extends StatefulWidget {
   const RunPhaseScreen({super.key});
 
   @override
+  State<RunPhaseScreen> createState() => _RunPhaseScreenState();
+}
+
+class _RunPhaseScreenState extends State<RunPhaseScreen> {
+  final GameState _game = DummyStates.run();
+
+  @override
+  void dispose() {
+    _game.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final complainer = _game.level.house(DummyData.complaintHouseId);
     return Scaffold(
       backgroundColor: AppColors.groundNight,
       body: NightScope(
@@ -35,7 +51,7 @@ class RunPhaseScreen extends StatelessWidget {
                   children: [
                     Positioned.fill(
                       child: NetworkMapView(
-                        scene: DummyScenes.run(),
+                        scene: SceneBuilder.fromState(_game),
                         alignment: Alignment.topCenter,
                         semanticLabel:
                             'Peta jaringan malam hari. Kabel router ke '
@@ -48,8 +64,8 @@ class RunPhaseScreen extends StatelessWidget {
                       right: AppSpacing.screenGutter,
                       bottom: AppSpacing.s18,
                       child: ComplaintPopup(
-                        name: DummyData.complaintName,
-                        house: DummyData.complaintHouse,
+                        name: complainer.customer,
+                        house: complainer.label,
                         clockMinutes: DummyData.complaintClockMinutes,
                         message: DummyData.complaintMessage,
                         onManageQueue: () => context.go(AppRoutes.queue),

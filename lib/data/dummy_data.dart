@@ -150,6 +150,8 @@ abstract final class DummyData {
   static const overloadedCapacity = 20;
   static const overloadedHousePatience = 15;
 
+  /// Rumah yang komplain (nama & label diambil dari definisi level).
+  static const complaintHouseId = 'r4';
   static const complaintName = 'Bu Sri';
   static const complaintHouse = 'Rumah 4';
   static const complaintClockMinutes = 20 * 60 + 14;

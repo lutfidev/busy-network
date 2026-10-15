@@ -3,9 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../core/format.dart';
-import '../../data/dummy_data.dart';
-import '../../data/dummy_scenes.dart';
+import '../../data/dummy_states.dart';
 import '../../game/map_scene.dart';
+import '../../game/model/model.dart';
+import '../../game/scene_builder.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'tutorial_overlay.dart';
@@ -33,9 +34,19 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Rect? _spot;
   double _spotScale = 1;
 
-  bool get _linked => _step == 3;
+  late GameState _game = DummyStates.tutorial(_step);
 
-  void _next() => setState(() => _step = (_step + 1).clamp(1, 3));
+  void _next() => setState(() {
+    _step = (_step + 1).clamp(1, 3);
+    _game.dispose();
+    _game = DummyStates.tutorial(_step);
+  });
+
+  @override
+  void dispose() {
+    _game.dispose();
+    super.dispose();
+  }
 
   void _measure() {
     if (!mounted) return;
@@ -64,8 +75,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
-    const level = DummyData.level1;
-    const lan = DummyData.lan;
+    final level = _game.level;
+    const lan = CableSpec.lan;
+    const fiber = CableSpec.fiber;
 
     return Scaffold(
       backgroundColor: AppColors.groundDay,
@@ -86,7 +98,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     stats: [
                       HeaderStat(
                         label: 'Sisa anggaran',
-                        value: IdFormat.rupiah(level.budget),
+                        value: IdFormat.rupiah(_game.budget),
                       ),
                       HeaderStat(
                         label: 'Target kepuasan',
@@ -98,10 +110,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 ),
                 Expanded(
                   child: NetworkMapView(
-                    scene: DummyScenes.tutorial(
-                      dragging: _step == 2,
-                      linked: _linked,
-                    ),
+                    scene: SceneBuilder.fromState(_game),
                     semanticLabel: 'Peta level 1: router pusat dan dua rumah',
                     overlays: [
                       Positioned.fromRect(
@@ -130,7 +139,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
                             ),
                           ),
                           Text(
-                            '${_linked ? 1 : 0}/${level.housesTotal} rumah '
+                            '${_game.connectedCount}/${level.houses.length} '
+                            'rumah '
                             'tersambung',
                             style: AppTypography.captionBold.copyWith(
                               color: AppColors.inkMuted,
@@ -159,12 +169,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
                             Expanded(
                               child: CableOptionCard(
                                 kind: CableKind.fiber,
-                                name: DummyData.fiber.name,
+                                name: fiber.name,
                                 price: '',
                                 capacity: '',
                                 lockedLabel:
-                                    'Terbuka di level '
-                                    '${DummyData.fiberUnlockLevel}',
+                                    'Terbuka di level ${fiber.unlockLevel}',
                               ),
                             ),
                           ],
