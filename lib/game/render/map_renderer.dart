@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import '../../theme/theme.dart';
 import '../../widgets/icons/svg_path.dart';
 import '../map_scene.dart';
+import 'map_motion.dart';
 
 /// Primitif gambar peta jaringan, murni di atas [Canvas].
 ///
@@ -409,7 +410,11 @@ abstract final class MapRenderer {
   }
 
   // ── Scene ─────────────────────────────────────────────────────────────
-  static void drawScene(Canvas canvas, MapScene scene, {double phase = 0}) {
+  static void drawScene(
+    Canvas canvas,
+    MapScene scene, {
+    MapMotion motion = MapMotion.still,
+  }) {
     final theme = scene.theme;
     drawDotGrid(canvas, scene.size, theme);
     for (final label in scene.blockLabels) {
@@ -427,7 +432,9 @@ abstract final class MapRenderer {
         gap: cable.state == CableState.overloaded
             ? AppMotion.trafficJamGap
             : AppMotion.trafficGap,
-        phase: phase,
+        phase: cable.traffic == TrafficState.jam
+            ? motion.jamPhase
+            : motion.flowPhase,
       );
     }
     final drafting = scene.cables

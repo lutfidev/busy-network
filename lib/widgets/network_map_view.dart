@@ -1,12 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../game/map_scene.dart';
+import '../game/render/map_motion.dart';
 import '../game/render/map_renderer.dart';
 import 'design_stage.dart';
+import 'loop_clock.dart';
 
-/// Peta jaringan statis: menggambar [MapScene] lewat [MapRenderer] dan
+/// Peta jaringan: menggambar [MapScene] lewat [MapRenderer] dan
 /// menskalakannya ke ruang yang tersedia. [overlays] diletakkan dengan
 /// koordinat desain peta (Positioned di atas 390×472).
+///
+/// Trafik bergerak mengikuti [LoopClock] (diam bila animasi dimatikan).
 class NetworkMapView extends StatelessWidget {
   const NetworkMapView({
     super.key,
@@ -31,7 +36,11 @@ class NetworkMapView extends StatelessWidget {
         alignment: alignment,
         children: [
           Positioned.fill(
-            child: CustomPaint(painter: NetworkMapPainter(scene)),
+            child: LoopClock(
+              enabled: scene.hasMotion,
+              builder: (context, clock) =>
+                  CustomPaint(painter: NetworkMapPainter(scene, clock: clock)),
+            ),
           ),
           ...overlays,
         ],
@@ -41,12 +50,12 @@ class NetworkMapView extends StatelessWidget {
 }
 
 class NetworkMapPainter extends CustomPainter {
-  const NetworkMapPainter(this.scene, {this.phase = 0});
+  const NetworkMapPainter(this.scene, {this.clock}) : super(repaint: clock);
 
   final MapScene scene;
 
-  /// Fase animasi trafik (px). Statis = 0; game loop nanti menggesernya.
-  final double phase;
+  /// Detik animasi dari [LoopClock]; `null` = bingkai statis.
+  final ValueListenable<double>? clock;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -55,11 +64,12 @@ class NetworkMapPainter extends CustomPainter {
       size.width / scene.size.width,
       size.height / scene.size.height,
     );
-    MapRenderer.drawScene(canvas, scene, phase: phase);
+    final seconds = clock?.value ?? 0;
+    MapRenderer.drawScene(canvas, scene, motion: MapMotion.at(seconds));
     canvas.restore();
   }
 
   @override
   bool shouldRepaint(NetworkMapPainter old) =>
-      old.scene != scene || old.phase != phase;
+      old.scene != scene || old.clock != clock;
 }

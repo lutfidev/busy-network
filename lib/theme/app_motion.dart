@@ -16,9 +16,10 @@ abstract final class AppMotion {
   static const double trafficGap = 18;
   static const double trafficAdvance = 36;
 
-  /// Trafik macet: titik tiap 9 px, 3,2 s.
+  /// Trafik macet: titik tiap 9 px, maju 18 px per 3,2 s (js-jam).
   static const trafficJam = Duration(milliseconds: 3200);
   static const double trafficJamGap = 9;
+  static const double trafficJamAdvance = 18;
 
   /// Kabel penuh berkedip.
   static const alarmBlink = Duration(milliseconds: 700);
