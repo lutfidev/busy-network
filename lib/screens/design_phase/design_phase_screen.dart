@@ -47,9 +47,21 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
     super.dispose();
   }
 
+  /// "Mulai Hari" sudah diketuk dan Fase Jalan sedang/sudah menutupi rute
+  /// ini; ketukan berikutnya diabaikan sampai pemain kembali ke sini.
+  bool _dayStarted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (ModalRoute.isCurrentOf(context) ?? true) _dayStarted = false;
+  }
+
   void _onGameChanged() => setState(() {});
 
   void _startDay() {
+    if (_dayStarted) return;
+    _dayStarted = true;
     _game.cancelCable();
     widget.session.begin(_game.planDay());
     context.go(AppRoutes.run);

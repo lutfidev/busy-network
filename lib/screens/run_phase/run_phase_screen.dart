@@ -17,10 +17,11 @@ import 'run_status_card.dart';
 
 /// 5 · Fase Jalan: hari dari [session] berjalan 06:00 → 24:00.
 ///
-/// Jam digerakkan `Ticker` (berhenti sendiri saat Panel Atur Antrean
-/// menutupi rute ini atau app di latar belakang). Komplain menjeda hari
-/// sampai dijawab. Tombol back = hari dibatalkan, kembali ke Fase Rancang.
-/// 24:00 → layar hasil.
+/// Jam digerakkan `Ticker` dan hanya jalan selama rute ini paling atas:
+/// berhenti begitu Panel Atur Antrean mulai meluncur masuk (bukan setelah
+/// transisinya selesai), saat back, dan saat app di latar belakang.
+/// Komplain menjeda hari sampai dijawab. Tombol back = hari dibatalkan,
+/// kembali ke Fase Rancang. 24:00 → layar hasil.
 class RunPhaseScreen extends StatefulWidget {
   const RunPhaseScreen({super.key, required this.session});
 
@@ -32,11 +33,14 @@ class RunPhaseScreen extends StatefulWidget {
 
 class _RunPhaseScreenState extends State<RunPhaseScreen>
     with SingleTickerProviderStateMixin {
-  late final GameState _game = widget.session.running;
+  late final GameState _game = widget.session.currentDay();
   late final Ticker _ticker = createTicker(_tick);
   Duration? _lastTick;
   bool _fastForward = false;
   bool _finished = false;
+
+  /// Rute ini paling atas (tidak tertutup panel, tidak sedang di-back).
+  bool _onTop = true;
 
   DaySim get _day => _game.day!;
 
@@ -44,6 +48,12 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
   void initState() {
     super.initState();
     _game.addListener(_onGameChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _onTop = ModalRoute.isCurrentOf(context) ?? true;
     _syncClock();
   }
 
@@ -71,9 +81,11 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
     setState(() {});
   }
 
-  /// Jam jalan selama hari berjalan dan tidak ada komplain menunggu.
+  /// Jam jalan selama rute paling atas, hari berjalan, dan tidak ada
+  /// komplain menunggu.
   void _syncClock() {
-    final run = _game.phase == GamePhase.run && _day.complaint == null;
+    final run =
+        _onTop && _game.phase == GamePhase.run && _day.complaint == null;
     if (run == _ticker.isActive) return;
     if (run) {
       _lastTick = null;
@@ -91,9 +103,18 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
     context.go(passed ? AppRoutes.success : AppRoutes.fail);
   }
 
-  void _manageQueue() {
-    _game.dismissComplaint();
+  /// Buka Panel Atur Antrean; jam berhenti sekarang juga supaya hari tidak
+  /// maju selama panel meluncur masuk.
+  void _openQueue() {
+    _onTop = false;
+    _syncClock();
     context.go(AppRoutes.queue);
+  }
+
+  void _manageQueue() {
+    _onTop = false;
+    _game.dismissComplaint();
+    _openQueue();
   }
 
   String _mapLabel() {
@@ -128,7 +149,7 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
                     fastForward: _fastForward,
                     onFastForward: () =>
                         setState(() => _fastForward = !_fastForward),
-                    onPause: () => context.go(AppRoutes.queue),
+                    onPause: _openQueue,
                   ),
                 ),
                 Expanded(

@@ -38,7 +38,7 @@ void main() {
       setScreenSize(tester, const Size(390, 844));
       final session = GameSession();
       await pumpApp(tester, location: AppRoutes.run, session: session);
-      final day = session.running.day!;
+      final day = session.currentDay().day!;
       await playFor(tester, 2);
       expect(day.minute, 20 * 60 + 15);
 
@@ -55,7 +55,7 @@ void main() {
       setScreenSize(tester, const Size(390, 844));
       final session = GameSession();
       await pumpApp(tester, location: AppRoutes.run, session: session);
-      final day = session.running.day!;
+      final day = session.currentDay().day!;
       await tester.tap(find.text('Abaikan'));
       await tester.tap(find.bySemanticsLabel('Percepat ke akhir hari'));
       await tester.pump();
@@ -74,7 +74,7 @@ void main() {
       await tester.tap(find.text('Atur antrean'));
       await tester.pumpAndSettle();
       expect(find.byType(QueuePanelScreen), findsOneWidget);
-      expect(session.running.day!.complaint, isNull);
+      expect(session.currentDay().day!.complaint, isNull);
       expect(find.text('20:15'), findsOneWidget);
     });
 
@@ -84,7 +84,7 @@ void main() {
       setScreenSize(tester, const Size(390, 844));
       final session = GameSession();
       await pumpApp(tester, location: AppRoutes.queue, session: session);
-      final day = session.running.day!;
+      final day = session.currentDay().day!;
       expect(day.priority, {'w'});
 
       await tester.tap(find.bySemanticsLabel('Prioritaskan Bu Sri'));
@@ -112,8 +112,54 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Prioritaskan Pak Rudi'));
       await tester.tap(find.text('Lanjutkan'));
       await tester.pump();
-      expect(session.running.day!.priority, {'w', 'r5'});
+      expect(session.currentDay().day!.priority, {'w', 'r5'});
     });
+  });
+
+  testWidgets('jeda: jam berhenti begitu panel mulai meluncur masuk', (
+    tester,
+  ) async {
+    setScreenSize(tester, const Size(390, 844));
+    final session = GameSession()..begin(winningDay(minute: 12 * 60));
+    final day = session.last!.day!;
+    await pumpApp(
+      tester,
+      location: AppRoutes.run,
+      session: session,
+      settle: false,
+    );
+    await playFor(tester, 0.5);
+    final paused = day.minute;
+    expect(paused, greaterThan(12 * 60));
+
+    await tester.tap(find.bySemanticsLabel('Jeda dan atur antrean'));
+    await playFor(tester, 0.2); // panel masih meluncur
+    expect(day.minute, paused);
+    await tester.pumpAndSettle();
+    expect(find.byType(QueuePanelScreen), findsOneWidget);
+    expect(day.minute, paused);
+    expect(find.text(IdFormat.clock(paused)), findsOneWidget);
+
+    await tester.tap(find.text('Lanjutkan'));
+    await playFor(tester, 1);
+    expect(day.minute, greaterThan(paused));
+  });
+
+  testWidgets('Mulai Hari diketuk dua kali: tetap satu hari', (tester) async {
+    setScreenSize(tester, const Size(390, 844));
+    final session = GameSession();
+    await pumpApp(tester, location: AppRoutes.design, session: session);
+    final button = find.text('Mulai Hari', skipOffstage: false);
+    await tester.tap(button);
+    final first = session.last;
+    // Ketukan kedua di frame yang sama, ketiga saat rute Jalan masih
+    // meluncur masuk (animasi mati: transisi dipercepat 20×).
+    await tester.tap(button, warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 5));
+    await tester.tap(button, warnIfMissed: false);
+    await playFor(tester, 0.5);
+    expect(session.last, same(first));
+    expect(find.byType(RunPhaseScreen), findsOneWidget);
   });
 
   testWidgets('back ke Fase Rancang membatalkan hari', (tester) async {

@@ -23,7 +23,7 @@ class QueuePanelScreen extends StatefulWidget {
 }
 
 class _QueuePanelScreenState extends State<QueuePanelScreen> {
-  late final GameState _game = widget.session.running;
+  late final GameState _game = widget.session.currentDay();
   late QueuePlan _plan = QueuePlan.of(_game.day!);
   bool _applied = false;
 

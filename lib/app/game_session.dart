@@ -3,7 +3,7 @@ import '../game/model/model.dart';
 
 /// Hari yang sedang dimainkan, dioper antarrute: Fase Rancang menaruhnya
 /// saat "Mulai Hari" ([begin]), Fase Jalan & Panel Atur Antrean memakai
-/// hari yang sama ([running]), layar hasil membaca akhirnya ([last],
+/// hari yang sama ([currentDay]), layar hasil membaca akhirnya ([last],
 /// langkah 6). Dibuat sekali oleh aplikasi dan diteruskan router ke layar.
 ///
 /// Hari milik sesi (dibuat `GameState.planDay`) tidak di-`dispose`: layar
@@ -11,7 +11,8 @@ import '../game/model/model.dart';
 class GameSession {
   GameState? _day;
 
-  /// Hari terakhir yang dimulai, termasuk yang sudah selesai.
+  /// Hari terakhir yang dimainkan layar Fase Jalan, termasuk yang sudah
+  /// selesai.
   GameState? get last => _day;
 
   /// Mulai hari baru dari rancangan (state fase jalan).
@@ -22,9 +23,11 @@ class GameSession {
     _day = day;
   }
 
-  /// Hari yang sedang berjalan. Tanpa hari berjalan (deep link, tutorial
-  /// sampai langkah 7) → bingkai Fase Jalan di desain.
-  GameState get running {
+  /// Hari untuk layar Fase Jalan & Panel Antrean: hari yang sedang
+  /// berjalan, atau — bila tidak ada (deep link, tutorial sampai langkah 7,
+  /// hari sebelumnya sudah selesai) — bingkai Fase Jalan di desain, yang
+  /// lalu menjadi hari sekarang (dan [last]).
+  GameState currentDay() {
     final day = _day;
     if (day != null && day.phase == GamePhase.run) return day;
     return _day = DummyStates.run();

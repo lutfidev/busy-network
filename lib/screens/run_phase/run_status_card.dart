@@ -163,8 +163,9 @@ class _DayTimeline extends StatelessWidget {
     return Semantics(
       label:
           'Linimasa hari ${IdFormat.hour(_startHour)}.00 sampai '
-          '$_endHour.00, jam sibuk ${day.rushFrom}.00 '
-          'sampai ${day.rushTo}.00, sekarang '
+          '${IdFormat.hour(_endHour)}.00, jam sibuk '
+          '${IdFormat.hour(day.rushFrom)}.00 sampai '
+          '${IdFormat.hour(day.rushTo)}.00, sekarang '
           '${IdFormat.clock(day.minute).replaceAll(':', '.')}',
       excludeSemantics: true,
       child: Column(
@@ -237,7 +238,7 @@ class _DayTimeline extends StatelessWidget {
                   style: labelStyle,
                 ),
               ),
-              Text('$_endHour', style: labelStyle),
+              Text(IdFormat.hour(_endHour), style: labelStyle),
             ],
           ),
         ],
