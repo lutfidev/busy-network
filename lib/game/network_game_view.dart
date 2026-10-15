@@ -13,8 +13,10 @@ import 'network_game.dart';
 /// [alignment]. [overlays] diletakkan dengan koordinat peta (Positioned di
 /// atas 390×472) dan ikut diskalakan bersama peta.
 ///
-/// Game dibuat sekali; [state] baru diteruskan ke game yang sama. Setelan
-/// "hapus animasi" (`MediaQuery.disableAnimations`) membuat peta diam.
+/// Game dibuat sekali; [state] baru diteruskan ke game yang sama. Peta diam
+/// bila setelan "hapus animasi" (`MediaQuery.disableAnimations`) aktif atau
+/// rutenya tertutup rute lain (`TickerMode` mati; loop Flame tidak ikut
+/// `TickerMode` sendiri). Peta tidak bisa difokus: hanya sentuhan.
 class NetworkGameView extends StatefulWidget {
   const NetworkGameView({
     super.key,
@@ -39,7 +41,9 @@ class _NetworkGameViewState extends State<NetworkGameView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _game.animate = !(MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    _game.animate =
+        TickerMode.valuesOf(context).enabled &&
+        !(MediaQuery.maybeDisableAnimationsOf(context) ?? false);
   }
 
   @override
@@ -63,7 +67,9 @@ class _NetworkGameViewState extends State<NetworkGameView> {
               clipBehavior: Clip.none,
               children: [
                 Positioned.fill(
-                  child: GameWidget(game: _game, autofocus: false),
+                  child: ExcludeFocus(
+                    child: GameWidget(game: _game, autofocus: false),
+                  ),
                 ),
                 Positioned.fill(
                   child: DesignStage(

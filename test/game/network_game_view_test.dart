@@ -73,6 +73,33 @@ void main() {
       expect(tester.binding.hasScheduledFrame, isFalse);
     });
 
+    testWidgets('rute tertutup (TickerMode mati) → peta diam', (tester) async {
+      setScreenSize(tester, _area);
+      final state = DummyStates.run();
+      Widget view({required bool ticking}) => MediaQuery(
+        data: const MediaQueryData(size: _area),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: TickerMode(
+            enabled: ticking,
+            child: NetworkGameView(state: state),
+          ),
+        ),
+      );
+      await tester.pumpWidget(view(ticking: true));
+      await tester.pump(const Duration(milliseconds: 16));
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(gameOf(tester).paused, isFalse);
+
+      await tester.pumpWidget(view(ticking: false));
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(gameOf(tester).paused, isTrue);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+
+      await tester.pumpWidget(view(ticking: true));
+      expect(gameOf(tester).paused, isFalse);
+    });
+
     testWidgets('setelan animasi diubah → game ikut', (tester) async {
       final state = DummyStates.run();
       await pumpView(tester, state);
@@ -112,6 +139,21 @@ void main() {
         tester.getRect(find.byKey(_spot)).top,
         closeTo(236 * _scale, 1e-6),
       );
+    });
+
+    testWidgets('peta tidak bisa difokus (bukan perhentian D-pad)', (
+      tester,
+    ) async {
+      await pumpView(tester, DummyStates.tutorial(1), disableAnimations: true);
+      final insideGame = tester.element(
+        find
+            .descendant(
+              of: find.byType(GameWidget<NetworkGame>),
+              matching: find.byType(MouseRegion),
+            )
+            .first,
+      );
+      expect(Focus.of(insideGame).canRequestFocus, isFalse);
     });
 
     testWidgets('label semantik peta', (tester) async {
