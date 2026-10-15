@@ -3,10 +3,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../core/format.dart';
-import '../../data/dummy_data.dart';
-import '../../data/dummy_scenes.dart';
+import '../../data/dummy_states.dart';
 import '../../game/map_scene.dart';
+import '../../game/model/model.dart';
 import '../../game/render/map_renderer.dart';
+import '../../game/scene_builder.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -21,22 +22,34 @@ class DesignPhaseScreen extends StatefulWidget {
 }
 
 class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
-  late CableKind _cable = widget.initialCable;
+  late final GameState _game = DummyStates.design(widget.initialCable);
   bool _erase = false;
 
-  CableSpec get _spec =>
-      _cable == CableKind.lan ? DummyData.lan : DummyData.fiber;
+  @override
+  void initState() {
+    super.initState();
+    _game.addListener(_onGameChanged);
+  }
 
-  int get _draftCost => DummyData.draftingSegments * _spec.pricePerSegment;
+  @override
+  void dispose() {
+    _game.dispose();
+    super.dispose();
+  }
 
-  void _pick(CableKind kind) => setState(() {
-    _cable = kind;
-    _erase = false;
-  });
+  void _onGameChanged() => setState(() {});
+
+  void _pick(CableKind kind) {
+    setState(() => _erase = false);
+    _game.selectCable(kind);
+  }
 
   @override
   Widget build(BuildContext context) {
-    const level = DummyData.level5;
+    final level = _game.level;
+    final draft = _game.draft;
+    final cost = _game.draftCost;
+    final connected = _game.connectedCount;
     return Scaffold(
       backgroundColor: AppColors.groundDay,
       body: SafeArea(
@@ -53,8 +66,10 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                 stats: [
                   HeaderStat(
                     label: 'Sisa anggaran',
-                    value: IdFormat.rupiah(level.budget),
-                    note: '${IdFormat.rupiah(-_draftCost)} sedang ditarik',
+                    value: IdFormat.rupiah(_game.budget),
+                    note: draft == null
+                        ? null
+                        : '${IdFormat.rupiah(-cost)} sedang ditarik',
                     noteColor: AppColors.warningStrong,
                   ),
                   HeaderStat(
@@ -72,22 +87,26 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                 children: [
                   Positioned.fill(
                     child: NetworkMapView(
-                      scene: DummyScenes.design(_cable),
+                      scene: SceneBuilder.fromState(_game),
                       semanticLabel:
                           'Peta ${level.name}: router pusat, '
-                          '${level.housesConnected} rumah tersambung, '
-                          '${level.housesTotal - level.housesConnected} belum',
+                          '$connected rumah tersambung, '
+                          '${level.houses.length - connected} belum',
                       overlays: [
-                        Positioned(
-                          left: 222,
-                          top: 288,
-                          child: _CostTooltip(
-                            color: MapRenderer.cableColor(_cable, MapTheme.day),
-                            label:
-                                '${DummyData.draftingSegments} segmen · '
-                                '${IdFormat.rupiah(_draftCost)}',
+                        if (draft != null)
+                          Positioned(
+                            left: 222,
+                            top: 288,
+                            child: _CostTooltip(
+                              color: MapRenderer.cableColor(
+                                draft.kind,
+                                MapTheme.day,
+                              ),
+                              label:
+                                  '${draft.segments} segmen · '
+                                  '${IdFormat.rupiah(cost)}',
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -116,7 +135,7 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                         ),
                       ),
                       Text(
-                        '${level.housesConnected}/${level.housesTotal} '
+                        '$connected/${level.houses.length} '
                         'rumah tersambung',
                         style: AppTypography.captionBold.copyWith(
                           color: AppColors.inkMuted,
@@ -129,10 +148,7 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        for (final spec in const [
-                          DummyData.lan,
-                          DummyData.fiber,
-                        ]) ...[
+                        for (final spec in level.unlockedCables) ...[
                           if (spec.kind == CableKind.fiber)
                             const SizedBox(width: AppSpacing.cardGap),
                           Expanded(
@@ -145,7 +161,7 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                               capacity:
                                   'Kapasitas ${spec.capacityMbps} Mbps · '
                                   '${spec.tagline}',
-                              selected: _cable == spec.kind,
+                              selected: _game.selectedCable == spec.kind,
                               onPressed: () => _pick(spec.kind),
                             ),
                           ),

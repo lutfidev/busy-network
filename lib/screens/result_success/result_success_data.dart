@@ -1,5 +1,6 @@
 import '../../core/format.dart';
 import '../../data/dummy_data.dart';
+import '../../game/levels/levels.dart';
 
 /// Satu syarat bintang di daftar hasil.
 class StarRule {
@@ -29,7 +30,7 @@ class SuccessSummary {
   final int complaints;
 
   List<StarRule> get rules {
-    final target = DummyData.level5.targetSatisfaction;
+    final target = Levels.level5.targetSatisfaction;
     return [
       const StarRule(
         stars: 1,

@@ -1,5 +1,29 @@
-import '../../data/dummy_data.dart';
+import '../../data/dummy_states.dart';
+import '../../game/model/model.dart';
 import '../../widgets/status_dot.dart';
+
+/// Satu rumah di panel antrean.
+class QueueHouse {
+  const QueueHouse({
+    required this.id,
+    required this.name,
+    required this.where,
+    required this.packageMbps,
+    required this.usageMbps,
+    required this.initialLimit,
+    this.onOverloadedCable = false,
+  });
+
+  final String id;
+  final String name;
+  final String where;
+  final int packageMbps;
+  final double usageMbps;
+  final int initialLimit;
+
+  /// Rumah yang lewat kabel yang disorot panel.
+  final bool onOverloadedCable;
+}
 
 /// Hitungan panel antrean (port dari logika prototipe HTML).
 ///
@@ -11,22 +35,75 @@ class QueueModel {
     required this.limits,
     required this.priority,
     required this.capacityMbps,
+    required this.cableLabel,
   });
 
-  factory QueueModel.initial() => QueueModel(
-    houses: DummyData.queueHouses,
-    limits: {for (final h in DummyData.queueHouses) h.id: h.initialLimit},
-    priority: {
-      for (final h in DummyData.queueHouses)
-        if (h.initiallyPrioritized) h.id,
-    },
-    capacityMbps: DummyData.overloadedCapacity,
+  factory QueueModel.initial() => QueueModel.fromState(
+    DummyStates.run(),
+    order: DummyStates.queueOrder,
+    priority: DummyStates.queuePriority,
   );
+
+  /// Panel untuk kabel paling sesak (rasio beban/kapasitas tertinggi) di
+  /// fase jalan; rumah ditampilkan sesuai [order]. Tanpa kabel: judul
+  /// kosong & kapasitas 0.
+  factory QueueModel.fromState(
+    GameState state, {
+    required List<String> order,
+    required Set<String> priority,
+  }) {
+    final usage = state.frame?.usage ?? const <String, double>{};
+    final net = state.network;
+    final level = state.level;
+    double ratio(Cable c) => net.cableLoad(c, usage) / c.spec.capacityMbps;
+    final Cable? cable = state.cables.isEmpty
+        ? null
+        : state.cables.reduce((a, b) => ratio(b) > ratio(a) ? b : a);
+    final served = cable == null
+        ? const <String>{}
+        : net.housesBelow(cable.stops[1]);
+    final houseIds = {for (final h in level.houses) h.id};
+    // Junction tidak bernama: pakai router/rumah terdekat di hulunya.
+    String name(String id) {
+      var node = id;
+      while (node != LevelDef.routerId && !houseIds.contains(node)) {
+        final up = net.parentOf(node);
+        if (up == null) return 'Router';
+        node = up.from;
+      }
+      return node == LevelDef.routerId ? 'Router' : level.house(node).label;
+    }
+
+    final houses = [
+      for (final id in order)
+        QueueHouse(
+          id: id,
+          name: level.house(id).customer,
+          where: level.house(id).place,
+          packageMbps: level.house(id).packageMbps,
+          usageMbps: usage[id] ?? 0,
+          initialLimit: level.house(id).packageMbps,
+          onOverloadedCable: served.contains(id),
+        ),
+    ];
+    return QueueModel(
+      houses: houses,
+      limits: {for (final h in houses) h.id: h.initialLimit},
+      priority: {...priority},
+      capacityMbps: cable?.spec.capacityMbps ?? 0,
+      cableLabel: cable == null
+          ? ''
+          : 'Kabel ${name(cable.from)} → ${name(cable.to)}',
+    );
+  }
 
   final List<QueueHouse> houses;
   final Map<String, int> limits;
   final Set<String> priority;
   final int capacityMbps;
+
+  /// "Kabel Router → Rumah 4".
+  final String cableLabel;
 
   double effectiveUse(QueueHouse h) {
     final limit = limits[h.id]!.toDouble();
@@ -58,6 +135,7 @@ class QueueModel {
     limits: {...limits, id: limit},
     priority: priority,
     capacityMbps: capacityMbps,
+    cableLabel: cableLabel,
   );
 
   QueueModel togglePriority(String id) => QueueModel(
@@ -67,5 +145,6 @@ class QueueModel {
         ? ({...priority}..remove(id))
         : {...priority, id},
     capacityMbps: capacityMbps,
+    cableLabel: cableLabel,
   );
 }

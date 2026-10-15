@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../data/dummy_data.dart';
+import '../../game/levels/levels.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'boss_level_card.dart';
@@ -89,7 +90,7 @@ class LevelMapScreen extends StatelessWidget {
                             borderRadius: AppRadius.pillAll,
                           ),
                           child: Text(
-                            DummyData.level5.name,
+                            Levels.level5.name,
                             style: AppTypography.captionStrong.copyWith(
                               color: AppColors.surface,
                             ),
@@ -131,7 +132,7 @@ class LevelMapScreen extends StatelessWidget {
       semanticLabel: switch (e.state) {
         LevelNodeState.locked => 'Level ${e.number} terkunci',
         LevelNodeState.current =>
-          'Level ${e.number}, ${DummyData.level5.name}, main sekarang',
+          'Level ${e.number}, ${Levels.level5.name}, main sekarang',
         LevelNodeState.done =>
           'Level ${e.number}, ${e.stars} bintang'
               '${e.number == 1 ? ', tutorial' : ''}',

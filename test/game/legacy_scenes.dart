@@ -1,11 +1,10 @@
 import 'dart:ui';
 
-import '../core/format.dart';
-import '../game/map_scene.dart';
-import 'dummy_data.dart';
+import 'package:busy_network/game/map_scene.dart';
 
-/// Peta statis per layar (koordinat 390×472, diambil dari desain).
-abstract final class DummyScenes {
+/// Salinan `DummyScenes` sebelum langkah 2: acuan "tampil identik" untuk
+/// `SceneBuilder.fromState`. Jangan diubah kecuali visual memang berubah.
+abstract final class LegacyScenes {
   // ── Tutorial level 1 ──────────────────────────────────────────────────
   static const tutorialRouter = Offset(105, 315);
   static const tutorialHouse1 = Offset(255, 165);
@@ -171,12 +170,7 @@ abstract final class DummyScenes {
           traffic: TrafficState.jam,
         ),
       ],
-      badges: [
-        MapBadge(
-          'Penuh! ${IdFormat.ratio(DummyData.overloadedLoad, DummyData.overloadedCapacity)}',
-          const Offset(262, 276),
-        ),
-      ],
+      badges: const [MapBadge('Penuh! 25/20', Offset(262, 276))],
       nodes: [
         const MapNode(
           id: 'j1',
@@ -214,16 +208,16 @@ abstract final class DummyScenes {
           state: HouseState.slow,
           patience: 22 / 40,
         ),
-        MapNode(
+        // Desain: bar 7/40 tapi label "sabar 15%". Model menyimpan satu
+        // nilai sabar (0,15), jadi bar menyusut 1 px (spec, keputusan 4).
+        const MapNode(
           id: 'r4',
           kind: NodeKind.house,
-          position: const Offset(315, 240),
-          label:
-              '${DummyData.complaintHouse} · sabar '
-              '${IdFormat.percent(DummyData.overloadedHousePatience)}',
+          position: Offset(315, 240),
+          label: 'Rumah 4 · sabar 15%',
           labelEmphasis: true,
           state: HouseState.jam,
-          patience: 7 / 40,
+          patience: 0.15,
           patiencePlacement: PatiencePlacement.above,
           alarm: true,
         ),

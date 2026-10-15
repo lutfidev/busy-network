@@ -1,6 +1,7 @@
-import 'package:busy_network/data/dummy_scenes.dart';
+import 'package:busy_network/data/dummy_states.dart';
 import 'package:busy_network/game/map_scene.dart';
 import 'package:busy_network/game/render/map_motion.dart';
+import 'package:busy_network/game/scene_builder.dart';
 import 'package:busy_network/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,20 +99,21 @@ void main() {
     }
 
     testWidgets('peta dengan trafik terus menggambar ulang', (tester) async {
-      await pumpMap(tester, DummyScenes.run());
+      await pumpMap(tester, SceneBuilder.fromState(DummyStates.run()));
       expect(tester.binding.hasScheduledFrame, isTrue);
     });
 
     testWidgets('animasi mati → peta diam', (tester) async {
-      await pumpMap(tester, DummyScenes.run(), disableAnimations: true);
+      await pumpMap(
+        tester,
+        SceneBuilder.fromState(DummyStates.run()),
+        disableAnimations: true,
+      );
       expect(tester.binding.hasScheduledFrame, isFalse);
     });
 
     testWidgets('peta tanpa trafik tidak memakai jam', (tester) async {
-      await pumpMap(
-        tester,
-        DummyScenes.tutorial(dragging: false, linked: true),
-      );
+      await pumpMap(tester, SceneBuilder.fromState(DummyStates.tutorial(3)));
       expect(tester.binding.hasScheduledFrame, isFalse);
     });
   });
