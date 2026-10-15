@@ -1,6 +1,7 @@
 import 'package:busy_network/app/app.dart';
 import 'package:busy_network/app/routes.dart';
 import 'package:busy_network/screens/level_map/level_map_screen.dart';
+import 'package:busy_network/screens/result_success/result_success_screen.dart';
 import 'package:busy_network/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,6 +50,42 @@ void main() {
         tester.widget<Opacity>(ring()).opacity,
         closeTo(AppMotion.ringOpacity.at(0.25), 1e-9),
       );
+    });
+  });
+
+  group('bintang hasil berhasil', () {
+    Finder filled() => find.descendant(
+      of: find.byType(ResultSuccessScreen),
+      matching: find.byType(Opacity),
+    );
+    List<double> opacities(WidgetTester tester) => [
+      for (final e in filled().evaluate()) (e.widget as Opacity).opacity,
+    ];
+
+    testWidgets('muncul bergiliran lalu diam', (tester) async {
+      await pumpAnimated(tester, AppRoutes.successWithStars(3));
+      // 0,1 s: belum ada yang muncul (jeda pertama 0,2 s).
+      expect(opacities(tester), [0, 0, 0]);
+      await tester.pump(const Duration(milliseconds: 600));
+      // 0,7 s: bintang 1 hampir selesai, bintang 2 baru mulai, 3 belum.
+      final mid = opacities(tester);
+      expect(mid[0], 1);
+      expect(mid[1], inExclusiveRange(0, 1));
+      expect(mid[2], 0);
+      await tester.pumpAndSettle();
+      expect(opacities(tester), [1, 1, 1]);
+    });
+
+    testWidgets('hanya bintang yang didapat yang muncul', (tester) async {
+      await pumpAnimated(tester, AppRoutes.successWithStars(1));
+      await tester.pumpAndSettle();
+      expect(opacities(tester), [1]);
+    });
+
+    testWidgets('animasi mati → langsung tampil', (tester) async {
+      setScreenSize(tester, const Size(390, 844));
+      await pumpApp(tester, location: AppRoutes.successWithStars(2));
+      expect(opacities(tester), [1, 1]);
     });
   });
 }

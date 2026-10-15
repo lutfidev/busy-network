@@ -41,6 +41,32 @@ abstract final class AppMotion {
   /// Pose statis cincin: sedang membesar (skala ±1,2), seperti referensi.
   static const ringStill = Duration(milliseconds: 450);
 
+  /// Bintang hasil "pop" bergiliran: membesar sambil berputar (js-star).
+  static const starPop = Duration(milliseconds: 550);
+  static const starPopDelays = [
+    Duration(milliseconds: 200),
+    Duration(milliseconds: 600),
+    Duration(milliseconds: 1000),
+  ];
+  static const Curve starPopCurve = Cubic(0.2, 1.3, 0.4, 1);
+  static const starPopScale = Keyframes([
+    (0, 0),
+    (0.65, 1.2),
+    (1, 1),
+  ], curve: starPopCurve);
+
+  /// Sudut putar (derajat).
+  static const starPopAngle = Keyframes([
+    (0, -40),
+    (0.65, 8),
+    (1, 0),
+  ], curve: starPopCurve);
+  static const starPopOpacity = Keyframes([
+    (0, 0),
+    (0.65, 1),
+    (1, 1),
+  ], curve: starPopCurve);
+
   static const Curve standard = Curves.easeOut;
   static const Curve pop = Cubic(0.2, 1.4, 0.4, 1);
 }
