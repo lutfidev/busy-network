@@ -79,5 +79,23 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
 - Commit kecil per langkah, pesan bahasa Inggris singkat
   (`feat(scope): ...`, `fix: ...`, `test: ...`).
 
+## Alur git per langkah roadmap
+Pemilik repo biasanya `/clear` setelah tiap sesi, jadi aturan ini yang
+berlaku, bukan ingatan percakapan. Kerjakan sendiri tanpa bertanya dan
+tanpa menyuruh pemilik repo menjalankan perintah:
+- **Awal langkah:** `git fetch`, pastikan PR langkah sebelumnya sudah
+  di-merge ke `origin/main`, lalu `git checkout main && git pull --ff-only`,
+  buat `feat/<nama-langkah>`, hapus branch lokal yang sudah di-merge,
+  `flutter pub get && flutter analyze && flutter test`. Kalau PR sebelumnya
+  belum di-merge, jangan bercabang dari `main` lama; beri tahu pemilik repo.
+- **Akhir langkah** (analyze bersih, test hijau, temuan review sudah
+  diperbaiki): `git push -u origin <branch>` lalu `gh pr create --base main`
+  langsung, tanpa menu pilihan. Kirim link PR-nya. Badan PR berbahasa
+  Indonesia, gaya PR #2/#3: daftar perubahan, lalu baris "Verifikasi:".
+- **Merge PR** dilakukan pemilik repo di GitHub; jangan merge sendiri
+  kecuali diminta.
+- Kesepakatan baru soal alur kerja langsung dicatat di file ini, jangan
+  hanya diucapkan di chat.
+
 ## Lanjut ke mana
 Lihat `docs/ROADMAP.md` — langkah berurutan beserta prompt siap tempel.
