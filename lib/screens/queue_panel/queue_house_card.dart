@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
-import '../../data/dummy_data.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import 'queue_logic.dart';
 
 /// Kartu satu pelanggan di panel antrean.
 class QueueHouseCard extends StatelessWidget {

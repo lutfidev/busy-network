@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../core/format.dart';
-import '../../data/dummy_data.dart';
+import '../../game/levels/levels.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'result_success_data.dart';
@@ -19,7 +19,7 @@ class ResultSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final summary = SuccessSummary(stars);
-    const level = DummyData.level5;
+    const level = Levels.level5;
     final tip = summary.tip;
     return Scaffold(
       backgroundColor: AppColors.groundCelebrate,

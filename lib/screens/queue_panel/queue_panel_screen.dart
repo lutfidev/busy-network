@@ -149,7 +149,7 @@ class _QueuePanelScreenState extends State<QueuePanelScreen> {
                         const SizedBox(width: AppSpacing.s8),
                         Expanded(
                           child: Text(
-                            DummyData.queueCableLabel,
+                            m.cableLabel,
                             style: AppTypography.captionStrong,
                           ),
                         ),

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/format.dart';
 import '../../data/dummy_data.dart';
+import '../../game/levels/levels.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -18,7 +19,7 @@ class RunStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const level = DummyData.level5;
+    const level = Levels.level5;
     final target = level.targetSatisfaction;
     const now = DummyData.runClockMinutes;
     return AppCard(
@@ -137,7 +138,7 @@ class _DayTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const level = DummyData.level5;
+    const level = Levels.level5;
     final now = _frac(DummyData.runClockMinutes / 60);
     final rushFrom = _frac(level.rushHourFrom!.toDouble());
     final rushTo = _frac(level.rushHourTo!.toDouble());

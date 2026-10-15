@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/routes.dart';
 import '../../core/format.dart';
 import '../../data/dummy_data.dart';
+import '../../game/levels/levels.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'churn_illustration.dart';
@@ -14,7 +15,7 @@ class ResultFailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const level = DummyData.level5;
+    const level = Levels.level5;
     return Scaffold(
       backgroundColor: AppColors.groundNight,
       body: NightScope(
