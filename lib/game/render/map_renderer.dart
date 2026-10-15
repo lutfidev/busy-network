@@ -9,8 +9,9 @@ import 'map_motion.dart';
 
 /// Primitif gambar peta jaringan, murni di atas [Canvas].
 ///
-/// Dipakai `NetworkMapPainter` (Flutter) sekarang, dan bisa dipanggil dari
-/// `render(Canvas)` komponen Flame nanti tanpa perubahan.
+/// Dipanggil dari `render(Canvas)` komponen Flame di `NetworkGame` (satu
+/// komponen = satu lapisan/bagian), dan dari ilustrasi/galeri. [drawScene]
+/// menggambar seluruh scene sekaligus dengan urutan lapisan yang sama.
 abstract final class MapRenderer {
   // ── Ukuran dari desain ────────────────────────────────────────────────
   static const double lanWidth = 7;
@@ -62,6 +63,14 @@ abstract final class MapRenderer {
     );
   }
 
+  /// Lapisan dasar: titik grid + label blok.
+  static void drawGround(Canvas canvas, MapScene scene) {
+    drawDotGrid(canvas, scene.size, scene.theme);
+    for (final label in scene.blockLabels) {
+      drawBlockLabel(canvas, label, scene.theme);
+    }
+  }
+
   // ── Kabel ─────────────────────────────────────────────────────────────
   static Path polyline(List<Offset> points) {
     final path = Path()..moveTo(points.first.dx, points.first.dy);
@@ -108,6 +117,34 @@ abstract final class MapRenderer {
         );
     }
   }
+
+  /// Trafik satu kabel pada pose [motion]: warna menurut tema, jarak titik
+  /// menurut beban, kecepatan menurut lancar/macet. Tanpa trafik = kosong.
+  static void drawCableTraffic(
+    Canvas canvas,
+    MapCable cable,
+    MapTheme theme, {
+    MapMotion motion = MapMotion.still,
+  }) {
+    if (cable.traffic == TrafficState.none) return;
+    drawTraffic(
+      canvas,
+      cable.points,
+      color: theme == MapTheme.day ? AppColors.trafficMap : AppColors.traffic,
+      gap: cable.state == CableState.overloaded
+          ? AppMotion.trafficJamGap
+          : AppMotion.trafficGap,
+      phase: cable.traffic == TrafficState.jam
+          ? motion.jamPhase
+          : motion.flowPhase,
+    );
+  }
+
+  /// Warna cincin snap rumah target = warna kabel yang sedang ditarik.
+  static Color? snapColor(MapScene scene) => scene.cables
+      .where((c) => c.state == CableState.drafting)
+      .map((c) => cableColor(c.kind, scene.theme))
+      .firstOrNull;
 
   /// Titik trafik: `stroke-dasharray="0 gap"` dengan ujung bulat →
   /// lingkaran berdiameter [trafficWidth] tiap [gap] px.
@@ -200,14 +237,17 @@ abstract final class MapRenderer {
     HouseState.jam => AppColors.statusJam,
   };
 
+  /// [center] menggantikan `node.position` (komponen Flame menggambar di
+  /// koordinat lokalnya).
   static void drawHouse(
     Canvas canvas,
     MapNode node,
     MapTheme theme, {
+    Offset? center,
     Color? snapColor,
     double alarmOpacity = 1,
   }) {
-    final c = node.position;
+    final c = center ?? node.position;
     final day = theme == MapTheme.day;
     final r = AppSizes.houseRadius;
 
@@ -256,7 +296,7 @@ abstract final class MapRenderer {
         day ? AppColors.track : AppColors.surfaceNightLine,
       );
     }
-    _drawNodeLabel(canvas, node, theme);
+    drawNodeLabel(canvas, node, theme, center: c);
   }
 
   static Offset _patienceOffset(PatiencePlacement p) => switch (p) {
@@ -332,7 +372,14 @@ abstract final class MapRenderer {
     canvas.restore();
   }
 
-  static void _drawNodeLabel(Canvas canvas, MapNode node, MapTheme theme) {
+  /// Label node ("Rumah 1", "Router") relatif ke [center] (default
+  /// `node.position`).
+  static void drawNodeLabel(
+    Canvas canvas,
+    MapNode node,
+    MapTheme theme, {
+    Offset? center,
+  }) {
     final label = node.label;
     if (label == null) return;
     final day = theme == MapTheme.day;
@@ -364,7 +411,7 @@ abstract final class MapRenderer {
     drawText(
       canvas,
       label,
-      node.position + offset,
+      (center ?? node.position) + offset,
       style,
       align: node.labelAlign,
     );
@@ -424,37 +471,22 @@ abstract final class MapRenderer {
   }
 
   // ── Scene ─────────────────────────────────────────────────────────────
+  /// Seluruh scene sekaligus. Urutan lapisan = prioritas komponen
+  /// `NetworkGame`: dasar, kabel, trafik, node, lencana, jari.
   static void drawScene(
     Canvas canvas,
     MapScene scene, {
     MapMotion motion = MapMotion.still,
   }) {
     final theme = scene.theme;
-    drawDotGrid(canvas, scene.size, theme);
-    for (final label in scene.blockLabels) {
-      drawBlockLabel(canvas, label, theme);
-    }
+    drawGround(canvas, scene);
     for (final cable in scene.cables) {
       drawCable(canvas, cable, theme, alarmOpacity: motion.alarmOpacity);
     }
     for (final cable in scene.cables) {
-      if (cable.traffic == TrafficState.none) continue;
-      drawTraffic(
-        canvas,
-        cable.points,
-        color: theme == MapTheme.day ? AppColors.trafficMap : AppColors.traffic,
-        gap: cable.state == CableState.overloaded
-            ? AppMotion.trafficJamGap
-            : AppMotion.trafficGap,
-        phase: cable.traffic == TrafficState.jam
-            ? motion.jamPhase
-            : motion.flowPhase,
-      );
+      drawCableTraffic(canvas, cable, theme, motion: motion);
     }
-    final drafting = scene.cables
-        .where((c) => c.state == CableState.drafting)
-        .map((c) => cableColor(c.kind, theme))
-        .firstOrNull;
+    final snap = snapColor(scene);
     for (final node in scene.nodes) {
       switch (node.kind) {
         case NodeKind.junction:
@@ -467,13 +499,13 @@ abstract final class MapRenderer {
             alarm: node.routerAlarm,
             alarmOpacity: motion.alarmOpacity,
           );
-          _drawNodeLabel(canvas, node, theme);
+          drawNodeLabel(canvas, node, theme);
         case NodeKind.house:
           drawHouse(
             canvas,
             node,
             theme,
-            snapColor: drafting,
+            snapColor: snap,
             alarmOpacity: motion.alarmOpacity,
           );
       }
