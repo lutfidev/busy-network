@@ -27,6 +27,17 @@ abstract final class AppMotion {
   static const alarmBlink = Duration(milliseconds: 700);
   static const alarmOpacity = Keyframes([(0, 1), (0.5, 0.25), (1, 1)]);
 
+  /// Kabel yang sedang ditarik: putus-putus 10/8 maju 36 px per 1 s
+  /// (js-march, linear).
+  static const cableMarch = Duration(seconds: 1);
+  static const double cableMarchAdvance = 36;
+  static const double cableDash = 10;
+  static const double cableDashGap = 8;
+
+  /// Cincin snap rumah tujuan berdenyut 0,9 → 0,25 → 0,9 (js-snap).
+  static const snapPulse = Duration(milliseconds: 1100);
+  static const snapOpacity = Keyframes([(0, 0.9), (0.5, 0.25), (1, 0.9)]);
+
   /// Cincin level aktif membesar 1 → 1,55 sambil memudar (js-ring).
   static const ringPulse = Duration(milliseconds: 1800);
   static const ringScale = Keyframes([

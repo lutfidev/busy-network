@@ -31,6 +31,46 @@ void main() {
     expect(MapMotion.at(0.7).alarmOpacity, closeTo(1, 1e-9));
   });
 
+  test('kabel ditarik maju 36 px per 1 s (js-march)', () {
+    expect(MapMotion.still.marchPhase, 0);
+    expect(MapMotion.at(0).marchPhase, 0);
+    expect(MapMotion.at(0.25).marchPhase, closeTo(9, 1e-9));
+    expect(MapMotion.at(1).marchPhase, closeTo(0, 1e-9));
+  });
+
+  test('cincin snap berdenyut 0,9 → 0,25 → 0,9 tiap 1,1 s (js-snap)', () {
+    expect(MapMotion.still.snapOpacity, 1);
+    expect(MapMotion.at(0).snapOpacity, closeTo(0.9, 1e-9));
+    expect(MapMotion.at(0.55).snapOpacity, closeTo(0.25, 1e-9));
+    expect(MapMotion.at(1.1).snapOpacity, closeTo(0.9, 1e-9));
+  });
+
+  test('hasMotion: kabel ditarik & cincin snap bergerak', () {
+    const p = [Offset.zero, Offset(30, 0)];
+    expect(
+      const MapScene(
+        theme: MapTheme.day,
+        nodes: [],
+        cables: [MapCable(points: p, state: CableState.drafting)],
+      ).hasMotion,
+      isTrue,
+    );
+    expect(
+      const MapScene(
+        theme: MapTheme.day,
+        nodes: [
+          MapNode(
+            id: 'r',
+            kind: NodeKind.house,
+            position: Offset.zero,
+            snapTarget: true,
+          ),
+        ],
+      ).hasMotion,
+      isTrue,
+    );
+  });
+
   test('hasMotion: alarm tanpa trafik tetap bergerak', () {
     const p = [Offset.zero, Offset(30, 0)];
     const house = MapNode(id: 'r', kind: NodeKind.house, position: Offset.zero);

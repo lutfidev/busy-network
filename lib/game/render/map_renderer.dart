@@ -26,6 +26,13 @@ abstract final class MapRenderer {
   static const double dotRadiusNight = 1.5;
   static const double glowSigma = 2.4;
 
+  /// Cincin snap rumah tujuan ("lepas jari di sini").
+  static const double snapRingRadius = 30;
+
+  /// Lingkaran jari di ujung kabel yang ditarik.
+  static const double dragHandleRadius = 26;
+  static const double dragHandleDot = 9;
+
   static final Path _houseGlyph = parseSvgPath(
     'M-8 1 L0 -7 L8 1 M-5.5 -1 V8 H5.5 V-1',
   );
@@ -92,12 +99,14 @@ abstract final class MapRenderer {
     ..strokeCap = StrokeCap.round
     ..strokeJoin = StrokeJoin.round;
 
-  /// [alarmOpacity] = opasitas lapisan merah kabel penuh (kedip).
+  /// [alarmOpacity] = opasitas lapisan merah kabel penuh (kedip);
+  /// [marchPhase] = geser garis putus-putus kabel yang ditarik.
   static void drawCable(
     Canvas canvas,
     MapCable cable,
     MapTheme theme, {
     double alarmOpacity = 1,
+    double marchPhase = 0,
   }) {
     final path = polyline(cable.points);
     final width = cable.kind == CableKind.fiber || cable.thick
@@ -108,7 +117,14 @@ abstract final class MapRenderer {
       case CableState.normal:
         canvas.drawPath(path, _stroke(color, width));
       case CableState.drafting:
-        drawDashedPath(canvas, path, _stroke(color, lanWidth), 10, 8);
+        drawDashedPath(
+          canvas,
+          path,
+          _stroke(color, lanWidth),
+          AppMotion.cableDash,
+          AppMotion.cableDashGap,
+          shift: marchPhase,
+        );
       case CableState.overloaded:
         canvas.drawPath(path, _stroke(color, width));
         canvas.drawPath(
@@ -180,19 +196,26 @@ abstract final class MapRenderer {
     }
   }
 
+  /// Garis putus-putus; [shift] menggeser pola maju sepanjang path
+  /// (`stroke-dashoffset: -shift`).
   static void drawDashedPath(
     Canvas canvas,
     Path path,
     Paint paint,
     double dash,
-    double gap,
-  ) {
+    double gap, {
+    double shift = 0,
+  }) {
+    final period = dash + gap;
     for (final metric in path.computeMetrics()) {
-      var d = 0.0;
+      var d = shift % period - period;
       while (d < metric.length) {
+        final start = math.max(d, 0.0);
         final end = math.min(d + dash, metric.length);
-        canvas.drawPath(metric.extractPath(d, end), paint);
-        d += dash + gap;
+        if (end > start) {
+          canvas.drawPath(metric.extractPath(start, end), paint);
+        }
+        d += period;
       }
     }
   }
@@ -215,7 +238,37 @@ abstract final class MapRenderer {
   }
 
   // ── Node ──────────────────────────────────────────────────────────────
-  static void drawJunction(Canvas canvas, Offset c, MapTheme theme) {
+  /// Cincin putus-putus "lepas jari di sini" di tujuan kabel yang ditarik,
+  /// berwarna kabel itu ([snapColor]).
+  static void drawSnapRing(
+    Canvas canvas,
+    Offset c, {
+    Color? snapColor,
+    double opacity = 1,
+  }) {
+    final color = snapColor ?? AppColors.cableLan;
+    _dashedCircle(
+      canvas,
+      c,
+      snapRingRadius,
+      _stroke(color.withValues(alpha: color.a * opacity), houseStroke),
+      4,
+      5,
+    );
+  }
+
+  /// Junction; [snapTarget] = tujuan kabel yang ditarik (junction putus).
+  static void drawJunction(
+    Canvas canvas,
+    Offset c,
+    MapTheme theme, {
+    bool snapTarget = false,
+    Color? snapColor,
+    double snapOpacity = 1,
+  }) {
+    if (snapTarget) {
+      drawSnapRing(canvas, c, snapColor: snapColor, opacity: snapOpacity);
+    }
     final day = theme == MapTheme.day;
     canvas.drawCircle(
       c,
@@ -243,20 +296,14 @@ abstract final class MapRenderer {
     MapTheme theme, {
     Color? snapColor,
     double alarmOpacity = 1,
+    double snapOpacity = 1,
   }) {
     final c = node.position;
     final day = theme == MapTheme.day;
     final r = AppSizes.houseRadius;
 
     if (node.snapTarget) {
-      _dashedCircle(
-        canvas,
-        c,
-        30,
-        _stroke(snapColor ?? AppColors.cableLan, houseStroke),
-        4,
-        5,
-      );
+      drawSnapRing(canvas, c, snapColor: snapColor, opacity: snapOpacity);
     }
     if (node.alarm) {
       canvas.drawCircle(
@@ -430,11 +477,15 @@ abstract final class MapRenderer {
   static void drawDragHandle(Canvas canvas, Offset c) {
     canvas.drawCircle(
       c,
-      26,
+      dragHandleRadius,
       Paint()..color = AppColors.ink.withValues(alpha: 0.10),
     );
-    canvas.drawCircle(c, 26, _stroke(AppColors.ink.withValues(alpha: 0.3), 2));
-    canvas.drawCircle(c, 9, Paint()..color = AppColors.ink);
+    canvas.drawCircle(
+      c,
+      dragHandleRadius,
+      _stroke(AppColors.ink.withValues(alpha: 0.3), 2),
+    );
+    canvas.drawCircle(c, dragHandleDot, Paint()..color = AppColors.ink);
   }
 
   /// Teks dengan [baseline] di titik [anchor] (seperti `<text x y>` SVG).
@@ -472,7 +523,13 @@ abstract final class MapRenderer {
     final theme = scene.theme;
     drawGround(canvas, scene);
     for (final cable in scene.cables) {
-      drawCable(canvas, cable, theme, alarmOpacity: motion.alarmOpacity);
+      drawCable(
+        canvas,
+        cable,
+        theme,
+        alarmOpacity: motion.alarmOpacity,
+        marchPhase: motion.marchPhase,
+      );
     }
     for (final cable in scene.cables) {
       drawCableTraffic(canvas, cable, theme, motion: motion);
@@ -481,7 +538,14 @@ abstract final class MapRenderer {
     for (final node in scene.nodes) {
       switch (node.kind) {
         case NodeKind.junction:
-          drawJunction(canvas, node.position, theme);
+          drawJunction(
+            canvas,
+            node.position,
+            theme,
+            snapTarget: node.snapTarget,
+            snapColor: snap,
+            snapOpacity: motion.snapOpacity,
+          );
         case NodeKind.router:
           drawRouter(
             canvas,
@@ -498,6 +562,7 @@ abstract final class MapRenderer {
             theme,
             snapColor: snap,
             alarmOpacity: motion.alarmOpacity,
+            snapOpacity: motion.snapOpacity,
           );
       }
     }

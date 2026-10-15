@@ -6,6 +6,9 @@ import '../map_scene.dart';
 /// Ukuran satu langkah grid peta (px desain).
 const double gridCell = 30;
 
+/// Titik grid level dalam satuan langkah: `gridOrigin + (30i, 30j)`.
+typedef Cell = ({int i, int j});
+
 /// Jumlah segmen kabel: panjang tiap ruas dalam langkah grid (diagonal
 /// dihitung satu langkah), dijumlah, dibulatkan, minimal 1.
 ///
@@ -128,10 +131,12 @@ class CableDraft {
   final CableKind kind;
   final List<Offset> points;
 
-  /// Rumah yang diberi cincin snap ("lepas jari di sini").
+  /// Rumah/junction yang diberi cincin snap ("lepas jari di sini").
   final String? target;
 
-  /// Posisi jari; `null` = tarikan dipandu (tutorial, jari = gambar tangan).
+  /// Ujung tarikan di titik grid bawah jari (lingkaran jari). `null` = kabel
+  /// sudah menempel ke [target], atau tarikan dipandu (tutorial, jari =
+  /// gambar tangan).
   final Offset? handle;
 
   int get segments => segmentCount(points);

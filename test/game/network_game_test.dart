@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:busy_network/data/dummy_states.dart';
 import 'package:busy_network/game/components/components.dart';
+import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/game/map_scene.dart';
 import 'package:busy_network/game/model/model.dart';
 import 'package:busy_network/game/network_game.dart';
@@ -20,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../test_helpers.dart';
+import 'design_pull.dart';
 
 final _boundary = GlobalKey();
 
@@ -30,10 +32,15 @@ Future<NetworkGame> pumpGame(
   WidgetTester tester,
   GameState state, {
   bool animate = false,
+  bool interactive = false,
   Size size = AppSizes.mapArea,
 }) async {
   setScreenSize(tester, size);
-  final game = NetworkGame(state: state, animate: animate);
+  final game = NetworkGame(
+    state: state,
+    animate: animate,
+    interactive: interactive,
+  );
   await tester.pumpWidget(
     RepaintBoundary(
       key: _boundary,
@@ -109,7 +116,7 @@ void main() {
     });
 
     testWidgets('kabel yang ditarik punya jari', (tester) async {
-      final game = await pumpGame(tester, DummyStates.design(CableKind.lan));
+      final game = await pumpGame(tester, designPull());
       final handle = piecesOf<DragHandleComponent>(game).single;
       expect(handle.center, game.scene.dragHandle);
     });
@@ -130,13 +137,21 @@ void main() {
         router.containsLocalPoint(r + Vector2(AppSizes.routerSize / 2 + 1, 0)),
         isFalse,
       );
-      for (final house in piecesOf<HouseComponent>(game)) {
-        final c = state.level.house(house.node.id).position.toVector2();
-        expect(house.containsLocalPoint(c), isTrue, reason: house.node.id);
+      // Rumah & junction lebih kecil dari jari: bidang sentuh minimal 48 px.
+      const touch = AppSizes.mapTouchRadius;
+      for (final node in piecesOf<MapNodeComponent>(game)) {
+        if (node is RouterComponent) continue;
+        final c = node.node.position.toVector2();
+        expect(node.containsLocalPoint(c), isTrue, reason: node.node.id);
         expect(
-          house.containsLocalPoint(c + Vector2(0, AppSizes.houseRadius + 1)),
+          node.containsLocalPoint(c + Vector2(0, touch - 1)),
+          isTrue,
+          reason: node.node.id,
+        );
+        expect(
+          node.containsLocalPoint(c + Vector2(0, touch + 1)),
           isFalse,
-          reason: house.node.id,
+          reason: node.node.id,
         );
       }
       expect(game.componentsAtPoint(r.clone()).whereType<RouterComponent>(), [
@@ -189,8 +204,14 @@ void main() {
       'tutorial 1': () => DummyStates.tutorial(1),
       'tutorial 2': () => DummyStates.tutorial(2),
       'tutorial 3': () => DummyStates.tutorial(3),
-      'fase rancang LAN': () => DummyStates.design(CableKind.lan),
-      'fase rancang fiber': () => DummyStates.design(CableKind.fiber),
+      'fase rancang LAN': designPull,
+      'fase rancang fiber': () => designPull(kind: CableKind.fiber),
+      'fase rancang menempel': () =>
+          designPull()..dragCable(const Offset(312, 386)),
+      'fase rancang ke junction putus': () => GameState(Levels.level5)
+        ..removeCable('c-w')
+        ..beginCable(LevelDef.routerId)
+        ..dragCable(const Offset(195, 190)),
       'fase jalan': DummyStates.run,
     };
     for (final MapEntry(key: name, value: create) in states.entries) {
@@ -275,7 +296,7 @@ void main() {
       tester,
     ) async {
       await loadMapFonts(tester);
-      final state = DummyStates.design(CableKind.lan);
+      final state = designPull();
       final game = await pumpGame(tester, state);
       final housesBefore = piecesOf<HouseComponent>(game).toList();
 
@@ -339,6 +360,167 @@ void main() {
       expect(game.scene.theme, MapTheme.night);
       expect(piecesOf<TrafficComponent>(game), hasLength(1));
       expect(game.paused, isFalse);
+    });
+
+    testWidgets('kabel ditarik & cincin snap bergerak (js-march, js-snap)', (
+      tester,
+    ) async {
+      final game = await pumpGame(tester, designPull(), animate: true);
+      expect(game.paused, isFalse);
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(game.motion.marchPhase, closeTo(9, 1e-3));
+      expect(game.motion.snapOpacity, lessThan(0.9));
+    });
+  });
+
+  group('input', () {
+    /// Peta 360 px (skala 0,92) supaya konversi layar → peta ikut diuji.
+    const size = Size(360, 360 * 472 / 390);
+    const scale = 360 / 390;
+    Offset screen(Offset map) => map * scale;
+
+    /// Jeda antar-langkah gestur: pengenal ketuk Flame memasang timer
+    /// pendek yang harus habis sebelum test selesai.
+    const step = Duration(milliseconds: 50);
+
+    Future<TestGesture> drag(
+      WidgetTester tester,
+      List<Offset> path, {
+      bool release = true,
+    }) async {
+      final gesture = await tester.startGesture(screen(path.first));
+      for (final p in path.skip(1)) {
+        await gesture.moveTo(screen(p));
+        await tester.pump(step);
+      }
+      if (release) {
+        await gesture.up();
+        await tester.pump(step);
+      }
+      return gesture;
+    }
+
+    testWidgets('seret router → Rumah 6: kabel terpasang', (tester) async {
+      final state = GameState(Levels.level5);
+      final game = await pumpGame(tester, state, interactive: true, size: size);
+      final gesture = await drag(tester, const [
+        Offset(195, 240),
+        Offset(195, 330),
+        Offset(196, 418),
+      ], release: false);
+      expect(state.pulling, isTrue);
+      expect(state.draft!.target, 'r6');
+      expect(state.draft!.handle, isNull, reason: 'menempel di Rumah 6');
+      expect(piecesOf<DragHandleComponent>(game), isEmpty);
+
+      await gesture.up();
+      await tester.pump(step);
+      expect(state.pulling, isFalse);
+      expect(state.cables.last.id, 'c-r6');
+      expect(state.connectedHouses, contains('r6'));
+      expect(state.budget, 850000 - 75000);
+      expect(
+        piecesOf<HouseComponent>(game)
+            .singleWhere((h) => h.node.id == 'r6')
+            .node
+            .state,
+        HouseState.connected,
+      );
+    });
+
+    testWidgets('tarikan desain lewat jari = desain', (tester) async {
+      final state = GameState(Levels.level5);
+      final game = await pumpGame(tester, state, interactive: true, size: size);
+      final gesture = await drag(tester, designPullPath, release: false);
+      expect(state.draft!.points, designPull().draft!.points);
+      expect(game.scene.dragHandle, const Offset(255, 360));
+      await gesture.up();
+      await tester.pump(step);
+      expect(state.cables, Levels.level5.cables, reason: 'lepas di luar rumah');
+      expect(state.draft, isNull);
+    });
+
+    testWidgets('dari rumah yang belum tersambung: tidak terjadi apa-apa', (
+      tester,
+    ) async {
+      final state = GameState(Levels.level5);
+      await pumpGame(tester, state, interactive: true, size: size);
+      await drag(tester, const [Offset(315, 390), Offset(255, 330)]);
+      expect(state.cables, Levels.level5.cables);
+    });
+
+    testWidgets('peta tidak interaktif mengabaikan seret', (tester) async {
+      final state = GameState(Levels.level5);
+      await pumpGame(tester, state, size: size);
+      await drag(tester, const [Offset(195, 240), Offset(195, 420)]);
+      expect(state.pulling, isFalse);
+      expect(state.cables, Levels.level5.cables);
+    });
+
+    testWidgets('state diganti di tengah tarikan → tarikan lama batal', (
+      tester,
+    ) async {
+      final old = GameState(Levels.level5);
+      final game = await pumpGame(tester, old, interactive: true, size: size);
+      final gesture = await drag(tester, const [
+        Offset(195, 240),
+        Offset(195, 330),
+      ], release: false);
+      expect(old.pulling, isTrue);
+
+      final fresh = GameState(Levels.level5);
+      game.state = fresh;
+      expect(old.pulling, isFalse);
+      expect(old.draft, isNull);
+
+      await gesture.up();
+      await tester.pump(step);
+      expect(fresh.pulling, isFalse);
+      expect(fresh.cables, Levels.level5.cables);
+    });
+
+    testWidgets('gestur dibatalkan → kabel tidak dipasang', (tester) async {
+      final state = GameState(Levels.level5);
+      await pumpGame(tester, state, interactive: true, size: size);
+      final gesture = await drag(tester, const [
+        Offset(195, 240),
+        Offset(195, 330),
+        Offset(195, 420),
+      ], release: false);
+      await gesture.cancel();
+      await tester.pump(step);
+      expect(state.pulling, isFalse);
+      expect(state.cables, Levels.level5.cables);
+    });
+
+    testWidgets('mode hapus: ketuk kabel → dibongkar', (tester) async {
+      final state = GameState(Levels.level5)..setErasing(true);
+      final game = await pumpGame(tester, state, interactive: true, size: size);
+      // Kabel Router → Rumah 4 di y = 240; ketuk sedikit di bawah garisnya.
+      await tester.tapAt(screen(const Offset(257, 249)));
+      await tester.pump(step);
+      expect(state.cables.map((c) => c.id), isNot(contains('c-r4')));
+      expect(state.budget, 850000 + 22500);
+      expect(
+        piecesOf<CableComponent>(game).map((c) => c.cable.id),
+        isNot(contains('c-r4')),
+      );
+    });
+
+    testWidgets('di luar mode hapus ketukan tidak membongkar', (tester) async {
+      final state = GameState(Levels.level5);
+      await pumpGame(tester, state, interactive: true, size: size);
+      await tester.tapAt(screen(const Offset(257, 240)));
+      await tester.pump(step);
+      expect(state.cables, Levels.level5.cables);
+    });
+
+    testWidgets('ketukan jauh dari kabel tidak membongkar', (tester) async {
+      final state = GameState(Levels.level5)..setErasing(true);
+      await pumpGame(tester, state, interactive: true, size: size);
+      await tester.tapAt(screen(const Offset(257, 262)));
+      await tester.pump(step);
+      expect(state.cables, Levels.level5.cables);
     });
   });
 }

@@ -4,9 +4,9 @@ import '../game/levels/levels.dart';
 import '../game/map_scene.dart';
 import '../game/model/model.dart';
 
-/// Snapshot [GameState] per layar, pengganti peta statis. Diganti state
-/// game asli di langkah 4 (tarik kabel) dan 5 (simulasi). Koordinat persis
-/// dari desain.
+/// Snapshot [GameState] untuk layar yang belum digerakkan game: tutorial
+/// (interaktif di langkah 7) dan fase jalan (simulasi di langkah 5).
+/// Koordinat persis dari desain. Fase Rancang sudah memakai state asli.
 abstract final class DummyStates {
   // ── Tutorial level 1 ──────────────────────────────────────────────────
   static const _tutorialCable = [Offset(105, 315), Offset(255, 165)];
@@ -41,19 +41,6 @@ abstract final class DummyStates {
   }
 
   // ── Gang Melati (level 5) ─────────────────────────────────────────────
-  /// Fase rancang: sedang menarik kabel [kind] dari router ke Rumah 5.
-  static GameState design(CableKind kind) => GameState(
-    Levels.level5,
-    selectedCable: kind,
-    draft: CableDraft(
-      from: LevelDef.routerId,
-      kind: kind,
-      points: const [Offset(195, 264), Offset(195, 300), Offset(255, 360)],
-      target: 'r5',
-      handle: const Offset(255, 360),
-    ),
-  );
-
   /// Fase jalan, jam sibuk: kabel Router → Rumah 4 penuh (16 + 9 Mbps).
   static GameState run() {
     const level = Levels.level5;

@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../game/design_pull.dart';
 import '../test_helpers.dart';
 import 'capture.dart';
 
@@ -28,6 +29,13 @@ const _screens = <String, String>{
   '07-hasil-berhasil-2': '${AppRoutes.success}?${AppRoutes.starsParam}=2',
   '07-hasil-berhasil-3': '${AppRoutes.success}?${AppRoutes.starsParam}=3',
   '08-hasil-gagal': AppRoutes.fail,
+};
+
+/// Aksi sebelum dipotret; gestur yang dikembalikan dilepas sesudahnya.
+final _before = <String, Future<TestGesture> Function(WidgetTester)>{
+  // Bingkai desain: jari masih menarik kabel router → arah Rumah 5.
+  '04-fase-rancang': (tester) =>
+      dragOnMap(tester, designPullPath, release: false),
 };
 
 const _sizes = [Size(390, 844), Size(360, 740)];
@@ -47,7 +55,9 @@ void main() {
           capturable(JaringanSibukApp(initialLocation: location)),
         );
         await tester.pumpAndSettle();
+        final gesture = await _before[name]?.call(tester);
         await capture(tester, '$folder/$name');
+        await gesture?.up();
       }, skip: !screenshotsEnabled);
     }
   }

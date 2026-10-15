@@ -77,6 +77,15 @@ class LevelDef {
   static const double cell = gridCell;
   static const routerId = 'router';
 
+  /// Area peta (px desain), sama dengan `AppSizes.mapArea`.
+  static const mapSize = Size(390, 472);
+
+  /// Jarak pusat → tepi node tempat kabel mulai/berakhir: router 48×48,
+  /// rumah berjari-jari 20 (`AppSizes.routerSize / 2`, `houseRadius`).
+  /// Kabel junction mulai dari pusatnya.
+  static const double routerReach = 24;
+  static const double houseReach = 20;
+
   final int number;
   final String name;
 
@@ -129,5 +138,25 @@ class LevelDef {
 
     final d = p - gridOrigin;
     return aligned(d.dx) && aligned(d.dy);
+  }
+
+  /// Titik grid terdekat dari [p] (boleh di luar peta).
+  Cell cellOf(Offset p) {
+    final d = p - gridOrigin;
+    return (i: (d.dx / cell).round(), j: (d.dy / cell).round());
+  }
+
+  Offset pointOf(Cell c) => gridOrigin + Offset(c.i * cell, c.j * cell);
+
+  /// Titik grid di dalam peta (tidak menempel tepi) yang terdekat dari
+  /// jari [p].
+  Cell snap(Offset p) {
+    int lo(double origin) => (-origin / cell).floor() + 1;
+    int hi(double origin, double size) => ((size - origin) / cell).ceil() - 1;
+    final c = cellOf(p);
+    return (
+      i: c.i.clamp(lo(gridOrigin.dx), hi(gridOrigin.dx, mapSize.width)),
+      j: c.j.clamp(lo(gridOrigin.dy), hi(gridOrigin.dy, mapSize.height)),
+    );
   }
 }

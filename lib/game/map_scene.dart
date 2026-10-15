@@ -75,7 +75,8 @@ class MapNode {
   /// Cincin merah di rumah macet.
   final bool alarm;
 
-  /// Cincin putus-putus "lepas jari di sini" saat menarik kabel.
+  /// Cincin putus-putus "lepas jari di sini" saat menarik kabel (rumah, atau
+  /// junction yang putus).
   final bool snapTarget;
 
   /// LED ketiga router menyala merah (ada kabel penuh).
@@ -84,12 +85,17 @@ class MapNode {
 
 class MapCable {
   const MapCable({
+    this.id,
     required this.points,
     this.kind = CableKind.lan,
     this.state = CableState.normal,
     this.traffic = TrafficState.none,
     this.thick = false,
   });
+
+  /// Id kabel terpasang (untuk dibongkar); `null` = kabel yang sedang
+  /// ditarik.
+  final String? id;
 
   /// Polyline kabel; segmen hanya 0°/45°/90°.
   final List<Offset> points;
@@ -139,12 +145,11 @@ class MapScene {
   /// Ujung kabel yang sedang ditarik (lingkaran jari).
   final Offset? dragHandle;
 
-  /// Ada yang bergerak (trafik, alarm)? Kalau tidak, peta cukup digambar
-  /// sekali.
+  /// Ada yang bergerak (trafik, alarm, kabel ditarik, cincin snap)? Kalau
+  /// tidak, peta cukup digambar sekali.
   bool get hasMotion =>
       cables.any(
-        (c) =>
-            c.traffic != TrafficState.none || c.state == CableState.overloaded,
+        (c) => c.traffic != TrafficState.none || c.state != CableState.normal,
       ) ||
-      nodes.any((n) => n.alarm || n.routerAlarm);
+      nodes.any((n) => n.alarm || n.routerAlarm || n.snapTarget);
 }
