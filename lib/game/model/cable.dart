@@ -131,7 +131,7 @@ class CableDraft {
   final CableKind kind;
   final List<Offset> points;
 
-  /// Rumah yang diberi cincin snap ("lepas jari di sini").
+  /// Rumah/junction yang diberi cincin snap ("lepas jari di sini").
   final String? target;
 
   /// Ujung tarikan di titik grid bawah jari (lingkaran jari). `null` = kabel

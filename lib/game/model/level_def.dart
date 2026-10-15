@@ -148,16 +148,8 @@ class LevelDef {
 
   Offset pointOf(Cell c) => gridOrigin + Offset(c.i * cell, c.j * cell);
 
-  /// Titik grid di dalam peta (tidak menempel tepi).
-  bool inMap(Cell c) {
-    final p = pointOf(c);
-    return p.dx > 0 &&
-        p.dx < mapSize.width &&
-        p.dy > 0 &&
-        p.dy < mapSize.height;
-  }
-
-  /// Titik grid di dalam peta yang terdekat dari jari [p].
+  /// Titik grid di dalam peta (tidak menempel tepi) yang terdekat dari
+  /// jari [p].
   Cell snap(Offset p) {
     int lo(double origin) => (-origin / cell).floor() + 1;
     int hi(double origin, double size) => ((size - origin) / cell).ceil() - 1;

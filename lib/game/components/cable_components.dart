@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
@@ -21,10 +19,10 @@ class CableComponent extends Component
   bool containsLocalPoint(Vector2 point) {
     if (cable.id == null) return false;
     final p = point.toOffset();
-    final reach = math.max(MapRenderer.fiberWidth / 2, AppSizes.cableTouchSlop);
     final points = cable.points;
     for (var i = 1; i < points.length; i++) {
-      if (_distanceToSegment(p, points[i - 1], points[i]) <= reach) {
+      if (_distanceToSegment(p, points[i - 1], points[i]) <=
+          AppSizes.cableTouchSlop) {
         return true;
       }
     }

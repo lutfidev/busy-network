@@ -208,6 +208,10 @@ void main() {
       'fase rancang fiber': () => designPull(kind: CableKind.fiber),
       'fase rancang menempel': () =>
           designPull()..dragCable(const Offset(312, 386)),
+      'fase rancang ke junction putus': () => GameState(Levels.level5)
+        ..removeCable('c-w')
+        ..beginCable(LevelDef.routerId)
+        ..dragCable(const Offset(195, 190)),
       'fase jalan': DummyStates.run,
     };
     for (final MapEntry(key: name, value: create) in states.entries) {
@@ -451,6 +455,28 @@ void main() {
       await drag(tester, const [Offset(195, 240), Offset(195, 420)]);
       expect(state.pulling, isFalse);
       expect(state.cables, Levels.level5.cables);
+    });
+
+    testWidgets('state diganti di tengah tarikan → tarikan lama batal', (
+      tester,
+    ) async {
+      final old = GameState(Levels.level5);
+      final game = await pumpGame(tester, old, interactive: true, size: size);
+      final gesture = await drag(tester, const [
+        Offset(195, 240),
+        Offset(195, 330),
+      ], release: false);
+      expect(old.pulling, isTrue);
+
+      final fresh = GameState(Levels.level5);
+      game.state = fresh;
+      expect(old.pulling, isFalse);
+      expect(old.draft, isNull);
+
+      await gesture.up();
+      await tester.pump(step);
+      expect(fresh.pulling, isFalse);
+      expect(fresh.cables, Levels.level5.cables);
     });
 
     testWidgets('gestur dibatalkan → kabel tidak dipasang', (tester) async {

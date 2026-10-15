@@ -56,7 +56,7 @@ class _Pull {
   final String from;
   final CableWalk walk;
 
-  /// Rumah bercincin snap.
+  /// Rumah/junction bercincin snap.
   String? target;
 
   /// Ujung jalur sudah di pusat [target]: lepas = pasang.
@@ -83,11 +83,11 @@ class GameState extends ChangeNotifier {
     if (draft != null) _checkUnlocked(draft.kind);
   }
 
-  /// Rumah terdekat dari jari dalam jarak ini mendapat cincin snap.
+  /// Tujuan terdekat dari jari dalam jarak ini mendapat cincin snap.
   static const double snapRadius = 90;
 
-  /// Jari sedekat ini dari pusat rumah (= jari-jari cincin snap) →
-  /// kabel menempel ke rumah itu.
+  /// Jari sedekat ini dari pusat tujuan (= jari-jari cincin snap,
+  /// `MapRenderer.snapRingRadius`) → kabel menempel ke situ.
   static const double dockRadius = 30;
 
   /// Bagian biaya yang kembali saat kabel dibongkar.
@@ -207,22 +207,27 @@ class GameState extends ChangeNotifier {
     return true;
   }
 
-  /// Jari (koordinat peta) bergerak selama tarikan.
+  /// Jari (koordinat peta) bergerak selama tarikan. Hanya memberi tahu bila
+  /// jalur, tujuan, atau status menempel berubah (bukan tiap geseran).
   void dragCable(Offset finger) {
     final pull = _pull;
     if (pull == null) return;
-    final target = _snapTarget(finger, exclude: pull.from);
+    (int, Cell, String?, bool) shape() =>
+        (pull.walk.cells.length, pull.walk.end, pull.target, pull.docked);
+    final before = shape();
+    final target = _snapTarget(finger);
     final targetCell = target == null ? null : level.cellOf(target.$2);
     final dock = target != null && (finger - target.$2).distance <= dockRadius;
     pull.walk.moveTo(dock ? targetCell! : level.snap(finger), dock: dock);
     pull
       ..target = target?.$1
       ..docked = dock && pull.walk.end == targetCell;
+    if (shape() == before) return;
     _draft = _draftOf(pull);
     notifyListeners();
   }
 
-  /// Jari dilepas. Menempel di rumah & anggaran cukup → kabel terpasang.
+  /// Jari dilepas. Menempel di tujuan & anggaran cukup → kabel terpasang.
   CableDrop endCable() {
     final pull = _pull;
     final draft = _draft;
@@ -331,15 +336,20 @@ class GameState extends ChangeNotifier {
     for (final j in junctions) j.position,
   ];
 
-  /// Rumah belum tersambung terdekat dari [finger] dalam [snapRadius].
-  (String, Offset)? _snapTarget(Offset finger, {required String exclude}) {
+  /// Tujuan terdekat dari [finger] dalam [snapRadius]: rumah, atau junction
+  /// yang putus (supaya kabel di hilirnya bisa tersambung lagi), yang belum
+  /// tersambung. Sumber tarikan selalu tersambung, jadi tidak ikut.
+  (String, Offset)? _snapTarget(Offset finger) {
     (String, Offset)? best;
     var bestDistance = snapRadius;
-    for (final h in level.houses) {
-      if (h.id == exclude || connectedHouses.contains(h.id)) continue;
-      final d = (finger - h.position).distance;
+    for (final (id, position) in [
+      for (final h in level.houses) (h.id, h.position),
+      for (final j in junctions) (j.id, j.position),
+    ]) {
+      if (isConnected(id)) continue;
+      final d = (finger - position).distance;
       if (d <= bestDistance) {
-        best = (h.id, h.position);
+        best = (id, position);
         bestDistance = d;
       }
     }
@@ -355,7 +365,7 @@ class GameState extends ChangeNotifier {
       points: cablePolyline(
         [for (final c in cells) level.pointOf(c)],
         startTrim: _reach(pull.from),
-        endTrim: pull.docked ? LevelDef.houseReach : 0,
+        endTrim: pull.docked ? _reach(pull.target!) : 0,
       ),
       target: pull.target,
       handle: pull.docked ? null : level.pointOf(pull.walk.end),

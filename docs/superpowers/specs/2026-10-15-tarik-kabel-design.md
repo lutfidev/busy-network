@@ -36,9 +36,9 @@ suara/getar (langkah 9).
 4. **Biaya** tetap `segmentCount` dari langkah 2 (panjang polyline terpotong
    dalam langkah grid, dibulatkan, min 1) × harga per segmen. Tarikan di
    desain = 3 segmen.
-5. **Cincin snap** = rumah yang belum tersambung terdekat dari jari dalam
-   90 px (desain: jari 67 px dari Rumah 5). Jari masuk cincin (≤ 30 px dari
-   pusat rumah) → jalur menempel ke rumah: kabel putus-putus masuk rumah,
+5. **Cincin snap** = tujuan terdekat dari jari dalam 90 px (desain: jari
+   67 px dari Rumah 5): rumah yang belum tersambung, atau junction yang
+   putus. Jari masuk cincin (≤ 30 px dari pusatnya) → jalur menempel: kabel putus-putus masuk rumah,
    lingkaran jari hilang, tooltip = biaya yang akan dibayar. Lepas saat
    menempel → kabel terpasang; lepas di tempat lain → tarikan batal.
 6. **Anggaran kurang**: selama menarik, tooltip merah bila biaya > sisa.
@@ -46,8 +46,13 @@ suara/getar (langkah 9).
    "Anggaran kurang: kabel ini Rp X, sisa Rp Y." tampil sampai aksi
    berikutnya. (Copy baru; desain belum punya keadaan ini.)
 7. **Mode Hapus**: ketuk kabel (pita ±12 px dari garisnya) → kabel dibongkar,
-   uang kembali `biaya ~/ 2`. Berlaku juga untuk kabel bawaan level. Rumah di
-   hilirnya ikut putus; kabel hilir tidak ikut dibongkar.
+   uang kembali `biaya ~/ 2`. Rumah di hilirnya ikut putus; kabel hilir
+   tidak ikut dibongkar. Junction yang putus bisa jadi tujuan tarikan, jadi
+   kabel hilirnya tersambung lagi (tanpa ini junction itu buntu selamanya).
+   Uang kembali berlaku juga untuk kabel bawaan level (dianggap investasi
+   pemain sebelumnya), jadi infrastruktur bisa "dijual" dengan mengorbankan
+   rumah yang putus. Bila ini merusak keseimbangan bintang, ubah di
+   langkah 6.
 8. **Input lewat Flame.** Node & kabel di `NetworkGame` menerima drag/ketuk
    (`DragCallbacks`/`TapCallbacks`, uji sentuh di koordinat peta). Bidang
    sentuh node minimal 24 px (48 px diameter). Posisi jari dilacak dengan
@@ -65,5 +70,6 @@ suara/getar (langkah 9).
     acuannya pusat rumah.
 12. **Animasi** kabel ditarik dari desain sekarang hidup: `js-march` (garis
     putus-putus maju 36 px/s) dan `js-snap` (cincin 0,9 ↔ 0,25, 1,1 s). Pose
-    diam = gambar desain.
+    diam = gambar desain. Kabel dipandu di tutorial langkah 2 juga
+    `js-march` di desain, jadi peta tutorial ikut bergerak.
 13. **Id kabel baru** `c-<rumah>`, ditambah `-2`, `-3`, … bila sudah dipakai.

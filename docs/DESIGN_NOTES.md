@@ -86,7 +86,9 @@ Gagal · Design token & komponen.
 - **Anggaran kurang** (belum ada di desain): tooltip merah, lalu banner
   "Anggaran kurang: kabel ini Rp X, sisa Rp Y." bila dilepas di rumah.
 - **Bongkar** berlaku juga untuk kabel bawaan level; uang kembali 50%.
-  Kabel hilir tidak ikut dibongkar, rumahnya saja yang putus.
+  Kabel hilir tidak ikut dibongkar, rumahnya saja yang putus. Junction yang
+  putus (mis. j1 setelah fiber Warung dibongkar) bisa jadi tujuan tarikan
+  untuk menyambung hilirnya lagi; cincin snap juga digambar di junction.
 - **Fase Rancang mulai kosong** (tanpa tarikan). Screenshot
   `04-fase-rancang` menarik kabel sungguhan lalu memotret sambil jari
   menempel.

@@ -98,6 +98,13 @@ class JunctionComponent extends MapNodeComponent {
 
   @override
   void render(Canvas canvas) {
-    MapRenderer.drawJunction(canvas, node.position, game.scene.theme);
+    MapRenderer.drawJunction(
+      canvas,
+      node.position,
+      game.scene.theme,
+      snapTarget: node.snapTarget,
+      snapColor: game.snapColor,
+      snapOpacity: game.motion.snapOpacity,
+    );
   }
 }

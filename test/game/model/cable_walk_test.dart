@@ -1,5 +1,6 @@
 import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/game/model/model.dart';
+import 'package:busy_network/game/render/map_renderer.dart';
 import 'package:busy_network/theme/theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,6 +12,7 @@ void main() {
       expect(LevelDef.mapSize, AppSizes.mapArea);
       expect(LevelDef.routerReach, AppSizes.routerSize / 2);
       expect(LevelDef.houseReach, AppSizes.houseRadius);
+      expect(GameState.dockRadius, MapRenderer.snapRingRadius);
     });
 
     test('cellOf / pointOf memakai titik asal level', () {
@@ -40,8 +42,6 @@ void main() {
 
       const l1 = Levels.level1;
       expect(l1.pointOf(l1.snap(const Offset(20, 470))), const Offset(15, 465));
-      expect(l1.inMap(l1.snap(const Offset(20, 470))), isTrue);
-      expect(l5.inMap(c(6, 0)), isFalse);
     });
   });
 

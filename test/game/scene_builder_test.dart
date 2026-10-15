@@ -84,6 +84,15 @@ void main() {
     expect(scene.hasMotion, isTrue, reason: 'js-march & js-snap');
   });
 
+  test('junction putus sebagai tujuan mendapat cincin snap', () {
+    final state = GameState(Levels.level5)
+      ..removeCable('c-w')
+      ..beginCable(LevelDef.routerId)
+      ..dragCable(const Offset(195, 190));
+    final scene = SceneBuilder.fromState(state);
+    expect(scene.nodes.singleWhere((n) => n.snapTarget).id, 'j1');
+  });
+
   test('kabel terpasang membawa id-nya; rumah baru tersambung', () {
     final state = designPull()..dragCable(const Offset(312, 386));
     state.endCable();

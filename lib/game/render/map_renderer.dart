@@ -29,6 +29,10 @@ abstract final class MapRenderer {
   /// Cincin snap rumah tujuan ("lepas jari di sini").
   static const double snapRingRadius = 30;
 
+  /// Lingkaran jari di ujung kabel yang ditarik.
+  static const double dragHandleRadius = 26;
+  static const double dragHandleDot = 9;
+
   static final Path _houseGlyph = parseSvgPath(
     'M-8 1 L0 -7 L8 1 M-5.5 -1 V8 H5.5 V-1',
   );
@@ -234,7 +238,37 @@ abstract final class MapRenderer {
   }
 
   // ── Node ──────────────────────────────────────────────────────────────
-  static void drawJunction(Canvas canvas, Offset c, MapTheme theme) {
+  /// Cincin putus-putus "lepas jari di sini" di tujuan kabel yang ditarik,
+  /// berwarna kabel itu ([snapColor]).
+  static void drawSnapRing(
+    Canvas canvas,
+    Offset c, {
+    Color? snapColor,
+    double opacity = 1,
+  }) {
+    final color = snapColor ?? AppColors.cableLan;
+    _dashedCircle(
+      canvas,
+      c,
+      snapRingRadius,
+      _stroke(color.withValues(alpha: color.a * opacity), houseStroke),
+      4,
+      5,
+    );
+  }
+
+  /// Junction; [snapTarget] = tujuan kabel yang ditarik (junction putus).
+  static void drawJunction(
+    Canvas canvas,
+    Offset c,
+    MapTheme theme, {
+    bool snapTarget = false,
+    Color? snapColor,
+    double snapOpacity = 1,
+  }) {
+    if (snapTarget) {
+      drawSnapRing(canvas, c, snapColor: snapColor, opacity: snapOpacity);
+    }
     final day = theme == MapTheme.day;
     canvas.drawCircle(
       c,
@@ -269,15 +303,7 @@ abstract final class MapRenderer {
     final r = AppSizes.houseRadius;
 
     if (node.snapTarget) {
-      final color = snapColor ?? AppColors.cableLan;
-      _dashedCircle(
-        canvas,
-        c,
-        snapRingRadius,
-        _stroke(color.withValues(alpha: color.a * snapOpacity), houseStroke),
-        4,
-        5,
-      );
+      drawSnapRing(canvas, c, snapColor: snapColor, opacity: snapOpacity);
     }
     if (node.alarm) {
       canvas.drawCircle(
@@ -451,11 +477,15 @@ abstract final class MapRenderer {
   static void drawDragHandle(Canvas canvas, Offset c) {
     canvas.drawCircle(
       c,
-      26,
+      dragHandleRadius,
       Paint()..color = AppColors.ink.withValues(alpha: 0.10),
     );
-    canvas.drawCircle(c, 26, _stroke(AppColors.ink.withValues(alpha: 0.3), 2));
-    canvas.drawCircle(c, 9, Paint()..color = AppColors.ink);
+    canvas.drawCircle(
+      c,
+      dragHandleRadius,
+      _stroke(AppColors.ink.withValues(alpha: 0.3), 2),
+    );
+    canvas.drawCircle(c, dragHandleDot, Paint()..color = AppColors.ink);
   }
 
   /// Teks dengan [baseline] di titik [anchor] (seperti `<text x y>` SVG).
@@ -508,7 +538,14 @@ abstract final class MapRenderer {
     for (final node in scene.nodes) {
       switch (node.kind) {
         case NodeKind.junction:
-          drawJunction(canvas, node.position, theme);
+          drawJunction(
+            canvas,
+            node.position,
+            theme,
+            snapTarget: node.snapTarget,
+            snapColor: snap,
+            snapOpacity: motion.snapOpacity,
+          );
         case NodeKind.router:
           drawRouter(
             canvas,

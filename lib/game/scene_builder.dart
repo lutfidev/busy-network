@@ -60,7 +60,12 @@ abstract final class SceneBuilder {
       ],
       nodes: [
         for (final j in s.junctions)
-          MapNode(id: j.id, kind: NodeKind.junction, position: j.position),
+          MapNode(
+            id: j.id,
+            kind: NodeKind.junction,
+            position: j.position,
+            snapTarget: draft?.target == j.id,
+          ),
         for (final h in level.houses)
           if (frame?.houses[h.id] case final live?)
             _liveHouse(h, live)

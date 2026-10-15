@@ -75,7 +75,8 @@ class MapNode {
   /// Cincin merah di rumah macet.
   final bool alarm;
 
-  /// Cincin putus-putus "lepas jari di sini" saat menarik kabel.
+  /// Cincin putus-putus "lepas jari di sini" saat menarik kabel (rumah, atau
+  /// junction yang putus).
   final bool snapTarget;
 
   /// LED ketiga router menyala merah (ada kabel penuh).

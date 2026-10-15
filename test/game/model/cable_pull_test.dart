@@ -35,6 +35,18 @@ void main() {
       expect(s.canStartCable('r1'), isFalse);
     });
 
+    test('geseran di dalam satu titik grid tidak memberi tahu', () {
+      final s = designPull();
+      expect(notifications(s, () => s.dragCable(const Offset(258, 357))), 0);
+      expect(notifications(s, () => s.dragCable(const Offset(285, 360))), 1);
+      expect(
+        notifications(s, () => s.dragCable(const Offset(300, 380))),
+        1,
+        reason: 'menempel ke Rumah 5',
+      );
+      expect(notifications(s, () => s.dragCable(const Offset(305, 385))), 0);
+    });
+
     test('ditolak di mode hapus & di luar fase rancang', () {
       final s = GameState(Levels.level5)..setErasing(true);
       expect(notifications(s, () => expect(s.beginCable(_router), isFalse)), 0);
@@ -171,6 +183,32 @@ void main() {
         ..beginCable(_router)
         ..dragCable(const Offset(195, 120));
       expect(s.draft!.handle, const Offset(195, 180), reason: 'j1 di y=150');
+    });
+
+    test('junction yang putus jadi tujuan: hilirnya tersambung lagi', () {
+      final s = GameState(Levels.level5)..removeCable('c-w');
+      expect(s.connectedHouses, {'r4'});
+      s
+        ..beginCable(_router)
+        ..dragCable(const Offset(195, 190));
+      expect(s.draft!.target, 'j1');
+      s.dragCable(const Offset(197, 155));
+      expect(s.draft!.handle, isNull, reason: 'menempel ke j1');
+      expect(s.draft!.points, const [Offset(195, 216), Offset(195, 150)]);
+      expect(s.endCable(), CableDrop.connected);
+      final cable = s.cables.last;
+      expect(cable.id, 'c-j1');
+      expect(cable.to, 'j1');
+      expectValidCable(s.level, cable, s.positionOf);
+      expect(s.connectedHouses, {'r4', 'r1', 'r3'});
+      expect(s.budget, 850000 + 150000 - 30000);
+    });
+
+    test('junction tersambung bukan tujuan', () {
+      final s = GameState(Levels.level5)
+        ..beginCable(_router)
+        ..dragCable(const Offset(195, 160));
+      expect(s.draft!.target, isNull);
     });
 
     test('rumah tersambung tidak jadi tujuan', () {

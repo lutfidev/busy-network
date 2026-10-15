@@ -65,10 +65,14 @@ class NetworkGame extends FlameGame {
   GameState get state => _state;
   set state(GameState value) {
     if (identical(value, _state)) return;
-    _pullPointer = null;
     if (_listening) {
       _state.removeListener(_onStateChanged);
       value.addListener(_onStateChanged);
+    }
+    // Tarikan milik state lama tidak boleh menggantung di sana.
+    if (_pullPointer != null) {
+      _pullPointer = null;
+      _state.cancelCable();
     }
     _state = value;
     _onStateChanged();

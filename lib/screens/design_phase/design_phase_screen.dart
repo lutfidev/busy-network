@@ -120,19 +120,17 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                       ],
                     ),
                   ),
-                  if (_game.erasing)
-                    const Positioned(
-                      left: AppSpacing.screenGutter,
-                      right: AppSpacing.screenGutter,
-                      top: 0,
-                      child: _EraseBanner(),
-                    )
-                  else if (refused != null)
+                  if (_game.erasing || refused != null)
                     Positioned(
                       left: AppSpacing.screenGutter,
                       right: AppSpacing.screenGutter,
                       top: 0,
-                      child: _BudgetBanner(cost: refused, budget: _game.budget),
+                      child: _game.erasing
+                          ? const _MapBanner.erase()
+                          : _MapBanner.budget(
+                              cost: refused!,
+                              budget: _game.budget,
+                            ),
                     ),
                 ],
               ),
@@ -216,14 +214,15 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
 
 /// Letak tooltip biaya: di atas-kiri ujung tarikan seperti desain (jari
 /// (255, 360) → tooltip (222, 288)), dijepit di dalam lebar peta; pindah ke
-/// bawah jari bila tidak muat di atas.
+/// bawah lingkaran jari bila tidak muat di atas.
 class _TooltipLayout extends SingleChildLayoutDelegate {
   const _TooltipLayout(this.tip);
 
   final Offset tip;
 
+  /// Koordinat desain: tooltip relatif ke ujung tarikan.
   static const _above = Offset(-33, -72);
-  static const _below = 36.0;
+  static const _below = MapRenderer.dragHandleRadius + AppSpacing.s10;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
@@ -295,41 +294,30 @@ class _CostTooltip extends StatelessWidget {
   }
 }
 
-/// Kabel ditolak karena anggaran kurang (copy baru; desain belum punya).
-class _BudgetBanner extends StatelessWidget {
-  const _BudgetBanner({required this.cost, required this.budget});
+/// Banner di atas peta: mode hapus (desain), atau kabel ditolak karena
+/// anggaran kurang (copy baru; desain belum punya keadaan ini).
+class _MapBanner extends StatelessWidget {
+  const _MapBanner.erase()
+    : icon = GameIcons.eraser,
+      text = 'Mode hapus: ketuk kabel buat dibongkar. Uangnya balik 50%.',
+      background = AppColors.warningBg,
+      border = AppColors.primary,
+      foreground = AppColors.warningText;
 
-  final int cost;
-  final int budget;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      liveRegion: true,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s14,
-          vertical: AppSpacing.s10,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.dangerBg,
-          borderRadius: AppRadius.bubbleAll,
-          border: Border.all(color: AppColors.statusJam, width: 2),
-        ),
-        child: Text(
+  _MapBanner.budget({required int cost, required int budget})
+    : icon = GameIcons.warning,
+      text =
           'Anggaran kurang: kabel ini ${IdFormat.rupiah(cost)}, '
           'sisa ${IdFormat.rupiah(budget)}.',
-          style: AppTypography.bodySmallStrong.copyWith(
-            color: AppColors.dangerText,
-          ),
-        ),
-      ),
-    );
-  }
-}
+      background = AppColors.dangerBg,
+      border = AppColors.statusJam,
+      foreground = AppColors.dangerText;
 
-class _EraseBanner extends StatelessWidget {
-  const _EraseBanner();
+  final GameIconData icon;
+  final String text;
+  final Color background;
+  final Color border;
+  final Color foreground;
 
   @override
   Widget build(BuildContext context) {
@@ -341,23 +329,19 @@ class _EraseBanner extends StatelessWidget {
           vertical: AppSpacing.s10,
         ),
         decoration: BoxDecoration(
-          color: AppColors.warningBg,
+          color: background,
           borderRadius: AppRadius.bubbleAll,
-          border: Border.all(color: AppColors.primary, width: 2),
+          border: Border.all(color: border, width: 2),
         ),
         child: Row(
           children: [
-            const GameIcon(
-              GameIcons.eraser,
-              size: 18,
-              color: AppColors.warningText,
-            ),
+            GameIcon(icon, size: 18, color: foreground),
             const SizedBox(width: AppSpacing.s10),
             Expanded(
               child: Text(
-                'Mode hapus: ketuk kabel buat dibongkar. Uangnya balik 50%.',
+                text,
                 style: AppTypography.bodySmallStrong.copyWith(
-                  color: AppColors.warningText,
+                  color: foreground,
                 ),
               ),
             ),
