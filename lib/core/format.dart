@@ -39,9 +39,9 @@ abstract final class IdFormat {
     return '${v.round()}%';
   }
 
-  /// Jam dari menit sejak 00:00 → "20:15".
+  /// Jam dari menit sejak 00:00 → "20:15". Akhir hari (1.440) → "24:00".
   static String clock(int minutesOfDay) {
-    final h = (minutesOfDay ~/ 60) % 24;
+    final h = minutesOfDay == 24 * 60 ? 24 : (minutesOfDay ~/ 60) % 24;
     final m = minutesOfDay % 60;
     return '${_two(h)}:${_two(m)}';
   }
