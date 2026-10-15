@@ -57,6 +57,42 @@ void main() {
     expect(net.parentOf(LevelDef.routerId), isNull);
   });
 
+  test('rumah yang dibawa kabel: mulai dari hop yang memberi makan', () {
+    final net = Network(level: level, cables: runCables);
+    expect(net.housesCarried(runCable('c-r4')), {'r4', 'r5'});
+    expect(net.housesCarried(runCable('c-w')), {'r1', 'w', 'r3'});
+    expect(() => net.housesBelow('r4').add('x'), throwsUnsupportedError);
+
+    // Kabel kedua router → j1 → Rumah 6: hop router → j1 di luar pohon
+    // (j1 sudah dari fiber Warung), jadi kabel ini hanya membawa Rumah 6.
+    const parallel = Cable(
+      id: 'c-x',
+      from: LevelDef.routerId,
+      to: 'r6',
+      via: ['j1'],
+      points: [Offset(195, 216), Offset(195, 400)],
+    );
+    final withParallel = Network(
+      level: level,
+      cables: [...level.cables, parallel],
+    );
+    expect(withParallel.housesCarried(parallel), {'r6'});
+  });
+
+  test('hop pohon berurutan hulu dulu; kedalaman node', () {
+    final net = Network(level: level, cables: runCables);
+    final seen = {LevelDef.routerId};
+    for (final hop in net.treeHops) {
+      expect(seen, contains(hop.from), reason: '${hop.from} → ${hop.to}');
+      seen.add(hop.to);
+    }
+    expect(seen, containsAll(usage.keys));
+    expect(net.depthOf(LevelDef.routerId), 0);
+    expect(net.depthOf('r4'), 1);
+    expect(net.depthOf('r5'), 2);
+    expect(net.depthOf('w'), 2); // router → j1 → Warung
+  });
+
   group('snapshot fase jalan', () {
     final net = Network(level: level, cables: runCables);
 

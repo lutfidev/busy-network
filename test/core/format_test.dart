@@ -28,6 +28,7 @@ void main() {
       expect(IdFormat.percent(0.62, fraction: true), '62%');
       expect(IdFormat.clock(20 * 60 + 15), '20:15');
       expect(IdFormat.clock(6 * 60), '06:00');
+      expect(IdFormat.clock(24 * 60), '24:00');
       expect(IdFormat.hourRange(19, 22), '19–22');
       expect(IdFormat.hour(6), '06');
     });

@@ -3,6 +3,7 @@ import 'dart:ui';
 import '../core/format.dart';
 import 'map_scene.dart';
 import 'model/model.dart';
+import 'sim/sim.dart';
 
 /// Menurunkan [MapScene] (yang digambar `MapRenderer`) dari [GameState].
 abstract final class SceneBuilder {
@@ -12,10 +13,12 @@ abstract final class SceneBuilder {
 
   static MapScene fromState(GameState s) {
     final level = s.level;
-    final run = s.phase == GamePhase.run;
+    // Fase hasil = potret terakhir hari itu (peta Fase Jalan yang sedang
+    // keluar layar saat 24:00), bukan kembali ke siang.
+    final run = s.phase != GamePhase.design;
     final frame = run ? s.frame : null;
     final draft = s.phase == GamePhase.design ? s.draft : null;
-    final usage = frame?.usage ?? const <String, double>{};
+    final usage = frame?.demand ?? const <String, double>{};
     final net = s.network;
     final overloaded = {
       if (frame != null)

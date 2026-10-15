@@ -3,6 +3,7 @@ import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/game/map_scene.dart';
 import 'package:busy_network/game/model/model.dart';
 import 'package:busy_network/game/scene_builder.dart';
+import 'package:busy_network/game/sim/sim.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'design_pull.dart';
@@ -108,13 +109,13 @@ void main() {
     expect(scene.hasMotion, isFalse);
   });
 
-  test('awal hari: rumah tanpa data frame tampil polos, tanpa trafik', () {
+  test('awal hari: trafik pagi mengalir, rumah putus tampil polos', () {
     final state = designPull()..startDay();
     final scene = SceneBuilder.fromState(state);
     expect(scene.theme, MapTheme.night);
     expect(scene.dragHandle, isNull);
     expect(scene.badges, isEmpty);
-    expect(scene.hasMotion, isFalse);
+    expect(scene.cables.map((c) => c.traffic).toSet(), {TrafficState.flow});
     final byId = {for (final n in scene.nodes) n.id: n};
     expect(byId['r1']!.state, HouseState.ok);
     expect(byId['r1']!.patience, 1);
@@ -122,12 +123,15 @@ void main() {
     expect(byId['r5']!.patience, isNull);
   });
 
-  test('fase hasil digambar siang tanpa draft', () {
+  test('fase hasil: tetap malam dengan potret 24:00, tanpa draft', () {
     final state = designPull()
       ..startDay()
-      ..finishDay();
+      ..advanceDay(SimClock.secondsPerDay);
+    expect(state.phase, GamePhase.result);
     final scene = SceneBuilder.fromState(state);
-    expect(scene.theme, MapTheme.day);
+    expect(scene.theme, MapTheme.night);
     expect(scene.dragHandle, isNull);
+    final r1 = scene.nodes.singleWhere((n) => n.id == 'r1');
+    expect(r1.patience, state.frame!.houses['r1']!.patience);
   });
 }

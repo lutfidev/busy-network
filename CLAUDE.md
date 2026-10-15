@@ -54,13 +54,22 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   menggambar lewat `MapRenderer`), `network_game_view.dart`
   (`NetworkGameView`: `GameWidget` + overlay widget berkoordinat peta;
   dipakai Tutorial/Rancang/Jalan; hanya Rancang yang `interactive`).
+- `lib/game/sim/` — simulasi hari, murni & deterministik (tanpa Flutter):
+  `SimClock` (06→24 dalam 90 detik, percepat ×4), `UsageCurve` (puncak jam
+  sibuk), `Flow.serve` (aliran per hop, prioritas dulu), `Patience`
+  (status lancar/lambat/macet & laju sabar), `DaySim` (maju per menit utuh,
+  kepuasan, komplain yang menjeda hari, batas & prioritas antrean,
+  `preview`), `SimFrame`/`HouseLive`, `QueuePlan` (isi Panel Atur
+  Antrean). `GameState.startDay()` membuat `DaySim`; `planDay()` menyalin
+  rancangan jadi hari baru; `advanceDay(detik)` memajukannya.
 - `lib/screens/<layar>/` — satu folder per layar (8 layar).
 - `lib/app/` — `routes.dart` (path), `router.dart` (go_router, bersarang),
-  `app.dart`.
-- `lib/data/` — `dummy_states.dart` (snapshot `GameState` Tutorial &
-  Jalan; Rancang memakai state asli) dan
-  `dummy_data.dart` (angka yang belum dihitung game: progres, jam,
-  komplain, hasil).
+  `app.dart`, `game_session.dart` (`GameSession`: hari dioper dari Rancang
+  ke Jalan & Antrean; tanpa hari → potret desain).
+- `lib/data/` — `dummy_states.dart` (potret `GameState` Tutorial & bingkai
+  Fase Jalan desain, yang dihitung `DaySim` dari jam/sabar/komplain
+  potret) dan `dummy_data.dart` (angka yang belum dihitung game: progres,
+  hasil).
 - `lib/core/format.dart` — `IdFormat`: `Rp 850.000`, `8,5 Mbps`, `20:15`.
 - `lib/gallery/` — galeri komponen (rute `/galeri`, tombol pengaturan di
   Beranda).
@@ -86,6 +95,12 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   Test memompa app lewat `pumpApp`/`disableAnimations` di
   `test/test_helpers.dart`; uji gerakannya di
   `test/screens/animation_test.dart` (tanpa `pumpAndSettle`).
+- Jam hari (Fase Jalan) adalah permainan, bukan hiasan: `Ticker` layar
+  tetap jalan walau animasi mati, berhenti saat rute tertutup, komplain
+  menunggu, atau hari selesai. Deep link Fase Jalan/Antrean = potret desain
+  yang dijeda komplain, jadi `pumpAndSettle` aman; hari yang berjalan
+  di-pompa dengan `playFor` / `pumpApp(settle: false)`, dan
+  `pumpAndSettle` menjalankannya sampai 24:00 (layar hasil).
 - Peta: kamera Flame beresolusi tetap 390×472 (koordinat desain, (0, 0)
   kiri atas). Overlay Flutter di atas peta (tooltip, banner, pop-up) tetap
   widget, diletakkan dengan koordinat peta lewat `NetworkGameView.overlays`
