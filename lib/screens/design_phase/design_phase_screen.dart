@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/game_session.dart';
 import '../../app/routes.dart';
 import '../../core/format.dart';
 import '../../game/levels/levels.dart';
@@ -13,9 +14,15 @@ import '../../widgets/widgets.dart';
 
 /// 4 · Fase Rancang – Level 5. Seret dari router/junction/rumah tersambung
 /// ke rumah untuk memasang kabel; mode Hapus: ketuk kabel untuk membongkar.
+/// "Mulai Hari" menyerahkan salinan rancangan ke [session] sebagai hari baru.
 class DesignPhaseScreen extends StatefulWidget {
-  const DesignPhaseScreen({super.key, this.initialCable = CableKind.lan});
+  const DesignPhaseScreen({
+    super.key,
+    required this.session,
+    this.initialCable = CableKind.lan,
+  });
 
+  final GameSession session;
   final CableKind initialCable;
 
   @override
@@ -41,6 +48,12 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
   }
 
   void _onGameChanged() => setState(() {});
+
+  void _startDay() {
+    _game.cancelCable();
+    widget.session.begin(_game.planDay());
+    context.go(AppRoutes.run);
+  }
 
   /// Ujung tarikan tempat tooltip menempel: jari, atau rumah/junction yang
   /// ditempeli.
@@ -197,7 +210,7 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                         child: ChunkyButton(
                           label: 'Mulai Hari',
                           leadingIcon: GameIcons.play,
-                          onPressed: () => context.go(AppRoutes.run),
+                          onPressed: _startDay,
                         ),
                       ),
                     ],

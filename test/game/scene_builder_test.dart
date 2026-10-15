@@ -108,13 +108,13 @@ void main() {
     expect(scene.hasMotion, isFalse);
   });
 
-  test('awal hari: rumah tanpa data frame tampil polos, tanpa trafik', () {
+  test('awal hari: trafik pagi mengalir, rumah putus tampil polos', () {
     final state = designPull()..startDay();
     final scene = SceneBuilder.fromState(state);
     expect(scene.theme, MapTheme.night);
     expect(scene.dragHandle, isNull);
     expect(scene.badges, isEmpty);
-    expect(scene.hasMotion, isFalse);
+    expect(scene.cables.map((c) => c.traffic).toSet(), {TrafficState.flow});
     final byId = {for (final n in scene.nodes) n.id: n};
     expect(byId['r1']!.state, HouseState.ok);
     expect(byId['r1']!.patience, 1);

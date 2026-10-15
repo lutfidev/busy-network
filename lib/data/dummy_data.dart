@@ -1,6 +1,6 @@
-/// Data dummy untuk layar yang belum punya logika game: progres babak,
-/// jam & kepuasan fase jalan, komplain, dan angka hasil. Level & jaringan
-/// ada di `lib/game/`; snapshot state ada di `dummy_states.dart`.
+/// Data dummy untuk layar yang belum punya logika game: progres babak dan
+/// angka hasil (langkah 6). Level & jaringan ada di `lib/game/`, simulasi
+/// hari di `lib/game/sim/`; snapshot state ada di `dummy_states.dart`.
 library;
 
 class ChapterInfo {
@@ -33,18 +33,6 @@ abstract final class DummyData {
     levelsDone: 4,
     levelsTotal: 12,
   );
-
-  // ── Fase jalan ────────────────────────────────────────────────────────
-  static const dayStartHour = 6;
-  static const dayEndHour = 24;
-  static const runClockMinutes = 20 * 60 + 15;
-  static const runSatisfaction = 62;
-
-  /// Rumah yang komplain (nama & label diambil dari definisi level).
-  static const complaintHouseId = 'r4';
-  static const complaintClockMinutes = 20 * 60 + 14;
-  static const complaintMessage =
-      'Bang, kok lemot?? Anak saya lagi ujian online!';
 
   // ── Hasil ─────────────────────────────────────────────────────────────
   static const savingsTarget = 200000;

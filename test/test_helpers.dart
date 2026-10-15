@@ -1,4 +1,5 @@
 import 'package:busy_network/app/app.dart';
+import 'package:busy_network/app/game_session.dart';
 import 'package:busy_network/game/network_game.dart';
 import 'package:busy_network/theme/theme.dart';
 import 'package:flame/game.dart' hide RouterComponent;
@@ -31,10 +32,33 @@ void disableAnimations(WidgetTester tester) {
 }
 
 /// Pompa aplikasi (animasi mati, lihat [disableAnimations]) di [location].
-Future<void> pumpApp(WidgetTester tester, {String location = '/'}) async {
+///
+/// [session] = hari yang sudah disiapkan test. Hari yang berjalan tidak
+/// pernah "settle" sampai 24:00, jadi [settle] bisa dimatikan.
+Future<void> pumpApp(
+  WidgetTester tester, {
+  String location = '/',
+  GameSession? session,
+  bool settle = true,
+}) async {
   disableAnimations(tester);
-  await tester.pumpWidget(JaringanSibukApp(initialLocation: location));
-  await tester.pumpAndSettle();
+  await tester.pumpWidget(
+    JaringanSibukApp(initialLocation: location, session: session),
+  );
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump();
+  }
+}
+
+/// Jalankan jam permainan [seconds] detik nyata dengan frame 100 ms
+/// (batas satu frame simulasi), tanpa menunggu settle.
+Future<void> playFor(WidgetTester tester, double seconds) async {
+  const frame = Duration(milliseconds: 100);
+  for (var t = 0.0; t < seconds - 1e-9; t += 0.1) {
+    await tester.pump(frame);
+  }
 }
 
 /// Titik layar untuk koordinat peta [p] (390×472) di peta yang tampil.

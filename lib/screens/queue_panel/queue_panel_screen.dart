@@ -1,30 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/game_session.dart';
 import '../../app/routes.dart';
 import '../../core/format.dart';
-import '../../data/dummy_data.dart';
+import '../../game/map_scene.dart';
+import '../../game/model/model.dart';
+import '../../game/sim/queue_plan.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'queue_house_card.dart';
-import 'queue_logic.dart';
 
-/// 6 · Panel Atur Antrean (game dijeda).
+/// 6 · Panel Atur Antrean (hari dijeda: rute Fase Jalan di bawahnya
+/// tertutup). Batas & prioritas disimpan ke hari dari [session].
 class QueuePanelScreen extends StatefulWidget {
-  const QueuePanelScreen({super.key});
+  const QueuePanelScreen({super.key, required this.session});
+
+  final GameSession session;
 
   @override
   State<QueuePanelScreen> createState() => _QueuePanelScreenState();
 }
 
 class _QueuePanelScreenState extends State<QueuePanelScreen> {
-  QueueModel _model = QueueModel.initial();
+  late final GameState _game = widget.session.running;
+  late QueuePlan _plan = QueuePlan.of(_game.day!);
   bool _applied = false;
 
-  void _update(QueueModel model) => setState(() {
-    _model = model;
+  void _update(QueuePlan plan) => setState(() {
+    _plan = plan;
     _applied = false;
   });
+
+  void _apply() {
+    if (_game.phase != GamePhase.run) return;
+    _game.setQueue(limits: _plan.limits, priority: _plan.priority);
+  }
+
+  /// Simpan, jawab komplain yang menunggu, lalu kembali ke hari.
+  void _resume() {
+    _apply();
+    if (_game.phase == GamePhase.run) _game.dismissComplaint();
+    context.go(AppRoutes.run);
+  }
+
+  static ServiceStatus _service(HouseState state) => switch (state) {
+    HouseState.jam => ServiceStatus.jam,
+    HouseState.slow => ServiceStatus.slow,
+    _ => ServiceStatus.ok,
+  };
+
+  /// "Turunkan batas Bu Sri atau Pak Rudi."
+  String _lowerHint() {
+    final names = [for (final h in _plan.heaviest) h.name];
+    return 'Turunkan batas ${names.join(' atau ')}.';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +87,7 @@ class _QueuePanelScreenState extends State<QueuePanelScreen> {
                           textStyle: AppTypography.captionStrong,
                         ),
                         Text(
-                          IdFormat.clock(DummyData.runClockMinutes),
+                          IdFormat.clock(_game.day!.minute),
                           style: AppTypography.title,
                         ),
                       ],
@@ -74,13 +104,13 @@ class _QueuePanelScreenState extends State<QueuePanelScreen> {
   }
 
   Widget _sheet(BuildContext context) {
-    final m = _model;
+    final m = _plan;
     final (Color capColor, Color capBg, String hint) = m.overloaded
         ? (
             AppColors.statusJam,
             AppColors.dangerPanelBg,
-            'Kelebihan ${IdFormat.mbps(m.load - m.capacityMbps)}. Turunkan '
-                'batas Bu Sri atau Pak Rudi.',
+            'Kelebihan ${IdFormat.mbps(m.load - m.capacityMbps)}. '
+                '${_lowerHint()}',
           )
         : m.tight
         ? (
@@ -167,7 +197,7 @@ class _QueuePanelScreenState extends State<QueuePanelScreen> {
                     ),
                     const SizedBox(height: AppSpacing.s8),
                     ProgressBar(
-                      value: m.load / m.capacityMbps,
+                      value: m.capacityMbps == 0 ? 0 : m.load / m.capacityMbps,
                       color: capColor,
                       height: AppSizes.progressMedium,
                       semanticLabel: 'Beban kabel',
@@ -193,9 +223,9 @@ class _QueuePanelScreenState extends State<QueuePanelScreen> {
                     final h = m.houses[i];
                     return QueueHouseCard(
                       house: h,
-                      status: m.statusOf(h),
+                      status: _service(m.statusOf(h.id)),
                       limit: m.limits[h.id]!,
-                      use: m.effectiveUse(h),
+                      use: m.useOf(h.id),
                       prioritized: m.priority.contains(h.id),
                       onLimitChanged: (v) => _update(m.withLimit(h.id, v)),
                       onTogglePriority: () => _update(m.togglePriority(h.id)),
@@ -217,7 +247,10 @@ class _QueuePanelScreenState extends State<QueuePanelScreen> {
                       leadingIcon: _applied ? GameIcons.check : null,
                       leadingIconColor: AppColors.statusOkText,
                       iconSize: 18,
-                      onPressed: () => setState(() => _applied = true),
+                      onPressed: () {
+                        _apply();
+                        setState(() => _applied = true);
+                      },
                     ),
                   ),
                   const SizedBox(width: AppSpacing.s10),
@@ -229,7 +262,7 @@ class _QueuePanelScreenState extends State<QueuePanelScreen> {
                       textStyle: AppTypography.title.copyWith(fontSize: 20),
                       leadingIcon: GameIcons.play,
                       iconSize: 18,
-                      onPressed: () => context.go(AppRoutes.run),
+                      onPressed: _resume,
                     ),
                   ),
                 ],

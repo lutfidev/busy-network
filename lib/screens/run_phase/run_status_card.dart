@@ -1,8 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../core/format.dart';
-import '../../data/dummy_data.dart';
-import '../../game/levels/levels.dart';
+import '../../game/sim/sim.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -10,18 +9,26 @@ import '../../widgets/widgets.dart';
 class RunStatusCard extends StatelessWidget {
   const RunStatusCard({
     super.key,
+    required this.day,
+    required this.fastForward,
     required this.onFastForward,
     required this.onPause,
   });
 
+  final DaySim day;
+
+  /// Tombol percepat sedang menyala.
+  final bool fastForward;
   final VoidCallback onFastForward;
   final VoidCallback onPause;
 
   @override
   Widget build(BuildContext context) {
-    const level = Levels.level5;
+    final level = day.level;
     final target = level.targetSatisfaction;
-    const now = DummyData.runClockMinutes;
+    final now = day.minute;
+    final rush = now >= day.rushFrom * 60 && now < day.rushTo * 60;
+    final satisfaction = day.satisfaction;
     return AppCard(
       tone: CardTone.night,
       radius: AppRadius.panel,
@@ -53,13 +60,15 @@ class RunStatusCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(IdFormat.clock(now), style: AppTypography.clock),
-                        const SizedBox(width: AppSpacing.s10),
-                        const Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: RushHourBadge(),
+                        if (rush) ...[
+                          const SizedBox(width: AppSpacing.s10),
+                          const Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: RushHourBadge(),
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ],
@@ -69,11 +78,14 @@ class RunStatusCard extends StatelessWidget {
               CircleIconButton(
                 icon: GameIcons.fastForward,
                 semanticLabel: 'Percepat ke akhir hari',
+                toggled: fastForward,
                 onPressed: onFastForward,
                 size: AppSizes.iconButtonMedium,
                 iconSize: AppSizes.iconMd,
-                background: AppColors.surfaceNightLine,
-                iconColor: AppColors.inkOnDark,
+                background: fastForward
+                    ? AppColors.primary
+                    : AppColors.surfaceNightLine,
+                iconColor: fastForward ? AppColors.ink : AppColors.inkOnDark,
               ),
               const SizedBox(width: AppSpacing.s10),
               CircleIconButton(
@@ -86,7 +98,7 @@ class RunStatusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.s10),
-          const _DayTimeline(),
+          _DayTimeline(day: day),
           const SizedBox(height: AppSpacing.s10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -100,7 +112,7 @@ class RunStatusCard extends StatelessWidget {
               ),
               Text.rich(
                 TextSpan(
-                  text: IdFormat.percent(DummyData.runSatisfaction),
+                  text: IdFormat.percent(satisfaction),
                   style: AppTypography.subtitle.copyWith(color: AppColors.star),
                   children: [
                     TextSpan(
@@ -116,7 +128,7 @@ class RunStatusCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s6),
           ProgressBar(
-            value: DummyData.runSatisfaction / 100,
+            value: satisfaction / 100,
             marker: target / 100,
             color: AppColors.star,
             trackColor: AppColors.surfaceNightLine,
@@ -130,27 +142,30 @@ class RunStatusCard extends StatelessWidget {
 }
 
 class _DayTimeline extends StatelessWidget {
-  const _DayTimeline();
+  const _DayTimeline({required this.day});
+
+  final DaySim day;
+
+  static const _startHour = SimClock.dayStart ~/ 60;
+  static const _endHour = SimClock.dayEnd ~/ 60;
 
   static double _frac(double hour) =>
-      (hour - DummyData.dayStartHour) /
-      (DummyData.dayEndHour - DummyData.dayStartHour);
+      (hour - _startHour) / (_endHour - _startHour);
 
   @override
   Widget build(BuildContext context) {
-    const level = Levels.level5;
-    final now = _frac(DummyData.runClockMinutes / 60);
-    final rushFrom = _frac(level.rushHourFrom!.toDouble());
-    final rushTo = _frac(level.rushHourTo!.toDouble());
+    final now = _frac(day.minute / 60);
+    final rushFrom = _frac(day.rushFrom.toDouble());
+    final rushTo = _frac(day.rushTo.toDouble());
     final labelStyle = AppTypography.micro.copyWith(
       color: AppColors.inkOnDarkMuted,
     );
     return Semantics(
       label:
-          'Linimasa hari ${IdFormat.hour(DummyData.dayStartHour)}.00 sampai '
-          '${DummyData.dayEndHour}.00, jam sibuk ${level.rushHourFrom}.00 '
-          'sampai ${level.rushHourTo}.00, sekarang '
-          '${IdFormat.clock(DummyData.runClockMinutes).replaceAll(':', '.')}',
+          'Linimasa hari ${IdFormat.hour(_startHour)}.00 sampai '
+          '$_endHour.00, jam sibuk ${day.rushFrom}.00 '
+          'sampai ${day.rushTo}.00, sekarang '
+          '${IdFormat.clock(day.minute).replaceAll(':', '.')}',
       excludeSemantics: true,
       child: Column(
         children: [
@@ -213,16 +228,16 @@ class _DayTimeline extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(IdFormat.hour(DummyData.dayStartHour), style: labelStyle),
+              Text(IdFormat.hour(_startHour), style: labelStyle),
               Text(IdFormat.hour(12), style: labelStyle),
               Padding(
                 padding: const EdgeInsets.only(left: 60),
                 child: Text(
-                  IdFormat.hourRange(level.rushHourFrom!, level.rushHourTo!),
+                  IdFormat.hourRange(day.rushFrom, day.rushTo),
                   style: labelStyle,
                 ),
               ),
-              Text('${DummyData.dayEndHour}', style: labelStyle),
+              Text('$_endHour', style: labelStyle),
             ],
           ),
         ],

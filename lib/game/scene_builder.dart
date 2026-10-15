@@ -3,6 +3,7 @@ import 'dart:ui';
 import '../core/format.dart';
 import 'map_scene.dart';
 import 'model/model.dart';
+import 'sim/sim.dart';
 
 /// Menurunkan [MapScene] (yang digambar `MapRenderer`) dari [GameState].
 abstract final class SceneBuilder {
@@ -15,7 +16,7 @@ abstract final class SceneBuilder {
     final run = s.phase == GamePhase.run;
     final frame = run ? s.frame : null;
     final draft = s.phase == GamePhase.design ? s.draft : null;
-    final usage = frame?.usage ?? const <String, double>{};
+    final usage = frame?.demand ?? const <String, double>{};
     final net = s.network;
     final overloaded = {
       if (frame != null)

@@ -11,12 +11,18 @@ import '../screens/result_success/result_success_screen.dart';
 import '../screens/run_phase/run_phase_screen.dart';
 import '../screens/tutorial/tutorial_screen.dart';
 import '../theme/theme.dart';
+import 'game_session.dart';
 import 'routes.dart';
 
 int? _intParam(GoRouterState state, String name) =>
     int.tryParse(state.uri.queryParameters[name] ?? '');
 
-GoRouter createRouter({String initialLocation = AppRoutes.home}) {
+/// [session] membawa hari dari Fase Rancang ke Fase Jalan & Panel Antrean.
+GoRouter createRouter({
+  String initialLocation = AppRoutes.home,
+  GameSession? session,
+}) {
+  final play = session ?? GameSession();
   return GoRouter(
     initialLocation: initialLocation,
     routes: [
@@ -37,18 +43,18 @@ GoRouter createRouter({String initialLocation = AppRoutes.home}) {
               ),
               GoRoute(
                 path: 'rancang',
-                builder: (context, state) => const DesignPhaseScreen(),
+                builder: (context, state) => DesignPhaseScreen(session: play),
                 routes: [
                   GoRoute(
                     path: 'jalan',
-                    builder: (context, state) => const RunPhaseScreen(),
+                    builder: (context, state) => RunPhaseScreen(session: play),
                     routes: [
                       GoRoute(
                         path: 'antrean',
                         pageBuilder: (context, state) => CustomTransitionPage(
                           key: state.pageKey,
                           transitionDuration: AppMotion.sheetIn,
-                          child: const QueuePanelScreen(),
+                          child: QueuePanelScreen(session: play),
                           transitionsBuilder: _slideUp,
                         ),
                       ),

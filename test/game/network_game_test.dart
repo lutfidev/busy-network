@@ -348,13 +348,6 @@ void main() {
       expect(game.paused, isTrue);
 
       state.startDay();
-      state.updateFrame(
-        const SimFrame(
-          houses: {
-            'r1': HouseLive(state: HouseState.ok, patience: 1, usageMbps: 5),
-          },
-        ),
-      );
       await tester.pump();
 
       expect(game.scene.theme, MapTheme.night);

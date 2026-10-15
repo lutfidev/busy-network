@@ -3,10 +3,11 @@ import 'dart:ui';
 import '../game/levels/levels.dart';
 import '../game/map_scene.dart';
 import '../game/model/model.dart';
+import '../game/sim/sim.dart';
 
-/// Snapshot [GameState] untuk layar yang belum digerakkan game: tutorial
-/// (interaktif di langkah 7) dan fase jalan (simulasi di langkah 5).
-/// Koordinat persis dari desain. Fase Rancang sudah memakai state asli.
+/// Snapshot [GameState] dari desain: tutorial (interaktif di langkah 7) dan
+/// bingkai Fase Jalan (deep link, screenshot). Koordinat persis dari desain.
+/// Fase Rancang & hari yang dimainkan memakai state asli.
 abstract final class DummyStates {
   // ── Tutorial level 1 ──────────────────────────────────────────────────
   static const _tutorialCable = [Offset(105, 315), Offset(255, 165)];
@@ -41,18 +42,14 @@ abstract final class DummyStates {
   }
 
   // ── Gang Melati (level 5) ─────────────────────────────────────────────
-  /// Fase jalan, jam sibuk: kabel Router → Rumah 4 penuh (16 + 9 Mbps).
+  /// Fase jalan, jam sibuk 20:15: hari dilanjutkan dari potret desain (sabar
+  /// tiap rumah, Warung diprioritaskan, komplain Bu Sri 20:14). Status,
+  /// beban, badge "Penuh! 25/20", dan kepuasan 62% dihitung simulasi.
   static GameState run() {
     const level = Levels.level5;
     Cable initial(String id) => level.cables.firstWhere((c) => c.id == id);
-    HouseLive live(String id, HouseState state, double patience) => HouseLive(
-      state: state,
-      patience: patience,
-      usageMbps: level.house(id).peakMbps,
-    );
     return GameState(
       level,
-      phase: GamePhase.run,
       junctions: [
         ...level.junctions,
         const Junction(id: 'j2', position: Offset(195, 330)),
@@ -82,25 +79,24 @@ abstract final class DummyStates {
         initial('c-w'),
         initial('c-r4'),
       ],
-      frame: SimFrame(
-        houses: {
-          'r1': live('r1', HouseState.ok, 36 / 40),
-          'w': live('w', HouseState.ok, 34 / 40),
-          'r3': live('r3', HouseState.slow, 22 / 40),
-          // Desain: bar 7/40 tapi label "sabar 15%"; model memakai 15%.
-          'r4': live('r4', HouseState.jam, 0.15),
-          'r5': live('r5', HouseState.slow, 16 / 40),
-          'r6': live('r6', HouseState.ok, 32 / 40),
-          'r7': live('r7', HouseState.ok, 30 / 40),
-        },
-      ),
+    )..startDay(
+      minute: runMinute,
+      patience: const {
+        'r1': 36 / 40,
+        'w': 34 / 40,
+        'r3': 22 / 40,
+        // Desain: bar 7/40 tapi label "sabar 15%"; model memakai 15%.
+        'r4': 0.15,
+        'r5': 16 / 40,
+        'r6': 32 / 40,
+        'r7': 30 / 40,
+      },
+      priority: const {'w'},
+      complaint: const Complaint(houseId: 'r4', minute: 20 * 60 + 14),
+      complaints: 1,
     );
   }
 
-  // ── Panel antrean ─────────────────────────────────────────────────────
-  /// Urutan kartu di panel antrean (desain).
-  static const queueOrder = ['r4', 'r5', 'r3', 'w', 'r1', 'r6', 'r7'];
-
-  /// Rumah yang diprioritaskan saat panel dibuka.
-  static const queuePriority = {'w'};
+  /// Jam bingkai Fase Jalan di desain.
+  static const runMinute = 20 * 60 + 15;
 }

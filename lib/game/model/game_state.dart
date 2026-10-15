@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../map_scene.dart';
+import '../sim/sim.dart';
 import 'cable.dart';
 import 'cable_walk.dart';
 import 'level_def.dart';
@@ -20,33 +21,6 @@ enum CableDrop {
 
   /// Sampai di rumah tapi anggaran kurang: kabel tidak dipasang.
   overBudget,
-}
-
-/// Keadaan satu rumah saat hari berjalan.
-class HouseLive {
-  const HouseLive({
-    required this.state,
-    required this.patience,
-    required this.usageMbps,
-  });
-
-  final HouseState state;
-
-  /// Sisa kesabaran 0..1.
-  final double patience;
-  final double usageMbps;
-}
-
-/// Potret simulasi pada satu saat (diisi simulasi di langkah 5).
-class SimFrame {
-  const SimFrame({required this.houses});
-
-  /// Hanya rumah tersambung.
-  final Map<String, HouseLive> houses;
-
-  Map<String, double> get usage => {
-    for (final e in houses.entries) e.key: e.value.usageMbps,
-  };
 }
 
 /// Tarikan yang sedang berjalan (jari masih menempel).
@@ -67,13 +41,11 @@ class _Pull {
 class GameState extends ChangeNotifier {
   GameState(
     this.level, {
-    this._phase = GamePhase.design,
     int? budget,
     List<Junction>? junctions,
     List<Cable>? cables,
     CableKind selectedCable = CableKind.lan,
     CableDraft? draft,
-    this._frame,
   }) : _budget = budget ?? level.budget,
        junctions = List.unmodifiable(junctions ?? level.junctions),
        _cables = List.unmodifiable(cables ?? level.cables),
@@ -96,12 +68,12 @@ class GameState extends ChangeNotifier {
   final LevelDef level;
   final List<Junction> junctions;
 
-  GamePhase _phase;
+  GamePhase _phase = GamePhase.design;
   int _budget;
   List<Cable> _cables;
   CableKind _selectedCable;
   CableDraft? _draft;
-  SimFrame? _frame;
+  DaySim? _day;
   bool _erasing = false;
   _Pull? _pull;
   int? _refusedCost;
@@ -116,7 +88,12 @@ class GameState extends ChangeNotifier {
   List<Cable> get cables => _cables;
   CableKind get selectedCable => _selectedCable;
   CableDraft? get draft => _draft;
-  SimFrame? get frame => _frame;
+
+  /// Hari yang dimainkan (sejak [startDay]).
+  DaySim? get day => _day;
+
+  /// Potret hari pada menit ini; `null` sebelum hari dimulai.
+  SimFrame? get frame => _day?.frame;
 
   /// Mode Hapus: ketuk kabel = bongkar.
   bool get erasing => _erasing;
@@ -289,30 +266,76 @@ class GameState extends ChangeNotifier {
   }
 
   // ── Fase ────────────────────────────────────────────────────────────
-  /// Rancang → jalan. Rumah tersambung mulai lancar dengan sabar penuh.
-  void startDay() {
+  /// Rancang → jalan: hari dimulai 06:00 di jaringan ini, rumah tersambung
+  /// lancar dengan sabar penuh.
+  ///
+  /// Parameter lain melanjutkan hari dari potret (bingkai Fase Jalan di
+  /// desain): jam, sabar tiap rumah, prioritas antrean, komplain yang
+  /// sedang tampil, dan jumlah komplain sejauh ini.
+  void startDay({
+    int minute = SimClock.dayStart,
+    Map<String, double> patience = const {},
+    Set<String> priority = const {},
+    Complaint? complaint,
+    int complaints = 0,
+  }) {
     _expectPhase(GamePhase.design);
     _phase = GamePhase.run;
     _draft = null;
     _pull = null;
     _erasing = false;
     _refusedCost = null;
-    _frame = SimFrame(
-      houses: {
-        for (final id in connectedHouses)
-          id: const HouseLive(state: HouseState.ok, patience: 1, usageMbps: 0),
-      },
+    _day = DaySim(
+      level: level,
+      network: network,
+      minute: minute,
+      patience: patience,
+      priority: priority,
+      complaint: complaint,
+      complaints: complaints,
     );
     notifyListeners();
   }
 
-  void updateFrame(SimFrame frame) {
+  /// Rancangan ini sebagai hari baru di state terpisah (fase jalan), supaya
+  /// rancangan tetap utuh bila pemain kembali ke Fase Rancang.
+  GameState planDay() => GameState(
+    level,
+    budget: _budget,
+    junctions: junctions,
+    cables: _cables,
+    selectedCable: _selectedCable,
+  )..startDay();
+
+  /// Majukan hari [seconds] detik nyata (sudah dikali kecepatan). Memberi
+  /// tahu bila jam berubah; sampai 24:00 → fase hasil.
+  void advanceDay(double seconds) {
     _expectPhase(GamePhase.run);
-    _frame = frame;
+    final day = _day!;
+    if (!day.advance(seconds * SimClock.minutesPerSecond)) return;
+    if (day.over) _phase = GamePhase.result;
     notifyListeners();
   }
 
-  /// Jalan → hasil.
+  /// Simpan batas & prioritas dari Panel Atur Antrean.
+  void setQueue({
+    required Map<String, int> limits,
+    required Set<String> priority,
+  }) {
+    _expectPhase(GamePhase.run);
+    _day!.setQueue(limits: limits, priority: priority);
+    notifyListeners();
+  }
+
+  /// Komplain dijawab ("Abaikan" / "Atur antrean"); hari bisa lanjut.
+  void dismissComplaint() {
+    _expectPhase(GamePhase.run);
+    if (_day!.complaint == null) return;
+    _day!.dismissComplaint();
+    notifyListeners();
+  }
+
+  /// Jalan → hasil (hari diakhiri lebih awal).
   void finishDay() {
     _expectPhase(GamePhase.run);
     _phase = GamePhase.result;
