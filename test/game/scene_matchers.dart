@@ -4,7 +4,7 @@ import 'package:busy_network/game/map_scene.dart';
 
 /// Uraian lengkap scene (urutan = urutan gambar) supaya selisihnya terbaca.
 List<String> describeScene(MapScene s) => [
-  'theme=${s.theme} size=${s.size} handle=${_o(s.dragHandle)}',
+  'theme=${s.theme} handle=${_o(s.dragHandle)}',
   for (final l in s.blockLabels) 'block ${l.text} ${_o(l.position)} ${l.align}',
   for (final c in s.cables)
     'cable ${c.points.map(_o).join(' ')} ${c.kind} ${c.state} '

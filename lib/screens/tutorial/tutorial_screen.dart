@@ -6,7 +6,7 @@ import '../../core/format.dart';
 import '../../data/dummy_states.dart';
 import '../../game/map_scene.dart';
 import '../../game/model/model.dart';
-import '../../game/scene_builder.dart';
+import '../../game/network_game_view.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'tutorial_overlay.dart';
@@ -109,8 +109,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
                   ),
                 ),
                 Expanded(
-                  child: NetworkMapView(
-                    scene: SceneBuilder.fromState(_game),
+                  child: NetworkGameView(
+                    state: _game,
                     semanticLabel: 'Peta level 1: router pusat dan dua rumah',
                     overlays: [
                       Positioned.fromRect(

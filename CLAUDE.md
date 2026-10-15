@@ -29,20 +29,27 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
 - `lib/widgets/` — komponen reusable (barrel `widgets/widgets.dart`):
   `ChunkyButton`, `CircleIconButton`, badge/pill, `StarRating`, `AppCard`,
   `StatTile`, `ProgressBar`, `LevelNode`, `CableOptionCard`,
-  `LevelHeaderCard`, `BottomPanel`, `NetworkMapView`, `DesignStage`,
+  `LevelHeaderCard`, `BottomPanel`, `DesignStage`,
   `GameIcon` (path SVG asli dari desain), `FillScrollView`, `LoopClock`
   (jam animasi berulang).
 - Animasi: `@keyframes` desain disalin jadi token `Keyframes` di
   `AppMotion` (persen + easing per segmen, persis CSS), digerakkan
   `LoopClock` (detik berjalan → pose). Pose peta di
-  `game/render/map_motion.dart`.
+  `game/render/map_motion.dart`, digerakkan `update(dt)` `NetworkGame`.
 - `lib/game/` — `model/` (`LevelDef`, `HouseDef`, `Cable`/`CableSpec`/
   `CableDraft`, `Network` topologi & beban, `GameState` fase
   rancang/jalan/hasil), `levels/levels.dart` (data level),
   `scene_builder.dart` (`SceneBuilder.fromState(state)` → `MapScene`),
-  `map_scene.dart` (model gambar) dan `render/map_renderer.dart` (gambar
-  rumah/router/kabel/trafik di atas `Canvas`; dipakai CustomPainter
-  sekarang, dan bisa dipanggil dari `render()` komponen Flame).
+  `map_scene.dart` (model gambar), `render/map_renderer.dart` (gambar
+  rumah/router/kabel/trafik di atas `Canvas`, per lapisan),
+  `network_game.dart` (`NetworkGame`: `FlameGame`, kamera
+  `withFixedResolution(390, 472)`, mendengarkan `GameState` dan
+  menyamakan komponen), `components/` (`GroundComponent`,
+  `CableComponent`, `TrafficComponent`, `RouterComponent`/`HouseComponent`/
+  `JunctionComponent`, `BadgeComponent`, `DragHandleComponent`; semuanya
+  menggambar lewat `MapRenderer`), `network_game_view.dart`
+  (`NetworkGameView`: `GameWidget` + overlay widget berkoordinat peta;
+  dipakai Tutorial/Rancang/Jalan).
 - `lib/screens/<layar>/` — satu folder per layar (8 layar).
 - `lib/app/` — `routes.dart` (path), `router.dart` (go_router, bersarang),
   `app.dart`.
@@ -68,16 +75,41 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
 - Animasi tak berujung membuat `pumpAndSettle` macet. Animasi berulang
   wajib lewat `LoopClock` (berhenti di pose `still` bila
   `MediaQuery.disableAnimations`); animasi sekali jalan langsung ke akhir.
+  Peta Flame: mesin `NetworkGame` hanya jalan bila scene bergerak dan
+  animasi boleh; selain itu tiap perubahan digambar satu bingkai lalu
+  mesin berhenti sendiri (`pumpAndSettle` aman).
   Test memompa app lewat `pumpApp`/`disableAnimations` di
   `test/test_helpers.dart`; uji gerakannya di
   `test/screens/animation_test.dart` (tanpa `pumpAndSettle`).
-- Peta: koordinat desain diskalakan seragam lewat `DesignStage`
-  (padanan `FixedResolutionViewport` Flame).
+- Peta: kamera Flame beresolusi tetap 390×472 (koordinat desain, (0, 0)
+  kiri atas). Overlay Flutter di atas peta (tooltip, banner, pop-up) tetap
+  widget, diletakkan dengan koordinat peta lewat `NetworkGameView.overlays`
+  (`DesignStage`). Gaya gambar hanya di `MapRenderer`;
+  `test/game/network_game_test.dart` membandingkan piksel game dengan
+  `MapRenderer.drawScene`.
 - Peta digambar dari state: ubah data level / `GameState`, bukan
-  `MapScene` langsung. `test/game/scene_builder_test.dart` menjaga snapshot
+  `MapScene` atau komponen langsung. `test/game/scene_builder_test.dart` menjaga snapshot
   tetap identik dengan desain.
 - Commit kecil per langkah, pesan bahasa Inggris singkat
   (`feat(scope): ...`, `fix: ...`, `test: ...`).
+
+## Alur git per langkah roadmap
+Pemilik repo biasanya `/clear` setelah tiap sesi, jadi aturan ini yang
+berlaku, bukan ingatan percakapan. Kerjakan sendiri tanpa bertanya dan
+tanpa menyuruh pemilik repo menjalankan perintah:
+- **Awal langkah:** `git fetch`, pastikan PR langkah sebelumnya sudah
+  di-merge ke `origin/main`, lalu `git checkout main && git pull --ff-only`,
+  buat `feat/<nama-langkah>`, hapus branch lokal yang sudah di-merge,
+  `flutter pub get && flutter analyze && flutter test`. Kalau PR sebelumnya
+  belum di-merge, jangan bercabang dari `main` lama; beri tahu pemilik repo.
+- **Akhir langkah** (analyze bersih, test hijau, temuan review sudah
+  diperbaiki): `git push -u origin <branch>` lalu `gh pr create --base main`
+  langsung, tanpa menu pilihan. Kirim link PR-nya. Badan PR berbahasa
+  Indonesia, gaya PR #2/#3: daftar perubahan, lalu baris "Verifikasi:".
+- **Merge PR** dilakukan pemilik repo di GitHub; jangan merge sendiri
+  kecuali diminta.
+- Kesepakatan baru soal alur kerja langsung dicatat di file ini, jangan
+  hanya diucapkan di chat.
 
 ## Lanjut ke mana
 Lihat `docs/ROADMAP.md` — langkah berurutan beserta prompt siap tempel.

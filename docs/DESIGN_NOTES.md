@@ -52,6 +52,11 @@ Gagal · Design token & komponen.
   3,2 s. Belum: js-march & js-snap (kabel ditarik), js-pop (komplain),
   js-float (konfeti), js-twinkle & js-flow di Peta Babak, js-walk/js-drip/
   js-flow di Hasil Gagal.
+- **Peta pakai Flame** (`NetworkGame`): komponen menggambar di koordinat
+  peta lewat `MapRenderer`, jadi hasilnya sama per piksel dengan
+  `MapRenderer.drawScene` (di-test). Penanda sorotan tutorial dan tooltip
+  biaya tetap widget di atas peta. Peta diam saat rutenya tertutup rute
+  lain (mis. Panel Atur Antrean di atas Fase Jalan).
 - **Animasi mati** (`MediaQuery.disableAnimations`): tiap animasi diam di
   pose yang mewakili referensi (cincin sedang membesar, tangan seret di
   titik awal, bintang sudah muncul), bukan pose 0% yang kadang kosong.

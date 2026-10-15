@@ -5,7 +5,8 @@ import 'package:flutter/animation.dart';
 /// keyframe, sama seperti di browser.
 ///
 /// Dihitung dari waktu, bukan dari [AnimationController], supaya sama saja
-/// dipakai widget (lewat `LoopClock`) maupun `update(dt)` Flame nanti.
+/// dipakai widget (lewat `LoopClock`) maupun `update(dt)` Flame
+/// (`NetworkGame`).
 class Keyframes {
   const Keyframes(this.stops, {this.curve = Curves.easeInOut});
 

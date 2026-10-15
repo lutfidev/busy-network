@@ -6,8 +6,8 @@ import '../../core/format.dart';
 import '../../data/dummy_states.dart';
 import '../../game/map_scene.dart';
 import '../../game/model/model.dart';
+import '../../game/network_game_view.dart';
 import '../../game/render/map_renderer.dart';
-import '../../game/scene_builder.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -86,8 +86,8 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: NetworkMapView(
-                      scene: SceneBuilder.fromState(_game),
+                    child: NetworkGameView(
+                      state: _game,
                       semanticLabel:
                           'Peta ${level.name}: router pusat, '
                           '$connected rumah tersambung, '
