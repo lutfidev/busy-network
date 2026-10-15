@@ -1,7 +1,4 @@
-import 'dart:math' as math;
-
 import '../map_scene.dart';
-import 'sim_clock.dart';
 
 /// Keadaan satu rumah tersambung saat hari berjalan.
 class HouseLive {
@@ -9,9 +6,14 @@ class HouseLive {
     required this.state,
     required this.patience,
     required this.usageMbps,
-    this.limitMbps,
-    this._servedMbps,
+    required this.demandMbps,
+    required this.servedMbps,
   });
+
+  /// Bagian [usage] yang terlayani oleh [served] (0..1); 1 bila tidak
+  /// memakai apa pun.
+  static double serviceOf(double usage, double served) =>
+      usage > 0 ? served / usage : 1;
 
   final HouseState state;
 
@@ -21,29 +23,23 @@ class HouseLive {
   /// Pemakaian yang diinginkan rumah saat ini (kurva harian × puncak).
   final double usageMbps;
 
-  /// Batas antrean; `null` = tanpa batas.
-  final int? limitMbps;
-  final double? _servedMbps;
-
   /// Yang masuk jaringan: pemakaian dipotong batas antrean ("Pakai
   /// sekarang" di panel antrean, beban kabel di badge "Penuh!").
-  double get demandMbps => limitMbps == null
-      ? usageMbps
-      : math.min(usageMbps, limitMbps!.toDouble());
+  final double demandMbps;
 
   /// Yang benar-benar sampai setelah kapasitas kabel dibagi.
-  double get servedMbps => _servedMbps ?? demandMbps;
+  final double servedMbps;
 
-  /// Bagian pemakaian yang terlayani (0..1); 1 bila tidak memakai apa pun.
-  double get service => usageMbps > 0 ? servedMbps / usageMbps : 1;
+  /// Bagian pemakaian yang terlayani (0..1).
+  double get service => serviceOf(usageMbps, servedMbps);
 }
 
 /// Potret simulasi pada satu menit.
 class SimFrame {
   const SimFrame({
-    this.minute = SimClock.dayStart,
+    required this.minute,
     required this.houses,
-    this.satisfaction = 100,
+    required this.satisfaction,
   });
 
   /// Jam (menit sejak 00:00).

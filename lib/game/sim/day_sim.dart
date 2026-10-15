@@ -33,12 +33,18 @@ class DaySim {
        _complaint = complaint {
     _limits = _checkedLimits(limits);
     _priority = _checkedPriority(priority);
-    if (complaint != null) _lastComplaint[complaint.houseId] = complaint.minute;
+    if (complaint != null) {
+      _lastComplaint[complaint.houseId] = complaint.minute;
+      _complained.add(complaint.houseId);
+    }
     _frame = _assess(_limits, _priority);
   }
 
   /// Rumah yang sama tidak komplain lagi dalam sekian menit.
   static const complaintCooldown = 120;
+
+  /// Rumah macet yang sudah komplain sejak terakhir kali mulai macet.
+  final _complained = <String>{};
 
   final LevelDef level;
   final Network network;
@@ -129,17 +135,27 @@ class DaySim {
       _patience[id] = (_patience[id]! + rate * hours).clamp(0.0, 1.0);
     }
     _minute++;
-    final before = _frame;
     _frame = _assess(_limits, _priority);
-    for (final MapEntry(key: id, value: live) in _frame.houses.entries) {
+    _raiseComplaint();
+  }
+
+  /// Satu komplain per masa macet tiap rumah, paling sering sekali per
+  /// [complaintCooldown]. Rumah yang macet bersamaan komplain bergiliran
+  /// (satu per langkah, setelah komplain sebelumnya dijawab); yang macet
+  /// saat masih jeda komplain menyusul begitu jedanya habis.
+  void _raiseComplaint() {
+    bool jammed(String id) => _frame.houses[id]?.state == HouseState.jam;
+    _complained.removeWhere((id) => !jammed(id));
+    for (final id in _frame.houses.keys) {
       final last = _lastComplaint[id];
-      if (live.state == HouseState.jam &&
-          before.houses[id]?.state != HouseState.jam &&
+      if (jammed(id) &&
+          !_complained.contains(id) &&
           (last == null || _minute - last >= complaintCooldown)) {
         _complaint = Complaint(houseId: id, minute: _minute);
         _complaints++;
         _lastComplaint[id] = _minute;
-        break;
+        _complained.add(id);
+        return;
       }
     }
   }
@@ -163,7 +179,7 @@ class DaySim {
     final houses = <String, HouseLive>{};
     for (final id in _patience.keys) {
       final cable = network.parentOf(id)!.cable;
-      final service = usage[id]! > 0 ? served[id]! / usage[id]! : 1.0;
+      final service = HouseLive.serviceOf(usage[id]!, served[id]!);
       houses[id] = HouseLive(
         state: Patience.status(
           jam: Patience.short(service) && network.isOverloaded(cable, demand),
@@ -172,8 +188,8 @@ class DaySim {
         ),
         patience: _patience[id]!,
         usageMbps: usage[id]!,
-        limitMbps: limits[id],
-        servedMbps: served[id],
+        demandMbps: demand[id]!,
+        servedMbps: served[id]!,
       );
     }
     final total = _patience.values.fold(0.0, (sum, p) => sum + p);

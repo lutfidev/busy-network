@@ -51,6 +51,7 @@ class Network {
   final _parent = <String, Hop>{};
   final _children = <String, List<String>>{};
   final _tree = <Hop>[];
+  final _below = <String, Set<String>>{};
 
   /// Rumah yang terjangkau dari router.
   late final Set<String> connectedHouses;
@@ -60,7 +61,7 @@ class Network {
 
   /// Hop pohon dari router ke hilir: tiap hop muncul setelah hop di
   /// hulunya.
-  List<Hop> get treeHops => List.unmodifiable(_tree);
+  late final List<Hop> treeHops = List.unmodifiable(_tree);
 
   /// Jumlah hop dari router ke [nodeId] (router 0).
   int depthOf(String nodeId) {
@@ -72,7 +73,8 @@ class Network {
   }
 
   /// Rumah tersambung di subpohon [nodeId] (termasuk [nodeId] sendiri).
-  Set<String> housesBelow(String nodeId) {
+  /// Disimpan per node (jaringan tidak berubah), tidak bisa diubah.
+  Set<String> housesBelow(String nodeId) => _below[nodeId] ??= () {
     final result = <String>{};
     final stack = [nodeId];
     while (stack.isNotEmpty) {
@@ -80,7 +82,22 @@ class Network {
       if (connectedHouses.contains(node)) result.add(node);
       stack.addAll(_children[node] ?? const <String>[]);
     }
-    return result;
+    return Set<String>.unmodifiable(result);
+  }();
+
+  /// Rumah yang mendapat internet lewat [cable]: subpohon hop pertama
+  /// kabel itu yang benar-benar memberi makan hilirnya. Kosong bila kabel
+  /// tidak dipakai pohon (mis. kabel paralel ke junction yang sudah
+  /// tersambung tetap membawa rumah di ujungnya saja).
+  Set<String> housesCarried(Cable cable) {
+    final stops = cable.stops;
+    for (var i = 1; i < stops.length; i++) {
+      final hop = _parent[stops[i]];
+      if (hop != null && hop.cable.id == cable.id && hop.from == stops[i - 1]) {
+        return housesBelow(stops[i]);
+      }
+    }
+    return const {};
   }
 
   /// Beban [hop]: pemakaian rumah di hilirnya. Hop di luar pohon (kabel

@@ -116,6 +116,37 @@ void main() {
       expect(p.houses.firstWhere((h) => h.onCable).id, 'r3');
     });
 
+    test('kabel paralel ke junction: hanya rumah di ujungnya dihitung', () {
+      Cable initial(String id) =>
+          Levels.level5.cables.firstWhere((c) => c.id == id);
+      final state = GameState(
+        Levels.level5,
+        cables: [
+          initial('c-w'),
+          initial('c-r1'),
+          initial('c-r3'),
+          const Cable(
+            id: 'c-x',
+            from: LevelDef.routerId,
+            to: 'r6',
+            via: ['j1'],
+            points: [Offset(195, 216), Offset(195, 400)],
+          ),
+        ],
+      )..startDay(minute: 20 * 60);
+      final p = QueuePlan.of(state.day!);
+      expect(p.cable!.id, 'c-x');
+      expect(
+        [
+          for (final h in p.houses)
+            if (h.onCable) h.id,
+        ],
+        ['r6'],
+      );
+      expect(p.load, 11);
+      expect(p.overloaded, isFalse);
+    });
+
     test('tanpa kabel sama sekali: panel tetap terbentuk', () {
       final state = GameState(
         Levels.level5,

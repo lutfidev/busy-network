@@ -200,6 +200,50 @@ void main() {
       expect(sim.complaints, 0);
     });
 
+    test('rumah yang macet bersamaan komplain bergiliran', () {
+      // Fiber Warung diganti LAN: jam 20:00 kabel Warung (24,5/20) dan
+      // kabel Rumah 4 (25/20) sama-sama penuh.
+      final sim = _sim([
+        for (final c in designCables)
+          c.id == 'c-w'
+              ? Cable(
+                  id: c.id,
+                  from: c.from,
+                  to: c.to,
+                  via: c.via,
+                  points: c.points,
+                )
+              : c,
+      ], minute: 20 * 60);
+      expect(sim.frame.houses['w']!.state, HouseState.jam);
+      expect(sim.frame.houses['r4']!.state, HouseState.jam);
+      sim.advance(1);
+      expect(sim.complaint!.houseId, 'w');
+      sim
+        ..dismissComplaint()
+        ..advance(1);
+      expect(sim.complaint!.houseId, 'r4');
+      sim
+        ..dismissComplaint()
+        ..advance(30);
+      expect(sim.complaint, isNull, reason: 'sekali per masa macet');
+      expect(sim.complaints, 2);
+    });
+
+    test('macet sejak masa jeda: komplain begitu jedanya habis', () {
+      // Komplain 18:00 (sebelum macet); Rumah 4 macet sejak 18:17 saat
+      // masih jeda, jeda 2 jam habis 20:00.
+      final sim = _sim(
+        designCables,
+        minute: 18 * 60,
+        complaint: const Complaint(houseId: 'r4', minute: 18 * 60),
+      )..dismissComplaint();
+      while (sim.complaint == null && sim.minute < 21 * 60) {
+        sim.advance(1);
+      }
+      expect(sim.complaint, const Complaint(houseId: 'r4', minute: 20 * 60));
+    });
+
     test('mengubah antrean tidak memicu komplain', () {
       final sim = _sim(designCables, minute: 20 * 60, limits: const {'r4': 11})
         ..setQueue(limits: const {}, priority: const {});

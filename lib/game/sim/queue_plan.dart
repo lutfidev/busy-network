@@ -61,9 +61,7 @@ class QueuePlan {
     for (final hop in net.treeHops) {
       if (cable == null || ratio(hop.cable) > ratio(cable)) cable = hop.cable;
     }
-    final onCable = cable == null
-        ? const <String>{}
-        : net.housesBelow(cable.stops[1]);
+    final onCable = cable == null ? const <String>{} : net.housesCarried(cable);
 
     final order = {for (final (i, h) in level.houses.indexed) h.id: i};
     int rank(String id) => switch (frame.houses[id]!.state) {
