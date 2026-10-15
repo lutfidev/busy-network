@@ -33,8 +33,30 @@ Gagal · Design token & komponen.
 - **Level 2–5** di peta membuka Fase Rancang Gang Melati (satu-satunya level
   yang didesain); level 1 membuka tutorial; level terkunci & bos nonaktif.
 - **Rute bersarang** (`/peta/rancang/jalan/antrean`) supaya tombol back
-  Android mengikuti alur. Tombol "Percepat" ke Hasil Berhasil (2 bintang),
-  "Abaikan" komplain ke Hasil Gagal (seperti tautan prototipe).
+  Android mengikuti alur. Back dari Fase Jalan = hari dibatalkan, rancangan
+  tetap utuh.
+- **Simulasi hari** (rincian di
+  `docs/superpowers/specs/2026-10-15-simulasi-hari-design.md`): 06→24 dalam
+  90 detik; tombol percepat = sakelar ×4 (bukan lompat ke hasil). Pemakaian
+  = `peakMbps` × kurva (25/35/45%, naik 2 jam ke 100% di jam sibuk, turun
+  ke 30% di 24). Rumah macet bila kabel yang langsung menyambungkannya
+  penuh dan ia kekurangan; mulai lambat bila sabar atau layanan < 60%.
+  Kepuasan = rata-rata sabar semua rumah (belum tersambung = 0), dibulatkan
+  ke bawah. 24:00 → Hasil Berhasil bila kepuasan ≥ target, selain itu
+  Hasil Gagal (angka hasil masih dummy sampai langkah 6).
+- **Komplain** muncul saat rumah baru macet (paling sering sekali per rumah
+  tiap 2 jam) dan menjeda hari sampai dijawab. "Abaikan" menutup pop-up
+  dan hari lanjut (bukan ke Hasil Gagal seperti tautan prototipe). Teks
+  komplain selain milik Bu Sri adalah copy baru.
+- **Panel Atur Antrean** dari hari yang berjalan: "Terapkan" menyimpan,
+  "Lanjutkan" juga menyimpan lalu melanjutkan hari. Petunjuk "Turunkan
+  batas A atau B." menyebut dua pemakai terbesar di kabel yang disorot.
+  Status kartu adalah pratinjau aturan simulasi (Kak Dewi "mulai lambat"
+  karena sabarnya 55%, bukan aturan khusus prototipe).
+- **Bingkai Fase Jalan** (20:15) dihitung simulasi dari potret: jam, sabar
+  tiap rumah, Warung prioritas, komplain Bu Sri 20:14. Tutorial "Mulai
+  Hari" masih membuka potret ini sampai langkah 7; dengan 1/2 rumah,
+  level 1 maksimal 50% (< target 60%).
 - **Hasil Berhasil** menerima `?bintang=1..3`; angka mengikuti logika
   prototipe (72/86%, Rp 120.000/240.000, komplain 7/3/2).
 - **Tutorial**: posisi sorotan diukur dari widget target (bukan koordinat

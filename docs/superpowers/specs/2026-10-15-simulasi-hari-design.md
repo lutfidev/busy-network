@@ -43,16 +43,16 @@ potret Fase Jalan (langkah 7); level lain (langkah 8); suara (langkah 9).
    sisanya dibagi proporsional. Rumah dapat `terlayani ≤ diminta`.
    Layanan `q = terlayani / pemakaian` (pembatasan juga mengurangi `q`).
 5. **Status rumah** (aturan roadmap, cocok dengan desain):
-   - **macet** — kabel yang langsung menyambungkan rumah itu penuh (badge
-     "Penuh!" ada di kabel yang masuk ke rumah merah);
+   - **macet** — kabel yang langsung menyambungkan rumah itu penuh dan
+     rumah itu kekurangan (badge "Penuh!" ada di kabel yang masuk ke rumah
+     merah; rumah prioritas yang tetap terlayani penuh tidak macet);
    - **mulai lambat** — sabar < 60% atau `q` < 60%;
    - **lancar** — selain itu.
    Di bingkai desain Rumah 5 tetap "mulai lambat" walau di hilir kabel
    penuh, karena kabelnya sendiri (Rumah 4 → 5) tidak penuh.
 6. **Kesabaran** 0–100%, mulai penuh. Per jam permainan:
    turun `1,0 × (1 − q)`, ditambah 0,30 bila macet atau 0,15 bila hanya
-   di hilir kabel penuh; naik 0,10 bila terlayani penuh tanpa kabel penuh
-   di jalurnya. Dengan aturan ini jaringan di desain (tanpa diatur) gagal
+   di hilir kabel penuh; naik 0,10 bila terlayani penuh. Dengan aturan ini jaringan di desain (tanpa diatur) gagal
    target 80%, dan lolos bila Bu Sri dibatasi 11 Mbps atau kabel Rumah 4
    diganti fiber.
 7. **Kepuasan** = rata-rata sabar **semua** rumah level, rumah yang belum
@@ -73,7 +73,8 @@ potret Fase Jalan (langkah 7); level lain (langkah 8); suara (langkah 9).
    dibuka. Status kartu = pratinjau aturan 5 dengan batas yang sedang
    digeser. Petunjuk "Turunkan batas A atau B." menyebut dua pemakai
    terbesar di kabel itu. "Terapkan" menyimpan ke hari ("Tersimpan");
-   "Lanjutkan" juga menyimpan lalu kembali ke peta.
+   "Lanjutkan" juga menyimpan, menjawab komplain yang menunggu, lalu
+   kembali ke peta.
 10. **Bingkai desain dihitung simulasi.** `DummyStates.run()` = jaringan
     desain + hari yang dilanjutkan dari potret: jam 20:15, sabar
     90/85/55/15/40/80/75%, Warung prioritas, komplain Bu Sri 20:14.
