@@ -182,6 +182,7 @@ class _ChunkyButtonState extends State<ChunkyButton> {
     );
 
     return Semantics(
+      container: true,
       button: true,
       enabled: enabled,
       label: widget.semanticLabel ?? widget.label,
@@ -244,6 +245,7 @@ class TextLinkButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       button: true,
       label: label,
       excludeSemantics: true,

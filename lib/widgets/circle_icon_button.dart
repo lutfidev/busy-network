@@ -31,6 +31,7 @@ class CircleIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       button: true,
       label: semanticLabel,
       excludeSemantics: true,

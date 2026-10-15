@@ -123,6 +123,7 @@ class CableOptionCard extends StatelessWidget {
     );
 
     return Semantics(
+      container: true,
       button: true,
       enabled: !locked,
       selected: selected,

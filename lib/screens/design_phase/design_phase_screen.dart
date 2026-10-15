@@ -277,6 +277,7 @@ class _EraseToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       button: true,
       toggled: active,
       label: 'Hapus',

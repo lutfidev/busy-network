@@ -27,6 +27,7 @@ class BossLevelCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
       button: true,
       enabled: false,
       label: 'Level 12, level bos Malam Final Sepak Bola, terkunci',
