@@ -217,7 +217,14 @@ class _TutorialScreenState extends State<TutorialScreen> {
       Positioned.fill(
         child: SpotlightScrim(spot: spot, radius: radius),
       ),
-      Positioned(left: hand.dx, top: hand.dy, child: const TutorialHand()),
+      Positioned(
+        left: hand.dx,
+        top: hand.dy,
+        child: TutorialHand(
+          motion: _step == 2 ? HandMotion.drag : HandMotion.bob,
+          scale: _step == 3 ? 1 : _spotScale,
+        ),
+      ),
       Positioned(
         left: AppSpacing.s20,
         right: AppSpacing.s20,

@@ -15,7 +15,21 @@ void setScreenSize(WidgetTester tester, Size size) {
   addTearDown(tester.view.reset);
 }
 
+/// Nyalakan setelan aksesibilitas "hapus animasi"
+/// (`MediaQuery.disableAnimations`) sampai test selesai.
+///
+/// Animasi berulang (trafik, cincin level, tangan tutorial) tidak pernah
+/// selesai, jadi tanpa ini `pumpAndSettle` macet. Dengan animasi mati,
+/// layar tampil di bingkai statisnya (sama dengan referensi desain).
+void disableAnimations(WidgetTester tester) {
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+}
+
+/// Pompa aplikasi (animasi mati, lihat [disableAnimations]) di [location].
 Future<void> pumpApp(WidgetTester tester, {String location = '/'}) async {
+  disableAnimations(tester);
   await tester.pumpWidget(JaringanSibukApp(initialLocation: location));
   await tester.pumpAndSettle();
 }

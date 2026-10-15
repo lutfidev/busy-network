@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../test_helpers.dart';
 import 'capture.dart';
 
 const _screens = <String, String>{
@@ -41,6 +42,7 @@ void main() {
         tester.view.physicalSize = size;
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
+        disableAnimations(tester);
         await tester.pumpWidget(
           capturable(JaringanSibukApp(initialLocation: location)),
         );
@@ -54,6 +56,7 @@ void main() {
     tester.view.physicalSize = const Size(390, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    disableAnimations(tester);
     await tester.pumpWidget(
       capturable(
         MaterialApp(

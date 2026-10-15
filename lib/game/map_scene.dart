@@ -140,4 +140,13 @@ class MapScene {
   /// Ujung kabel yang sedang ditarik (lingkaran jari).
   final Offset? dragHandle;
   final Size size;
+
+  /// Ada yang bergerak (trafik, alarm)? Kalau tidak, peta cukup digambar
+  /// sekali.
+  bool get hasMotion =>
+      cables.any(
+        (c) =>
+            c.traffic != TrafficState.none || c.state == CableState.overloaded,
+      ) ||
+      nodes.any((n) => n.alarm || n.routerAlarm);
 }

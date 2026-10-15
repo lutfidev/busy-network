@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import '../../theme/theme.dart';
 import '../../widgets/icons/svg_path.dart';
 import '../map_scene.dart';
+import 'map_motion.dart';
 
 /// Primitif gambar peta jaringan, murni di atas [Canvas].
 ///
@@ -82,7 +83,13 @@ abstract final class MapRenderer {
     ..strokeCap = StrokeCap.round
     ..strokeJoin = StrokeJoin.round;
 
-  static void drawCable(Canvas canvas, MapCable cable, MapTheme theme) {
+  /// [alarmOpacity] = opasitas lapisan merah kabel penuh (kedip).
+  static void drawCable(
+    Canvas canvas,
+    MapCable cable,
+    MapTheme theme, {
+    double alarmOpacity = 1,
+  }) {
     final path = polyline(cable.points);
     final width = cable.kind == CableKind.fiber || cable.thick
         ? fiberWidth
@@ -95,7 +102,10 @@ abstract final class MapRenderer {
         drawDashedPath(canvas, path, _stroke(color, lanWidth), 10, 8);
       case CableState.overloaded:
         canvas.drawPath(path, _stroke(color, width));
-        canvas.drawPath(path, _stroke(AppColors.statusJam, width));
+        canvas.drawPath(
+          path,
+          _stroke(AppColors.statusJam.withValues(alpha: alarmOpacity), width),
+        );
     }
   }
 
@@ -195,6 +205,7 @@ abstract final class MapRenderer {
     MapNode node,
     MapTheme theme, {
     Color? snapColor,
+    double alarmOpacity = 1,
   }) {
     final c = node.position;
     final day = theme == MapTheme.day;
@@ -214,7 +225,8 @@ abstract final class MapRenderer {
       canvas.drawCircle(
         c,
         30,
-        Paint()..color = AppColors.statusJam.withValues(alpha: 0.25),
+        Paint()
+          ..color = AppColors.statusJam.withValues(alpha: 0.25 * alarmOpacity),
       );
     }
 
@@ -283,6 +295,7 @@ abstract final class MapRenderer {
     Offset c,
     MapTheme theme, {
     bool alarm = false,
+    double alarmOpacity = 1,
   }) {
     final day = theme == MapTheme.day;
     final body = day ? AppColors.ink : AppColors.inkOnDark;
@@ -309,7 +322,9 @@ abstract final class MapRenderer {
     final leds = [
       day ? AppColors.traffic : AppColors.trafficDay,
       AppColors.statusOk,
-      alarm ? AppColors.statusJam : AppColors.primary,
+      alarm
+          ? AppColors.statusJam.withValues(alpha: alarmOpacity)
+          : AppColors.primary,
     ];
     for (var i = 0; i < 3; i++) {
       canvas.drawCircle(Offset(-9.0 + 9 * i, 7), 3, Paint()..color = leds[i]);
@@ -409,14 +424,18 @@ abstract final class MapRenderer {
   }
 
   // ── Scene ─────────────────────────────────────────────────────────────
-  static void drawScene(Canvas canvas, MapScene scene, {double phase = 0}) {
+  static void drawScene(
+    Canvas canvas,
+    MapScene scene, {
+    MapMotion motion = MapMotion.still,
+  }) {
     final theme = scene.theme;
     drawDotGrid(canvas, scene.size, theme);
     for (final label in scene.blockLabels) {
       drawBlockLabel(canvas, label, theme);
     }
     for (final cable in scene.cables) {
-      drawCable(canvas, cable, theme);
+      drawCable(canvas, cable, theme, alarmOpacity: motion.alarmOpacity);
     }
     for (final cable in scene.cables) {
       if (cable.traffic == TrafficState.none) continue;
@@ -427,7 +446,9 @@ abstract final class MapRenderer {
         gap: cable.state == CableState.overloaded
             ? AppMotion.trafficJamGap
             : AppMotion.trafficGap,
-        phase: phase,
+        phase: cable.traffic == TrafficState.jam
+            ? motion.jamPhase
+            : motion.flowPhase,
       );
     }
     final drafting = scene.cables
@@ -439,10 +460,22 @@ abstract final class MapRenderer {
         case NodeKind.junction:
           drawJunction(canvas, node.position, theme);
         case NodeKind.router:
-          drawRouter(canvas, node.position, theme, alarm: node.routerAlarm);
+          drawRouter(
+            canvas,
+            node.position,
+            theme,
+            alarm: node.routerAlarm,
+            alarmOpacity: motion.alarmOpacity,
+          );
           _drawNodeLabel(canvas, node, theme);
         case NodeKind.house:
-          drawHouse(canvas, node, theme, snapColor: drafting);
+          drawHouse(
+            canvas,
+            node,
+            theme,
+            snapColor: drafting,
+            alarmOpacity: motion.alarmOpacity,
+          );
       }
     }
     for (final badge in scene.badges) {

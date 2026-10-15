@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -146,32 +148,92 @@ class ResultSuccessScreen extends StatelessWidget {
   }
 }
 
-class _StarTrio extends StatelessWidget {
+/// Tiga bintang besar. Bintang yang didapat "pop" bergiliran di atas
+/// bintang kosong (js-star); langsung tampil bila animasi dimatikan.
+class _StarTrio extends StatefulWidget {
   const _StarTrio({required this.stars});
 
   final int stars;
 
   @override
+  State<_StarTrio> createState() => _StarTrioState();
+}
+
+class _StarTrioState extends State<_StarTrio>
+    with SingleTickerProviderStateMixin {
+  static final _total = AppMotion.starPopDelays.last + AppMotion.starPop;
+
+  late final _pop = AnimationController(vsync: this, duration: _total);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _pop.value = 1;
+    } else if (_pop.isDismissed) {
+      _pop.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pop.dispose();
+    super.dispose();
+  }
+
+  /// Kemajuan 0..1 animasi bintang ke-[i] (setelah jedanya).
+  double _progress(int i) {
+    final elapsed = _total * _pop.value - AppMotion.starPopDelays[i];
+    return (elapsed.inMicroseconds / AppMotion.starPop.inMicroseconds).clamp(
+      0.0,
+      1.0,
+    );
+  }
+
+  Widget _star(int i, double size) {
+    final empty = StarIcon(filled: false, size: size, style: StarStyle.large);
+    if (widget.stars <= i) return empty;
+    return Stack(
+      children: [
+        empty,
+        AnimatedBuilder(
+          animation: _pop,
+          builder: (context, star) {
+            final t = _progress(i);
+            return Opacity(
+              opacity: AppMotion.starPopOpacity.at(t).clamp(0.0, 1.0),
+              child: Transform.rotate(
+                angle: AppMotion.starPopAngle.at(t) * math.pi / 180,
+                child: Transform.scale(
+                  scale: AppMotion.starPopScale.at(t),
+                  child: star,
+                ),
+              ),
+            );
+          },
+          child: StarIcon(filled: true, size: size, style: StarStyle.large),
+        ),
+      ],
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Dapat $stars dari 3 bintang',
+      label: 'Dapat ${widget.stars} dari 3 bintang',
       excludeSemantics: true,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          StarIcon(filled: stars >= 1, size: 84, style: StarStyle.large),
+          _star(0, 84),
           const SizedBox(width: AppSpacing.s6),
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.s18),
-            child: StarIcon(
-              filled: stars >= 2,
-              size: 108,
-              style: StarStyle.large,
-            ),
+            child: _star(1, 108),
           ),
           const SizedBox(width: AppSpacing.s6),
-          StarIcon(filled: stars >= 3, size: 84, style: StarStyle.large),
+          _star(2, 84),
         ],
       ),
     );

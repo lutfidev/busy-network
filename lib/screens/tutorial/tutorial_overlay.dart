@@ -137,18 +137,61 @@ class TutorialCard extends StatelessWidget {
   }
 }
 
-/// Tangan penunjuk.
+enum HandMotion {
+  /// Mengangguk di tempat (menunjuk sesuatu).
+  bob,
+
+  /// Menyeret dari router ke Rumah 1.
+  drag,
+}
+
+/// Tangan penunjuk yang bergerak (diam bila animasi dimatikan).
 class TutorialHand extends StatelessWidget {
-  const TutorialHand({super.key});
+  const TutorialHand({super.key, this.motion = HandMotion.bob, this.scale = 1});
+
+  final HandMotion motion;
+
+  /// Skala peta di layar: jarak gerak dari desain ikut diskalakan.
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
-    return const IgnorePointer(
-      child: GameIcon(
-        GameIcons.hand,
-        size: AppSizes.handPointer,
-        color: AppColors.ink,
-        secondaryColor: AppColors.surface,
+    final drag = motion == HandMotion.drag;
+    return IgnorePointer(
+      child: LoopClock(
+        key: ValueKey(motion),
+        still: drag ? AppMotion.handDragStill : Duration.zero,
+        builder: (context, clock) => ValueListenableBuilder<double>(
+          valueListenable: clock,
+          builder: (context, seconds, hand) =>
+              drag ? _drag(seconds, hand!) : _bob(seconds, hand!),
+          child: const GameIcon(
+            GameIcons.hand,
+            size: AppSizes.handPointer,
+            color: AppColors.ink,
+            secondaryColor: AppColors.surface,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _bob(double seconds, Widget hand) {
+    final t = Keyframes.loop(seconds, AppMotion.handBob);
+    return Transform.translate(
+      offset: AppMotion.handBobOffset * AppMotion.handBobAmount.at(t) * scale,
+      child: hand,
+    );
+  }
+
+  Widget _drag(double seconds, Widget hand) {
+    final t = Keyframes.loop(seconds, AppMotion.handDrag);
+    return Opacity(
+      opacity: AppMotion.handDragOpacity.at(t),
+      child: Transform.translate(
+        offset:
+            AppMotion.handDragOffset * AppMotion.handDragAmount.at(t) * scale,
+        child: hand,
       ),
     );
   }
