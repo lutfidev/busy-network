@@ -22,9 +22,8 @@ import 'scene_builder.dart';
 /// aktif. Selain itu tiap perubahan digambar satu bingkai lalu mesin
 /// berhenti sendiri, jadi `pumpAndSettle` di test tidak macet.
 class NetworkGame extends FlameGame {
-  NetworkGame({required GameState state, this._animate = true})
-    : _state = state,
-      super(
+  NetworkGame({required this._state, this._animate = true})
+    : super(
         camera: CameraComponent.withFixedResolution(
           width: AppSizes.mapArea.width,
           height: AppSizes.mapArea.height,
@@ -32,7 +31,6 @@ class NetworkGame extends FlameGame {
       ) {
     camera.viewfinder.anchor = Anchor.topLeft;
     world.add(GroundComponent()..priority = _Layer.ground);
-    _show(SceneBuilder.fromState(state));
   }
 
   GameState _state;
@@ -69,7 +67,7 @@ class NetworkGame extends FlameGame {
     _invalidate();
   }
 
-  /// Scene yang sedang digambar.
+  /// Scene yang sedang digambar (ada sejak game terpasang).
   MapScene get scene => _scene;
 
   /// Warna cincin snap rumah target (warna kabel yang sedang ditarik).
@@ -86,6 +84,8 @@ class NetworkGame extends FlameGame {
   @override
   Color backgroundColor() => AppColors.transparent;
 
+  /// Scene pertama diturunkan di sini (bukan di konstruktor): state bisa
+  /// berubah selama game belum terpasang.
   @override
   void onMount() {
     super.onMount();

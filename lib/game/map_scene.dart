@@ -2,7 +2,8 @@ import 'dart:ui';
 
 /// Model data statis peta jaringan (posisi dalam koordinat desain).
 ///
-/// Area peta di desain berukuran 390×472 dengan grid 30 px. Semua
+/// Area peta di desain berukuran 390×472 (`AppSizes.mapArea`) dengan grid
+/// 30 px. Semua
 /// koordinat di sini mengacu ke ruang itu; kamera `NetworkGame` yang
 /// menskalakan ke layar.
 ///
@@ -127,7 +128,6 @@ class MapScene {
     this.blockLabels = const [],
     this.badges = const [],
     this.dragHandle,
-    this.size = const Size(390, 472),
   });
 
   final MapTheme theme;
@@ -138,7 +138,6 @@ class MapScene {
 
   /// Ujung kabel yang sedang ditarik (lingkaran jari).
   final Offset? dragHandle;
-  final Size size;
 
   /// Ada yang bergerak (trafik, alarm)? Kalau tidak, peta cukup digambar
   /// sekali.

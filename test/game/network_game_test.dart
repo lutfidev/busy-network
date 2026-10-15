@@ -11,6 +11,7 @@ import 'package:busy_network/game/scene_builder.dart';
 import 'package:busy_network/theme/theme.dart';
 import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
 import 'package:flame/game.dart' hide RouterComponent;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -78,17 +79,6 @@ Future<void> loadMapFonts(WidgetTester tester) async {
   });
 }
 
-/// Piksel sama, boleh beda satu tingkat per kanal: path putus-putus
-/// (cincin rumah idle) yang dihitung di koordinat lokal komponen kadang
-/// bergeser satu tingkat anti-alias. Beda yang terlihat jauh lebih besar.
-Matcher samePixels(Uint8List expected) => predicate<Uint8List>((actual) {
-  if (actual.length != expected.length) return false;
-  for (var i = 0; i < actual.length; i++) {
-    if ((actual[i] - expected[i]).abs() > 1) return false;
-  }
-  return true;
-}, 'piksel sama dengan drawScene (±1 per kanal)');
-
 void main() {
   setUpFonts();
 
@@ -124,20 +114,34 @@ void main() {
       expect(handle.center, game.scene.dragHandle);
     });
 
-    testWidgets('node berpusat di posisinya pada koordinat peta', (
+    testWidgets('bidang sentuh node berpusat di posisinya (koordinat peta)', (
       tester,
     ) async {
       final state = DummyStates.run();
       final game = await pumpGame(tester, state);
       final router = piecesOf<RouterComponent>(game).single;
-      expect(router.position.toOffset(), state.level.routerPosition);
-      expect(router.size.x, AppSizes.routerSize);
+      final r = state.level.routerPosition.toVector2();
+      expect(router.containsLocalPoint(r), isTrue);
+      expect(
+        router.containsLocalPoint(r + Vector2(AppSizes.routerSize / 2 - 1, 0)),
+        isTrue,
+      );
+      expect(
+        router.containsLocalPoint(r + Vector2(AppSizes.routerSize / 2 + 1, 0)),
+        isFalse,
+      );
       for (final house in piecesOf<HouseComponent>(game)) {
+        final c = state.level.house(house.node.id).position.toVector2();
+        expect(house.containsLocalPoint(c), isTrue, reason: house.node.id);
         expect(
-          house.position.toOffset(),
-          state.level.house(house.node.id).position,
+          house.containsLocalPoint(c + Vector2(0, AppSizes.houseRadius + 1)),
+          isFalse,
+          reason: house.node.id,
         );
       }
+      expect(game.componentsAtPoint(r.clone()).whereType<RouterComponent>(), [
+        router,
+      ]);
     });
 
     testWidgets('urutan gambar sama dengan MapRenderer.drawScene', (
@@ -197,7 +201,7 @@ void main() {
         await tester.runAsync(() async {
           expect(
             await gamePixels(),
-            samePixels(await referencePixels(SceneBuilder.fromState(state))),
+            await referencePixels(SceneBuilder.fromState(state)),
           );
         });
       });
@@ -287,7 +291,7 @@ void main() {
       await tester.runAsync(() async {
         expect(
           await gamePixels(),
-          samePixels(await referencePixels(SceneBuilder.fromState(state))),
+          await referencePixels(SceneBuilder.fromState(state)),
         );
       });
     });

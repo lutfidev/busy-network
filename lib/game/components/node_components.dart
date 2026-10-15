@@ -6,20 +6,12 @@ import '../map_scene.dart';
 import '../network_game.dart';
 import '../render/map_renderer.dart';
 
-/// Node peta (router, rumah, junction) yang berpusat di `node.position`
-/// (koordinat peta 390×472). Ukurannya = bidang sentuh node; label, bar
-/// sabar, dan cincin boleh tergambar di luarnya.
-///
-/// Digambar lewat [MapRenderer] dengan pusat di tengah komponen.
-sealed class MapNodeComponent extends PositionComponent
+/// Node peta (router, rumah, junction). Seperti kabel, digambar dan diuji
+/// sentuh langsung di koordinat peta (390×472), jadi [MapRenderer] dipanggil
+/// apa adanya dan hasilnya sama persis dengan `drawScene`.
+sealed class MapNodeComponent extends Component
     with HasGameReference<NetworkGame> {
-  MapNodeComponent(MapNode node, {required double extent})
-    : _node = node,
-      super(
-        position: node.position.toVector2(),
-        size: Vector2.all(extent),
-        anchor: Anchor.center,
-      );
+  MapNodeComponent(this.node, {required this.hitRadius});
 
   factory MapNodeComponent.of(MapNode node) => switch (node.kind) {
     NodeKind.router => RouterComponent(node),
@@ -27,36 +19,35 @@ sealed class MapNodeComponent extends PositionComponent
     NodeKind.junction => JunctionComponent(node),
   };
 
-  MapNode _node;
-  MapNode get node => _node;
-  set node(MapNode value) {
-    _node = value;
-    position.setValues(value.position.dx, value.position.dy);
-  }
+  MapNode node;
 
-  /// Pusat node di koordinat lokal komponen.
-  Offset get localCenter => (size / 2).toOffset();
+  /// Jari-jari bidang sentuh di sekitar `node.position` (untuk tarik kabel).
+  final double hitRadius;
+
+  @override
+  bool containsLocalPoint(Vector2 point) =>
+      (point.toOffset() - node.position).distance <= hitRadius;
 }
 
 class RouterComponent extends MapNodeComponent {
-  RouterComponent(super.node) : super(extent: AppSizes.routerSize);
+  RouterComponent(super.node) : super(hitRadius: AppSizes.routerSize / 2);
 
   @override
   void render(Canvas canvas) {
     final theme = game.scene.theme;
     MapRenderer.drawRouter(
       canvas,
-      localCenter,
+      node.position,
       theme,
       alarm: node.routerAlarm,
       alarmOpacity: game.motion.alarmOpacity,
     );
-    MapRenderer.drawNodeLabel(canvas, node, theme, center: localCenter);
+    MapRenderer.drawNodeLabel(canvas, node, theme);
   }
 }
 
 class HouseComponent extends MapNodeComponent {
-  HouseComponent(super.node) : super(extent: AppSizes.houseRadius * 2);
+  HouseComponent(super.node) : super(hitRadius: AppSizes.houseRadius);
 
   @override
   void render(Canvas canvas) {
@@ -64,7 +55,6 @@ class HouseComponent extends MapNodeComponent {
       canvas,
       node,
       game.scene.theme,
-      center: localCenter,
       snapColor: game.snapColor,
       alarmOpacity: game.motion.alarmOpacity,
     );
@@ -72,10 +62,10 @@ class HouseComponent extends MapNodeComponent {
 }
 
 class JunctionComponent extends MapNodeComponent {
-  JunctionComponent(super.node) : super(extent: MapRenderer.junctionRadius * 2);
+  JunctionComponent(super.node) : super(hitRadius: MapRenderer.junctionRadius);
 
   @override
   void render(Canvas canvas) {
-    MapRenderer.drawJunction(canvas, localCenter, game.scene.theme);
+    MapRenderer.drawJunction(canvas, node.position, game.scene.theme);
   }
 }

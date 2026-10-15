@@ -63,9 +63,9 @@ abstract final class MapRenderer {
     );
   }
 
-  /// Lapisan dasar: titik grid + label blok.
+  /// Lapisan dasar: titik grid (seluas area peta) + label blok.
   static void drawGround(Canvas canvas, MapScene scene) {
-    drawDotGrid(canvas, scene.size, scene.theme);
+    drawDotGrid(canvas, AppSizes.mapArea, scene.theme);
     for (final label in scene.blockLabels) {
       drawBlockLabel(canvas, label, scene.theme);
     }
@@ -237,17 +237,14 @@ abstract final class MapRenderer {
     HouseState.jam => AppColors.statusJam,
   };
 
-  /// [center] menggantikan `node.position` (komponen Flame menggambar di
-  /// koordinat lokalnya).
   static void drawHouse(
     Canvas canvas,
     MapNode node,
     MapTheme theme, {
-    Offset? center,
     Color? snapColor,
     double alarmOpacity = 1,
   }) {
-    final c = center ?? node.position;
+    final c = node.position;
     final day = theme == MapTheme.day;
     final r = AppSizes.houseRadius;
 
@@ -296,7 +293,7 @@ abstract final class MapRenderer {
         day ? AppColors.track : AppColors.surfaceNightLine,
       );
     }
-    drawNodeLabel(canvas, node, theme, center: c);
+    drawNodeLabel(canvas, node, theme);
   }
 
   static Offset _patienceOffset(PatiencePlacement p) => switch (p) {
@@ -372,14 +369,8 @@ abstract final class MapRenderer {
     canvas.restore();
   }
 
-  /// Label node ("Rumah 1", "Router") relatif ke [center] (default
-  /// `node.position`).
-  static void drawNodeLabel(
-    Canvas canvas,
-    MapNode node,
-    MapTheme theme, {
-    Offset? center,
-  }) {
+  /// Label node ("Rumah 1", "Router") di sekitar `node.position`.
+  static void drawNodeLabel(Canvas canvas, MapNode node, MapTheme theme) {
     final label = node.label;
     if (label == null) return;
     final day = theme == MapTheme.day;
@@ -411,7 +402,7 @@ abstract final class MapRenderer {
     drawText(
       canvas,
       label,
-      (center ?? node.position) + offset,
+      node.position + offset,
       style,
       align: node.labelAlign,
     );
