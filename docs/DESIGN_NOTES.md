@@ -60,3 +60,14 @@ Gagal · Design token & komponen.
   seperti browser di desain), tapi tampil kotak di screenshot `flutter test`.
 - **Layar pendek** (< 844 px): peta mengecil seragam; layar hasil & beranda
   bisa di-scroll bila tidak muat.
+- **Level 5 sudah punya jaringan** saat dimulai (Rumah 1, Warung, Rumah 3,
+  Rumah 4 + junction atas); Rp 850.000 = sisa untuk memperluas.
+- **Grid level 5 bergeser 15 px vertikal** dari titik grid yang digambar
+  (node di y = 60, 90, 240, …). `LevelDef.gridOrigin` mencatatnya; snap
+  kabel (langkah 4) harus ke grid level.
+- **Segmen kabel** = panjang dalam langkah grid 30 px (diagonal = 1),
+  dibulatkan: kabel yang sedang ditarik di desain = 3 segmen.
+- **Bar sabar Rumah 4** di Fase Jalan memakai 15% (sesuai label), bukan
+  7/40 seperti gambar desain (beda 1 px).
+- **Pelanggan/paket Rumah 1–2 level 1** belum ada di desain; nilainya
+  sementara.

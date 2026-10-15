@@ -36,14 +36,19 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `AppMotion` (persen + easing per segmen, persis CSS), digerakkan
   `LoopClock` (detik berjalan → pose). Pose peta di
   `game/render/map_motion.dart`.
-- `lib/game/` — `map_scene.dart` (model peta statis) dan
-  `render/map_renderer.dart` (gambar rumah/router/kabel/trafik di atas
-  `Canvas`; dipakai CustomPainter sekarang, dan bisa dipanggil dari
-  `render()` komponen Flame).
+- `lib/game/` — `model/` (`LevelDef`, `HouseDef`, `Cable`/`CableSpec`/
+  `CableDraft`, `Network` topologi & beban, `GameState` fase
+  rancang/jalan/hasil), `levels/levels.dart` (data level),
+  `scene_builder.dart` (`SceneBuilder.fromState(state)` → `MapScene`),
+  `map_scene.dart` (model gambar) dan `render/map_renderer.dart` (gambar
+  rumah/router/kabel/trafik di atas `Canvas`; dipakai CustomPainter
+  sekarang, dan bisa dipanggil dari `render()` komponen Flame).
 - `lib/screens/<layar>/` — satu folder per layar (8 layar).
 - `lib/app/` — `routes.dart` (path), `router.dart` (go_router, bersarang),
   `app.dart`.
-- `lib/data/` — data dummy & scene peta statis (diganti state game nanti).
+- `lib/data/` — `dummy_states.dart` (snapshot `GameState` per layar) dan
+  `dummy_data.dart` (angka yang belum dihitung game: progres, jam,
+  komplain, hasil).
 - `lib/core/format.dart` — `IdFormat`: `Rp 850.000`, `8,5 Mbps`, `20:15`.
 - `lib/gallery/` — galeri komponen (rute `/galeri`, tombol pengaturan di
   Beranda).
@@ -68,6 +73,9 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `test/screens/animation_test.dart` (tanpa `pumpAndSettle`).
 - Peta: koordinat desain diskalakan seragam lewat `DesignStage`
   (padanan `FixedResolutionViewport` Flame).
+- Peta digambar dari state: ubah data level / `GameState`, bukan
+  `MapScene` langsung. `test/game/scene_builder_test.dart` menjaga snapshot
+  tetap identik dengan desain.
 - Commit kecil per langkah, pesan bahasa Inggris singkat
   (`feat(scope): ...`, `fix: ...`, `test: ...`).
 
