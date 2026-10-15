@@ -18,7 +18,11 @@ class HouseDef {
     required this.peakMbps,
     this.labelSide = MarkSide.below,
     this.patienceSide = MarkSide.below,
+    this.complaint = defaultComplaint,
   });
+
+  /// Komplain untuk pelanggan yang belum punya teks sendiri (copy baru).
+  static const defaultComplaint = 'Bang, internetnya kok lemot banget?';
 
   final String id;
 
@@ -33,9 +37,11 @@ class HouseDef {
   /// Paket langganan (Mbps).
   final int packageMbps;
 
-  /// Profil pemakaian: pemakaian saat jam sibuk (Mbps). Kurva harian
-  /// dibentuk dari sini di langkah 5.
+  /// Pemakaian saat jam sibuk (Mbps); di luar itu mengikuti `UsageCurve`.
   final double peakMbps;
+
+  /// Isi pop-up komplain saat rumah ini macet.
+  final String complaint;
 
   /// Fase rancang: [MarkSide.right] = label di kanan rumah, rata kiri.
   final MarkSide labelSide;

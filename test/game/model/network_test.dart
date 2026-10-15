@@ -57,6 +57,20 @@ void main() {
     expect(net.parentOf(LevelDef.routerId), isNull);
   });
 
+  test('hop pohon berurutan hulu dulu; kedalaman node', () {
+    final net = Network(level: level, cables: runCables);
+    final seen = {LevelDef.routerId};
+    for (final hop in net.treeHops) {
+      expect(seen, contains(hop.from), reason: '${hop.from} → ${hop.to}');
+      seen.add(hop.to);
+    }
+    expect(seen, containsAll(usage.keys));
+    expect(net.depthOf(LevelDef.routerId), 0);
+    expect(net.depthOf('r4'), 1);
+    expect(net.depthOf('r5'), 2);
+    expect(net.depthOf('w'), 2); // router → j1 → Warung
+  });
+
   group('snapshot fase jalan', () {
     final net = Network(level: level, cables: runCables);
 

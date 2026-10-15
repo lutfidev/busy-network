@@ -5,7 +5,8 @@ import '../model/cable.dart';
 import '../model/level_def.dart';
 
 /// Level Babak 1 · Perumahan Batam. Angka & koordinat dari
-/// `design/Jaringan Sibuk.html`.
+/// `design/Jaringan Sibuk.html`. Teks komplain: hanya milik Bu Sri yang ada
+/// di desain; sisanya copy baru.
 abstract final class Levels {
   static const level1 = LevelDef(
     number: 1,
@@ -54,6 +55,7 @@ abstract final class Levels {
         customer: 'Pak Anton',
         packageMbps: 10,
         peakMbps: 4,
+        complaint: 'Bang, nonton berita aja patah-patah gini.',
       ),
       HouseDef(
         id: 'w',
@@ -65,6 +67,7 @@ abstract final class Levels {
         peakMbps: 12,
         labelSide: MarkSide.right,
         patienceSide: MarkSide.right,
+        complaint: 'Pembeli mau bayar QRIS nggak bisa-bisa, Bang!',
       ),
       HouseDef(
         id: 'r3',
@@ -73,6 +76,7 @@ abstract final class Levels {
         customer: 'Kak Dewi',
         packageMbps: 10,
         peakMbps: 8.5,
+        complaint: 'Kok lemot? Aku lagi live jualan nih!',
       ),
       HouseDef(
         id: 'r4',
@@ -82,6 +86,7 @@ abstract final class Levels {
         packageMbps: 20,
         peakMbps: 16,
         patienceSide: MarkSide.above,
+        complaint: 'Bang, kok lemot?? Anak saya lagi ujian online!',
       ),
       HouseDef(
         id: 'r5',
@@ -90,6 +95,7 @@ abstract final class Levels {
         customer: 'Pak Rudi',
         packageMbps: 10,
         peakMbps: 9,
+        complaint: 'Bang, meeting kantor saya putus-putus terus.',
       ),
       HouseDef(
         id: 'r6',
@@ -99,6 +105,7 @@ abstract final class Levels {
         packageMbps: 20,
         peakMbps: 11,
         patienceSide: MarkSide.right,
+        complaint: 'Lagi mabar malah ngelag, Bang! Kalah kami.',
       ),
       HouseDef(
         id: 'r7',
@@ -107,6 +114,7 @@ abstract final class Levels {
         customer: 'Mbak Wulan',
         packageMbps: 10,
         peakMbps: 6,
+        complaint: 'Drakorku buffering terus, Bang...',
       ),
     ],
     junctions: [Junction(id: 'j1', position: _j1)],

@@ -36,6 +36,7 @@ class Network {
           continue;
         }
         _parent[hop.to] = hop;
+        _tree.add(hop);
         (_children[node] ??= []).add(hop.to);
         queue.add(hop.to);
       }
@@ -49,12 +50,26 @@ class Network {
   final Set<String> _houseIds;
   final _parent = <String, Hop>{};
   final _children = <String, List<String>>{};
+  final _tree = <Hop>[];
 
   /// Rumah yang terjangkau dari router.
   late final Set<String> connectedHouses;
 
   /// Hop yang memberi [nodeId] internet; `null` untuk router / node lepas.
   Hop? parentOf(String nodeId) => _parent[nodeId];
+
+  /// Hop pohon dari router ke hilir: tiap hop muncul setelah hop di
+  /// hulunya.
+  List<Hop> get treeHops => List.unmodifiable(_tree);
+
+  /// Jumlah hop dari router ke [nodeId] (router 0).
+  int depthOf(String nodeId) {
+    var depth = 0;
+    for (var hop = _parent[nodeId]; hop != null; hop = _parent[hop.from]) {
+      depth++;
+    }
+    return depth;
+  }
 
   /// Rumah tersambung di subpohon [nodeId] (termasuk [nodeId] sendiri).
   Set<String> housesBelow(String nodeId) {
