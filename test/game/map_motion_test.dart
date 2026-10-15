@@ -11,6 +11,7 @@ void main() {
       final m = MapMotion.at(0);
       expect(m.flowPhase, MapMotion.still.flowPhase);
       expect(m.jamPhase, MapMotion.still.jamPhase);
+      expect(m.alarmOpacity, MapMotion.still.alarmOpacity);
     });
 
     test('trafik lancar maju 36 px per 1,4 s (js-flow)', () {
@@ -24,6 +25,58 @@ void main() {
       expect(MapMotion.at(1.6).jamPhase, closeTo(9, 1e-9));
       expect(MapMotion.at(0.8).jamPhase, closeTo(4.5, 1e-9));
     });
+  });
+
+  test('alarm berkedip 1 → 0,25 → 1 tiap 0,7 s (js-alarm)', () {
+    expect(MapMotion.at(0).alarmOpacity, 1);
+    expect(MapMotion.at(0.35).alarmOpacity, closeTo(0.25, 1e-9));
+    expect(MapMotion.at(0.175).alarmOpacity, closeTo(0.625, 1e-9));
+    expect(MapMotion.at(0.7).alarmOpacity, closeTo(1, 1e-9));
+  });
+
+  test('hasMotion: alarm tanpa trafik tetap bergerak', () {
+    const p = [Offset.zero, Offset(30, 0)];
+    const house = MapNode(id: 'r', kind: NodeKind.house, position: Offset.zero);
+    expect(
+      const MapScene(theme: MapTheme.night, nodes: [house]).hasMotion,
+      isFalse,
+    );
+    expect(
+      const MapScene(
+        theme: MapTheme.night,
+        nodes: [house],
+        cables: [MapCable(points: p, state: CableState.overloaded)],
+      ).hasMotion,
+      isTrue,
+    );
+    expect(
+      const MapScene(
+        theme: MapTheme.night,
+        nodes: [
+          MapNode(
+            id: 'r',
+            kind: NodeKind.house,
+            position: Offset.zero,
+            alarm: true,
+          ),
+        ],
+      ).hasMotion,
+      isTrue,
+    );
+    expect(
+      const MapScene(
+        theme: MapTheme.night,
+        nodes: [
+          MapNode(
+            id: 'router',
+            kind: NodeKind.router,
+            position: Offset.zero,
+            routerAlarm: true,
+          ),
+        ],
+      ).hasMotion,
+      isTrue,
+    );
   });
 
   group('NetworkMapView', () {

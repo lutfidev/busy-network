@@ -7,7 +7,11 @@ import '../../theme/theme.dart';
 /// `NetworkMapPainter` (lewat `LoopClock`) maupun `render()` Flame.
 @immutable
 class MapMotion {
-  const MapMotion({this.flowPhase = 0, this.jamPhase = 0});
+  const MapMotion({
+    this.flowPhase = 0,
+    this.jamPhase = 0,
+    this.alarmOpacity = 1,
+  });
 
   /// Bingkai statis (animasi mati) = gambar desain.
   static const still = MapMotion();
@@ -19,6 +23,9 @@ class MapMotion {
     jamPhase:
         AppMotion.trafficJamAdvance *
         Keyframes.loop(seconds, AppMotion.trafficJam),
+    alarmOpacity: AppMotion.alarmOpacity.at(
+      Keyframes.loop(seconds, AppMotion.alarmBlink),
+    ),
   );
 
   /// Pergeseran titik trafik (px) di kabel lancar (js-flow).
@@ -26,4 +33,8 @@ class MapMotion {
 
   /// Pergeseran titik trafik (px) di kabel macet (js-jam).
   final double jamPhase;
+
+  /// Opasitas lapisan merah kabel penuh, cincin alarm rumah, dan LED merah
+  /// router (js-alarm).
+  final double alarmOpacity;
 }

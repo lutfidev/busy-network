@@ -1,5 +1,7 @@
 import 'package:flutter/animation.dart';
 
+import 'keyframes.dart';
+
 /// Token gerak (kartu "Elevasi & gerak").
 abstract final class AppMotion {
   /// Tombol ditekan / dilepas.
@@ -21,8 +23,9 @@ abstract final class AppMotion {
   static const double trafficJamGap = 9;
   static const double trafficJamAdvance = 18;
 
-  /// Kabel penuh berkedip.
+  /// Kabel penuh, cincin rumah macet & LED router berkedip (js-alarm).
   static const alarmBlink = Duration(milliseconds: 700);
+  static const alarmOpacity = Keyframes([(0, 1), (0.5, 0.25), (1, 1)]);
 
   static const Curve standard = Curves.easeOut;
   static const Curve pop = Cubic(0.2, 1.4, 0.4, 1);
