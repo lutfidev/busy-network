@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../core/format.dart';
-import '../../data/dummy_states.dart';
+import '../../game/levels/levels.dart';
 import '../../game/map_scene.dart';
 import '../../game/model/model.dart';
 import '../../game/network_game_view.dart';
@@ -11,7 +11,8 @@ import '../../game/render/map_renderer.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 
-/// 4 · Fase Rancang – Level 5 (sedang menarik kabel ke Rumah 5).
+/// 4 · Fase Rancang – Level 5. Seret dari router/junction/rumah tersambung
+/// ke rumah untuk memasang kabel; mode Hapus: ketuk kabel untuk membongkar.
 class DesignPhaseScreen extends StatefulWidget {
   const DesignPhaseScreen({super.key, this.initialCable = CableKind.lan});
 
@@ -22,8 +23,10 @@ class DesignPhaseScreen extends StatefulWidget {
 }
 
 class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
-  late final GameState _game = DummyStates.design(widget.initialCable);
-  bool _erase = false;
+  late final GameState _game = GameState(
+    Levels.level5,
+    selectedCable: widget.initialCable,
+  );
 
   @override
   void initState() {
@@ -39,10 +42,13 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
 
   void _onGameChanged() => setState(() {});
 
-  void _pick(CableKind kind) {
-    setState(() => _erase = false);
-    _game.selectCable(kind);
-  }
+  /// Ujung tarikan tempat tooltip menempel: jari, atau rumah yang
+  /// ditempeli.
+  Offset _tip(CableDraft draft) =>
+      draft.handle ??
+      (draft.target != null
+          ? _game.level.house(draft.target!).position
+          : draft.points.last);
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +56,7 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
     final draft = _game.draft;
     final cost = _game.draftCost;
     final connected = _game.connectedCount;
+    final refused = _game.refusedCost;
     return Scaffold(
       backgroundColor: AppColors.groundDay,
       body: SafeArea(
@@ -88,34 +95,44 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                   Positioned.fill(
                     child: NetworkGameView(
                       state: _game,
+                      interactive: true,
                       semanticLabel:
                           'Peta ${level.name}: router pusat, '
                           '$connected rumah tersambung, '
                           '${level.houses.length - connected} belum',
                       overlays: [
                         if (draft != null)
-                          Positioned(
-                            left: 222,
-                            top: 288,
-                            child: _CostTooltip(
-                              color: MapRenderer.cableColor(
-                                draft.kind,
-                                MapTheme.day,
+                          Positioned.fill(
+                            child: CustomSingleChildLayout(
+                              delegate: _TooltipLayout(_tip(draft)),
+                              child: _CostTooltip(
+                                color: MapRenderer.cableColor(
+                                  draft.kind,
+                                  MapTheme.day,
+                                ),
+                                label:
+                                    '${draft.segments} segmen · '
+                                    '${IdFormat.rupiah(cost)}',
+                                overBudget: _game.draftOverBudget,
                               ),
-                              label:
-                                  '${draft.segments} segmen · '
-                                  '${IdFormat.rupiah(cost)}',
                             ),
                           ),
                       ],
                     ),
                   ),
-                  if (_erase)
+                  if (_game.erasing)
                     const Positioned(
                       left: AppSpacing.screenGutter,
                       right: AppSpacing.screenGutter,
                       top: 0,
                       child: _EraseBanner(),
+                    )
+                  else if (refused != null)
+                    Positioned(
+                      left: AppSpacing.screenGutter,
+                      right: AppSpacing.screenGutter,
+                      top: 0,
+                      child: _BudgetBanner(cost: refused, budget: _game.budget),
                     ),
                 ],
               ),
@@ -162,7 +179,7 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                                   'Kapasitas ${spec.capacityMbps} Mbps · '
                                   '${spec.tagline}',
                               selected: _game.selectedCable == spec.kind,
-                              onPressed: () => _pick(spec.kind),
+                              onPressed: () => _game.selectCable(spec.kind),
                             ),
                           ),
                         ],
@@ -174,8 +191,8 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _EraseToggle(
-                        active: _erase,
-                        onPressed: () => setState(() => _erase = !_erase),
+                        active: _game.erasing,
+                        onPressed: () => _game.setErasing(!_game.erasing),
                       ),
                       const SizedBox(width: AppSpacing.s10),
                       Expanded(
@@ -197,11 +214,45 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
   }
 }
 
+/// Letak tooltip biaya: di atas-kiri ujung tarikan seperti desain (jari
+/// (255, 360) → tooltip (222, 288)), dijepit di dalam lebar peta; pindah ke
+/// bawah jari bila tidak muat di atas.
+class _TooltipLayout extends SingleChildLayoutDelegate {
+  const _TooltipLayout(this.tip);
+
+  final Offset tip;
+
+  static const _above = Offset(-33, -72);
+  static const _below = 36.0;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final room = size.width - childSize.width;
+    final x = (tip.dx + _above.dx).clamp(0.0, room < 0 ? 0.0 : room);
+    final above = tip.dy + _above.dy;
+    return Offset(x, above >= 0 ? above : tip.dy + _below);
+  }
+
+  @override
+  bool shouldRelayout(_TooltipLayout oldDelegate) => tip != oldDelegate.tip;
+}
+
 class _CostTooltip extends StatelessWidget {
-  const _CostTooltip({required this.color, required this.label});
+  const _CostTooltip({
+    required this.color,
+    required this.label,
+    this.overBudget = false,
+  });
 
   final Color color;
   final String label;
+
+  /// Biaya melebihi sisa anggaran: tooltip merah.
+  final bool overBudget;
 
   @override
   Widget build(BuildContext context) {
@@ -212,8 +263,8 @@ class _CostTooltip extends StatelessWidget {
           horizontal: AppSpacing.s12,
           vertical: AppSpacing.s8,
         ),
-        decoration: const BoxDecoration(
-          color: AppColors.ink,
+        decoration: BoxDecoration(
+          color: overBudget ? AppColors.statusJamDark : AppColors.ink,
           borderRadius: AppRadius.pillAll,
           boxShadow: AppElevation.tooltip,
         ),
@@ -238,6 +289,39 @@ class _CostTooltip extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Kabel ditolak karena anggaran kurang (copy baru; desain belum punya).
+class _BudgetBanner extends StatelessWidget {
+  const _BudgetBanner({required this.cost, required this.budget});
+
+  final int cost;
+  final int budget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s14,
+          vertical: AppSpacing.s10,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.dangerBg,
+          borderRadius: AppRadius.bubbleAll,
+          border: Border.all(color: AppColors.statusJam, width: 2),
+        ),
+        child: Text(
+          'Anggaran kurang: kabel ini ${IdFormat.rupiah(cost)}, '
+          'sisa ${IdFormat.rupiah(budget)}.',
+          style: AppTypography.bodySmallStrong.copyWith(
+            color: AppColors.dangerText,
+          ),
         ),
       ),
     );
