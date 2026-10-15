@@ -52,6 +52,11 @@ Gagal · Design token & komponen.
   3,2 s. Belum: js-march & js-snap (kabel ditarik), js-pop (komplain),
   js-float (konfeti), js-twinkle & js-flow di Peta Babak, js-walk/js-drip/
   js-flow di Hasil Gagal.
+- **Peta pakai Flame** (`NetworkGame`): hasil gambar sama dengan
+  `CustomPainter` lama. Satu-satunya beda: cincin putus-putus rumah idle
+  dihitung di koordinat lokal komponen, jadi beberapa piksel tepinya
+  bergeser satu tingkat anti-alias (tak terlihat). Penanda sorotan
+  tutorial dan tooltip biaya tetap widget di atas peta.
 - **Animasi mati** (`MediaQuery.disableAnimations`): tiap animasi diam di
   pose yang mewakili referensi (cincin sedang membesar, tangan seret di
   titik awal, bintang sudah muncul), bukan pose 0% yang kadang kosong.
