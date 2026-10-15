@@ -1,4 +1,3 @@
-import 'package:busy_network/app/app.dart';
 import 'package:busy_network/app/routes.dart';
 import 'package:busy_network/gallery/widget_gallery_screen.dart';
 import 'package:busy_network/theme/theme.dart';
@@ -52,14 +51,14 @@ void main() {
       setScreenSize(tester, const Size(360, 800));
       tester.platformDispatcher.textScaleFactorTestValue = 1.3;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      await tester.pumpWidget(JaringanSibukApp(initialLocation: route));
-      await tester.pumpAndSettle();
+      await pumpApp(tester, location: route);
       expect(tester.takeException(), isNull);
     });
   }
 
   testWidgets('galeri bisa di-scroll sampai bawah di 360 px', (tester) async {
     setScreenSize(tester, const Size(360, 740));
+    disableAnimations(tester);
     await tester.pumpWidget(
       MaterialApp(theme: AppTheme.light(), home: const WidgetGalleryScreen()),
     );
