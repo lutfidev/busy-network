@@ -65,3 +65,13 @@ Future<TestGesture> dragOnMap(
   }
   return gesture;
 }
+
+/// Tunggu font google_fonts yang diminta layar selesai dimuat, lalu tata
+/// ulang. Tanpa ini test pertama di satu file memakai font cadangan.
+Future<void> loadAppFonts(WidgetTester tester) async {
+  await tester.runAsync(() async {
+    await GoogleFonts.pendingFonts();
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+  });
+  await tester.pumpAndSettle();
+}
