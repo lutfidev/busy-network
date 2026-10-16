@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/dummy_data.dart';
 import '../gallery/widget_gallery_screen.dart';
+import '../game/levels/levels.dart';
 import '../screens/design_phase/design_phase_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/level_map/level_map_screen.dart';
@@ -43,7 +45,14 @@ GoRouter createRouter({
               ),
               GoRoute(
                 path: 'rancang',
-                builder: (context, state) => DesignPhaseScreen(session: play),
+                builder: (context, state) => DesignPhaseScreen(
+                  session: play,
+                  level:
+                      Levels.byNumber(
+                        _intParam(state, AppRoutes.levelParam) ?? 0,
+                      ) ??
+                      Levels.level5,
+                ),
                 routes: [
                   GoRoute(
                     path: 'jalan',
@@ -65,15 +74,22 @@ GoRouter createRouter({
               GoRoute(
                 path: 'hasil/berhasil',
                 builder: (context, state) => ResultSuccessScreen(
-                  stars: (_intParam(state, AppRoutes.starsParam) ?? 2).clamp(
-                    1,
-                    3,
-                  ),
+                  result: switch (play.result) {
+                    final result? when result.passed => result,
+                    _ => DummyData.success(
+                      (_intParam(state, AppRoutes.starsParam) ?? 2).clamp(1, 3),
+                    ),
+                  },
                 ),
               ),
               GoRoute(
                 path: 'hasil/gagal',
-                builder: (context, state) => const ResultFailScreen(),
+                builder: (context, state) => ResultFailScreen(
+                  result: switch (play.result) {
+                    final result? when !result.passed => result,
+                    _ => DummyData.fail,
+                  },
+                ),
               ),
             ],
           ),

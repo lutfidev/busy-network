@@ -20,9 +20,13 @@ class DesignPhaseScreen extends StatefulWidget {
     super.key,
     required this.session,
     this.initialCable = CableKind.lan,
+    this.level = Levels.level5,
   });
 
   final GameSession session;
+
+  /// Level yang dirancang (`?level=n`).
+  final LevelDef level;
   final CableKind initialCable;
 
   @override
@@ -31,7 +35,7 @@ class DesignPhaseScreen extends StatefulWidget {
 
 class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
   late final GameState _game = GameState(
-    Levels.level5,
+    widget.level,
     selectedCable: widget.initialCable,
   );
 

@@ -51,6 +51,8 @@ void main() {
     // Sisa hari berjalan sampai 24:00; 57% < target 80% → gagal.
     await tester.pumpAndSettle();
     expect(find.byType(ResultFailScreen), findsOneWidget);
+    expect(find.text('3 rumah belum tersambung.'), findsOneWidget);
+    expect(find.text('3 rumah'), findsOneWidget);
 
     await tester.tap(find.text('Coba Lagi'));
     await tester.pumpAndSettle();

@@ -42,13 +42,6 @@ abstract final class DummyData {
     levelsTotal: 12,
   );
 
-  // ── Hasil ─────────────────────────────────────────────────────────────
-  static const savingsTarget = 200000;
-
-  static const failSatisfaction = 41;
-  static const failComplaints = 11;
-  static const failHousesLost = 2;
-
   /// Biang kerok di potret hasil desain.
   static const _blockB = FullCable(
     area: 'Blok B',

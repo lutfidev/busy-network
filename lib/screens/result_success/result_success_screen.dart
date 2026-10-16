@@ -6,20 +6,31 @@ import 'package:go_router/go_router.dart';
 import '../../app/routes.dart';
 import '../../core/format.dart';
 import '../../game/levels/levels.dart';
+import '../../game/result/level_result.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'result_success_data.dart';
 
 /// 7 · Hasil Level – Berhasil (1–3 bintang).
 class ResultSuccessScreen extends StatelessWidget {
-  const ResultSuccessScreen({super.key, this.stars = 2});
+  const ResultSuccessScreen({super.key, required this.result});
 
-  final int stars;
+  final LevelResult result;
+
+  /// Level berikutnya bila datanya ada; selain itu Peta Babak (level baru
+  /// sudah terbuka di sana).
+  void _next(BuildContext context) {
+    final next = result.level.number + 1;
+    context.go(
+      Levels.byNumber(next) != null ? AppRoutes.play(next) : AppRoutes.levelMap,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final summary = SuccessSummary(stars);
-    const level = Levels.level5;
+    final summary = SuccessSummary(result);
+    final level = result.level;
+    final stars = result.stars;
     final tip = summary.tip;
     return Scaffold(
       backgroundColor: AppColors.groundCelebrate,
@@ -71,7 +82,7 @@ class ResultSuccessScreen extends StatelessWidget {
                         Expanded(
                           child: StatTile(
                             label: 'Kepuasan',
-                            value: IdFormat.percent(summary.satisfaction),
+                            value: IdFormat.percent(result.satisfaction),
                             tone: CardTone.surface,
                             centered: true,
                             valueStyle: AppTypography.titleLarge,
@@ -81,7 +92,7 @@ class ResultSuccessScreen extends StatelessWidget {
                         Expanded(
                           child: StatTile(
                             label: 'Sisa anggaran',
-                            value: IdFormat.rupiah(summary.remainingBudget),
+                            value: IdFormat.rupiah(result.budgetLeft),
                             tone: CardTone.surface,
                             centered: true,
                             valueStyle: AppTypography.subtitle.copyWith(
@@ -93,7 +104,7 @@ class ResultSuccessScreen extends StatelessWidget {
                         Expanded(
                           child: StatTile(
                             label: 'Komplain',
-                            value: '${summary.complaints}',
+                            value: '${result.complaints}',
                             tone: CardTone.surface,
                             centered: true,
                             valueStyle: AppTypography.titleLarge,
@@ -121,7 +132,8 @@ class ResultSuccessScreen extends StatelessWidget {
                           leadingIcon: GameIcons.retry,
                           iconSize: 18,
                           textStyle: AppTypography.titleSmall,
-                          onPressed: () => context.go(AppRoutes.design),
+                          onPressed: () =>
+                              context.go(AppRoutes.play(level.number)),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.s10),
@@ -132,7 +144,7 @@ class ResultSuccessScreen extends StatelessWidget {
                           trailingIcon: GameIcons.chevronRight,
                           iconSize: 18,
                           textStyle: AppTypography.titleSmall,
-                          onPressed: () => context.go(AppRoutes.levelMap),
+                          onPressed: () => _next(context),
                         ),
                       ),
                     ],

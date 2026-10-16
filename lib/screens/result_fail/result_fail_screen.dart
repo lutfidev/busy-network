@@ -3,19 +3,21 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../core/format.dart';
-import '../../data/dummy_data.dart';
-import '../../game/levels/levels.dart';
+import '../../game/result/level_result.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'churn_illustration.dart';
+import 'fail_cause.dart';
 
 /// 8 · Hasil Level – Gagal.
 class ResultFailScreen extends StatelessWidget {
-  const ResultFailScreen({super.key});
+  const ResultFailScreen({super.key, required this.result});
+
+  final LevelResult result;
 
   @override
   Widget build(BuildContext context) {
-    const level = Levels.level5;
+    final level = result.level;
     return Scaffold(
       backgroundColor: AppColors.groundNight,
       body: NightScope(
@@ -53,7 +55,7 @@ class ResultFailScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.s8),
                       Text(
                         'Kepuasan cuma '
-                        '${IdFormat.percent(DummyData.failSatisfaction)}, '
+                        '${IdFormat.percent(result.satisfaction)}, '
                         'targetnya ${IdFormat.percent(level.targetSatisfaction)}. '
                         'Nggak apa, besok coba lagi.',
                         textAlign: TextAlign.center,
@@ -82,19 +84,14 @@ class ResultFailScreen extends StatelessWidget {
                                 (
                                   0,
                                   'Kepuasan',
-                                  IdFormat.percent(DummyData.failSatisfaction),
+                                  IdFormat.percent(result.satisfaction),
                                   AppColors.dangerOnDark,
                                 ),
-                                (
-                                  1,
-                                  'Komplain',
-                                  '${DummyData.failComplaints}',
-                                  null,
-                                ),
+                                (1, 'Komplain', '${result.complaints}', null),
                                 (
                                   2,
                                   'Pindah',
-                                  '${DummyData.failHousesLost} rumah',
+                                  '${result.housesLost} rumah',
                                   null,
                                 ),
                               ]) ...[
@@ -113,15 +110,18 @@ class ResultFailScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.s20),
-                        const _CauseCard(),
+                        if (result.culprit case final culprit?) ...[
+                          const SizedBox(height: AppSpacing.s20),
+                          _CauseCard(cause: failCause(culprit)),
+                        ],
                         const Spacer(),
                         const SizedBox(height: AppSpacing.s20),
                         ChunkyButton(
                           label: 'Coba Lagi',
                           leadingIcon: GameIcons.retry,
                           height: AppSizes.buttonTall,
-                          onPressed: () => context.go(AppRoutes.design),
+                          onPressed: () =>
+                              context.go(AppRoutes.play(level.number)),
                         ),
                         const SizedBox(
                           height: AppSpacing.s8 - AppElevation.chunky,
@@ -148,7 +148,9 @@ class ResultFailScreen extends StatelessWidget {
 }
 
 class _CauseCard extends StatelessWidget {
-  const _CauseCard();
+  const _CauseCard({required this.cause});
+
+  final FailCause cause;
 
   @override
   Widget build(BuildContext context) {
@@ -191,14 +193,12 @@ class _CauseCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s4),
                 Text(
-                  'Kabel ke Blok B kelebihan beban jam '
-                  '${IdFormat.clock(20 * 60)}.',
+                  cause.title,
                   style: AppTypography.emphasis.copyWith(color: AppColors.ink),
                 ),
                 const SizedBox(height: AppSpacing.s4),
                 Text(
-                  'Ganti kabel utamanya ke fiber, atau batasi jatah Bu Sri '
-                  'dan Pak Rudi sebelum jam sibuk.',
+                  cause.hint,
                   style: AppTypography.caption.copyWith(
                     color: AppColors.inkSecondary,
                   ),
