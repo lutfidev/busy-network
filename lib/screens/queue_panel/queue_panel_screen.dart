@@ -41,7 +41,7 @@ class _QueuePanelScreenState extends State<QueuePanelScreen> {
   void _resume() {
     _apply();
     if (_game.phase == GamePhase.run) _game.dismissComplaint();
-    context.go(AppRoutes.run);
+    context.go(AppRoutes.runOf(_game.level.number));
   }
 
   static ServiceStatus _service(HouseState state) => switch (state) {

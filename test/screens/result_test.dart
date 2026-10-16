@@ -1,9 +1,14 @@
 import 'package:busy_network/app/game_session.dart';
+import 'package:busy_network/app/progress_book.dart';
 import 'package:busy_network/app/routes.dart';
+import 'package:busy_network/data/dummy_states.dart';
+import 'package:busy_network/data/progress_store.dart';
 import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/game/model/model.dart';
+import 'package:busy_network/game/progress/progress.dart';
 import 'package:busy_network/screens/design_phase/design_phase_screen.dart';
 import 'package:busy_network/screens/level_map/level_map_screen.dart';
+import 'package:busy_network/screens/tutorial/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -100,8 +105,53 @@ void main() {
     expect(find.byType(LevelMapScreen), findsOneWidget);
   });
 
-  test('play: level 1 tutorial, lainnya Fase Rancang ber-level', () {
-    expect(AppRoutes.play(1), AppRoutes.tutorial);
-    expect(AppRoutes.play(5), '/peta/rancang?level=5');
+  test('play: level 1 tutorial sampai selesai, lainnya Fase Rancang', () {
+    expect(AppRoutes.play(1, tutorialDone: false), AppRoutes.tutorial);
+    expect(AppRoutes.play(1, tutorialDone: true), '/peta/rancang?level=1');
+    expect(AppRoutes.play(5, tutorialDone: false), '/peta/rancang?level=5');
+  });
+
+  test('rute Fase Jalan & Panel Antrean membawa level', () {
+    expect(AppRoutes.runOf(1), '/peta/rancang/jalan?level=1');
+    expect(AppRoutes.queueOf(5), '/peta/rancang/jalan/antrean?level=5');
+  });
+
+  group('Ulangi level 1', () {
+    /// Sesi dengan hari level 1 (Rumah 1 saja) yang sudah selesai.
+    GameSession level1Done({required bool tutorialDone}) {
+      final progress = ProgressBook(
+        MemoryProgressStore(
+          tutorialDone ? Progress(const {}).completeTutorial() : null,
+        ),
+      );
+      final game = GameState(
+        Levels.level1,
+        cables: DummyStates.tutorial(3).cables,
+      )..startDay();
+      final session = GameSession(progress: progress)..begin(game);
+      playDay(game);
+      session.finish();
+      return session;
+    }
+
+    testWidgets('tutorial selesai → Fase Rancang level 1', (tester) async {
+      setScreenSize(tester, const Size(390, 844));
+      final session = level1Done(tutorialDone: true);
+      await pumpApp(tester, location: AppRoutes.success, session: session);
+      await tester.tap(find.text('Ulangi'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DesignPhaseScreen), findsOneWidget);
+      expect(find.text('Rumah Pertama'), findsOneWidget);
+      expect(find.text('0/2 rumah tersambung'), findsOneWidget);
+    });
+
+    testWidgets('tutorial belum selesai → tutorial', (tester) async {
+      setScreenSize(tester, const Size(390, 844));
+      final session = level1Done(tutorialDone: false);
+      await pumpApp(tester, location: AppRoutes.success, session: session);
+      await tester.tap(find.text('Ulangi'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TutorialScreen), findsOneWidget);
+    });
   });
 }

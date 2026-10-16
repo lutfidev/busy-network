@@ -16,6 +16,7 @@ const _routes = <String>[
   '${AppRoutes.tutorial}?${AppRoutes.stepParam}=2',
   '${AppRoutes.tutorial}?${AppRoutes.stepParam}=3',
   AppRoutes.design,
+  '${AppRoutes.design}?${AppRoutes.levelParam}=1',
   AppRoutes.run,
   AppRoutes.queue,
   '${AppRoutes.success}?${AppRoutes.starsParam}=1',

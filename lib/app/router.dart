@@ -75,6 +75,7 @@ GoRouter createRouter({
               GoRoute(
                 path: 'hasil/berhasil',
                 builder: (context, state) => ResultSuccessScreen(
+                  progress: play.progress,
                   result: switch (play.result) {
                     final result? when result.passed => result,
                     _ => DummyData.success(
@@ -86,6 +87,7 @@ GoRouter createRouter({
               GoRoute(
                 path: 'hasil/gagal',
                 builder: (context, state) => ResultFailScreen(
+                  progress: play.progress,
                   result: switch (play.result) {
                     final result? when !result.passed => result,
                     _ => DummyData.fail,

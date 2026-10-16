@@ -23,6 +23,7 @@ const _screens = <String, String>{
   '03-tutorial-2': '${AppRoutes.tutorial}?${AppRoutes.stepParam}=2',
   '03-tutorial-3': '${AppRoutes.tutorial}?${AppRoutes.stepParam}=3',
   '04-fase-rancang': AppRoutes.design,
+  '04-fase-rancang-level-1': '${AppRoutes.design}?${AppRoutes.levelParam}=1',
   '05-fase-jalan': AppRoutes.run,
   '06-panel-atur-antrean': AppRoutes.queue,
   '07-hasil-berhasil-1': '${AppRoutes.success}?${AppRoutes.starsParam}=1',

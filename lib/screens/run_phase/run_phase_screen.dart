@@ -108,7 +108,7 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
   void _openQueue() {
     _onTop = false;
     _syncClock();
-    context.go(AppRoutes.queue);
+    context.go(AppRoutes.queueOf(_game.level.number));
   }
 
   void _manageQueue() {

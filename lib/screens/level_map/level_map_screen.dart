@@ -146,14 +146,15 @@ class LevelMapScreen extends StatelessWidget {
       state: state,
       onPressed: locked || level == null
           ? null
-          : () => context.go(AppRoutes.play(n)),
+          : () => context.go(AppRoutes.play(n, tutorialDone: p.tutorialDone)),
       semanticLabel: switch (state) {
         LevelNodeState.locked => 'Level $n terkunci',
         LevelNodeState.current when level != null =>
           'Level $n, ${level.name}, main sekarang',
         LevelNodeState.current => 'Level $n, belum tersedia',
         LevelNodeState.done =>
-          'Level $n, ${p.starsOf(n)} bintang${n == 1 ? ', tutorial' : ''}',
+          'Level $n, ${p.starsOf(n)} bintang'
+              '${n == 1 && !p.tutorialDone ? ', tutorial' : ''}',
       },
     );
     return [
