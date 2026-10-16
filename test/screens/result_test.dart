@@ -123,14 +123,17 @@ void main() {
       return session;
     }
 
-    testWidgets('bintang < 24 → Peta (bos terkunci)', (tester) async {
+    testWidgets('bintang < 24 → "Balik ke peta" (bos terkunci)', (
+      tester,
+    ) async {
       setScreenSize(tester, const Size(390, 844));
       final session = level11Done(
         Progress({for (var n = 1; n <= 10; n++) n: 2}),
       );
       expect(session.progress.progress.starsUpTo(11), 23);
       await pumpApp(tester, location: AppRoutes.success, session: session);
-      await tester.tap(find.text('Level Berikutnya'));
+      expect(find.text('Level Berikutnya'), findsNothing);
+      await tester.tap(find.text('Balik ke peta'));
       await tester.pumpAndSettle();
       expect(find.byType(LevelMapScreen), findsOneWidget);
     });

@@ -172,9 +172,12 @@ class LevelResult {
   }
 
   static TightLimit? _tightLimit(LevelDef level, DaySim day) {
+    // Pemakaian terbesar sehari, termasuk lonjakan (level bos).
+    final surge = level.surge?.factor ?? 1;
     final limited = [
       for (final h in level.houses)
-        if (day.limits[h.id] case final limit? when limit < h.peakMbps) h,
+        if (day.limits[h.id] case final limit? when limit < h.peakMbps * surge)
+          h,
     ];
     if (limited.isEmpty) return null;
     final houses = day.frame.houses;

@@ -28,14 +28,15 @@ class ResultSuccessScreen extends StatelessWidget {
   String _play(int number) =>
       AppRoutes.play(number, tutorialDone: progress.progress.tutorialDone);
 
-  /// Level berikutnya bila ada dan bisa dimainkan; selain itu Peta Babak
-  /// (setelah level bos, atau level bos yang bintangnya belum cukup).
-  void _next(BuildContext context) {
+  /// Level berikutnya, bila ada dan — untuk level bos — bintangnya cukup
+  /// (`Progress.canPlay`). Level biasa sudah terbuka karena hari ini lulus
+  /// (potret deep link tidak dicatat, tapi tetap ke level berikutnya).
+  int? get _nextLevel {
     final next = result.level.number + 1;
-    final open =
-        Levels.byNumber(next) != null &&
-        progress.progress.canPlay(Levels.chapter, next);
-    context.go(open ? _play(next) : AppRoutes.levelMap);
+    if (Levels.byNumber(next) == null) return null;
+    final boss = next == Levels.chapter.bossLevel;
+    if (boss && !progress.progress.canPlay(Levels.chapter, next)) return null;
+    return next;
   }
 
   @override
@@ -44,6 +45,7 @@ class ResultSuccessScreen extends StatelessWidget {
     final level = result.level;
     final stars = result.stars;
     final tip = summary.tip;
+    final next = _nextLevel;
     return Scaffold(
       backgroundColor: AppColors.groundCelebrate,
       body: Stack(
@@ -150,12 +152,19 @@ class ResultSuccessScreen extends StatelessWidget {
                       const SizedBox(width: AppSpacing.s10),
                       Expanded(
                         flex: 15,
+                        // Tidak ada level berikutnya yang bisa dimainkan
+                        // (setelah bos, atau bintang belum cukup): copy
+                        // baru, kembali ke Peta Babak.
                         child: ChunkyButton(
-                          label: 'Level Berikutnya',
+                          label: next == null
+                              ? 'Balik ke peta'
+                              : 'Level Berikutnya',
                           trailingIcon: GameIcons.chevronRight,
                           iconSize: 18,
                           textStyle: AppTypography.titleSmall,
-                          onPressed: () => _next(context),
+                          onPressed: () => context.go(
+                            next == null ? AppRoutes.levelMap : _play(next),
+                          ),
                         ),
                       ),
                     ],

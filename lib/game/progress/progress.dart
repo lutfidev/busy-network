@@ -15,7 +15,9 @@ class Progress {
   /// Belum ada level yang selesai, tutorial belum dimainkan: awal permainan.
   static final empty = Progress(const {});
 
-  static const version = 1;
+  /// Versi 2: progres awal kosong. Data versi 1 bisa berisi bintang
+  /// potret desain (progres awal sebelum langkah 8), jadi diabaikan.
+  static const version = 2;
 
   final Map<int, int> _stars;
 
@@ -42,9 +44,13 @@ class Progress {
   int get totalStars => _stars.values.fold(0, (sum, s) => sum + s);
 
   /// Bintang level 1..[lastLevel].
-  int starsUpTo(int lastLevel) =>
-      [for (var n = 1; n <= lastLevel; n++) starsOf(n)]
-          .fold(0, (sum, s) => sum + s);
+  int starsUpTo(int lastLevel) {
+    var sum = 0;
+    for (final MapEntry(key: level, value: stars) in _stars.entries) {
+      if (level <= lastLevel) sum += stars;
+    }
+    return sum;
+  }
 
   /// Level [level] di [chapter] bisa dimainkan: terbuka ([isOpen]), dan
   /// untuk level bos juga bintang level sebelumnya ≥

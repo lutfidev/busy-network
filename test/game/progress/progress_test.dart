@@ -82,8 +82,15 @@ void main() {
 
   test('encode/decode bolak-balik', () {
     final p = _design.record(5, 3);
-    expect(p.encode(), '{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1,"5":3}}');
+    expect(p.encode(), '{"versi":2,"bintang":{"1":3,"2":2,"3":3,"4":1,"5":3}}');
     expect(Progress.decode(p.encode()), p);
+  });
+
+  test('versi 1 (progres awal desain lama) diabaikan', () {
+    expect(
+      Progress.decode('{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1}}'),
+      isNull,
+    );
   });
 
   test('data kosong, rusak, atau versi lain → null', () {
@@ -92,11 +99,11 @@ void main() {
       '',
       'bukan json',
       '[]',
-      '{"versi":2,"bintang":{}}',
-      '{"versi":1}',
-      '{"versi":1,"bintang":{"x":1}}',
-      '{"versi":1,"bintang":{"1":"3"}}',
-      '{"versi":1,"bintang":{"1":9}}',
+      '{"versi":3,"bintang":{}}',
+      '{"versi":2}',
+      '{"versi":2,"bintang":{"x":1}}',
+      '{"versi":2,"bintang":{"1":"3"}}',
+      '{"versi":2,"bintang":{"1":9}}',
     ]) {
       expect(Progress.decode(s), isNull, reason: '$s');
     }
@@ -126,12 +133,12 @@ void main() {
     test('JSON: kunci tutorial hanya bila selesai', () {
       expect(
         _design.encode(),
-        '{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1}}',
+        '{"versi":2,"bintang":{"1":3,"2":2,"3":3,"4":1}}',
       );
       final done = _design.completeTutorial();
       expect(
         done.encode(),
-        '{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1},"tutorial":true}',
+        '{"versi":2,"bintang":{"1":3,"2":2,"3":3,"4":1},"tutorial":true}',
       );
       expect(Progress.decode(done.encode()), done);
       expect(Progress.decode(_design.encode())!.tutorialDone, isFalse);
@@ -139,14 +146,14 @@ void main() {
 
     test('tutorial bukan bool → data rusak', () {
       for (final s in [
-        '{"versi":1,"bintang":{},"tutorial":"ya"}',
-        '{"versi":1,"bintang":{},"tutorial":1}',
-        '{"versi":1,"bintang":{},"tutorial":null}',
+        '{"versi":2,"bintang":{},"tutorial":"ya"}',
+        '{"versi":2,"bintang":{},"tutorial":1}',
+        '{"versi":2,"bintang":{},"tutorial":null}',
       ]) {
         expect(Progress.decode(s), isNull, reason: s);
       }
       expect(
-        Progress.decode('{"versi":1,"bintang":{},"tutorial":false}'),
+        Progress.decode('{"versi":2,"bintang":{},"tutorial":false}'),
         Progress(const {}),
       );
     });
