@@ -39,8 +39,77 @@ void main() {
           expectValidCable(level, c, level.positionOf);
         }
       });
+
+      test('node muat di peta (dengan label) & tidak berdempet', () {
+        final nodes = {
+          LevelDef.routerId: level.routerPosition,
+          for (final h in level.houses) h.id: h.position,
+          for (final j in level.junctions) j.id: j.position,
+        };
+        for (final MapEntry(key: id, value: p) in nodes.entries) {
+          expect(p.dx, inInclusiveRange(30, 360), reason: id);
+          expect(p.dy, inInclusiveRange(30, 420), reason: id);
+        }
+        final ids = nodes.keys.toList();
+        for (var a = 0; a < ids.length; a++) {
+          for (var b = a + 1; b < ids.length; b++) {
+            expect(
+              (nodes[ids[a]]! - nodes[ids[b]]!).distance,
+              greaterThanOrEqualTo(90),
+              reason: '${ids[a]}–${ids[b]}',
+            );
+          }
+        }
+      });
+
+      test('pemakaian puncak (juga saat lonjakan) muat di paket', () {
+        final surge = level.surge?.factor ?? 1;
+        for (final h in level.houses) {
+          expect(
+            h.peakMbps * surge,
+            lessThanOrEqualTo(h.packageMbps),
+            reason: h.id,
+          );
+        }
+      });
+
+      test('batas lulus < target ≤ 100', () {
+        expect(level.passSatisfaction, lessThan(level.targetSatisfaction));
+        expect(level.targetSatisfaction, lessThanOrEqualTo(100));
+      });
     });
   }
+
+  test('babak 1 lengkap: level 1–12 berurutan, bos di akhir', () {
+    expect(
+      [for (final l in Levels.all) l.number],
+      [for (var n = 1; n <= Levels.chapter.levelCount; n++) n],
+    );
+    expect(Levels.chapter.bossLevel, 12);
+    expect(Levels.chapter.bossStars, 24);
+    expect(Levels.level12.name, 'Malam Final Sepak Bola');
+    expect(Levels.level12.surge, isNotNull);
+    expect(
+      [
+        for (final l in Levels.all)
+          if (l.surge != null) l.number,
+      ],
+      [12],
+    );
+  });
+
+  test('lonjakan: kali pemakaian hanya di jamnya', () {
+    const surge = TrafficSurge(
+      fromHour: 20,
+      toHour: 22,
+      factor: 1.5,
+      name: 'Nobar',
+    );
+    expect(surge.factorAt(20 * 60 - 1), 1);
+    expect(surge.factorAt(20 * 60), 1.5);
+    expect(surge.factorAt(22 * 60 - 1), 1.5);
+    expect(surge.factorAt(22 * 60), 1);
+  });
 
   test('kabel terbuka mengikuti level buka', () {
     expect(Levels.level1.unlockedCables, [CableSpec.lan]);
@@ -96,10 +165,11 @@ void main() {
       expect(Levels.level1.house('r2').block, isNull);
     });
 
-    test('byNumber: hanya level yang ada datanya', () {
+    test('byNumber: level 1–12', () {
       expect(Levels.byNumber(1), same(Levels.level1));
       expect(Levels.byNumber(5), same(Levels.level5));
-      expect(Levels.byNumber(6), isNull);
+      expect(Levels.byNumber(12), same(Levels.level12));
+      expect(Levels.byNumber(13), isNull);
       expect(Levels.byNumber(0), isNull);
     });
 

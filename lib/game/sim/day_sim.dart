@@ -209,8 +209,10 @@ class DaySim {
       rushFrom: rushFrom,
       rushTo: rushTo,
     );
+    final surge = level.surge?.factorAt(_minute) ?? 1.0;
     final usage = {
-      for (final id in _patience.keys) id: level.house(id).peakMbps * share,
+      for (final id in _patience.keys)
+        id: level.house(id).peakMbps * share * surge,
     };
     final demand = {
       for (final id in _patience.keys)
