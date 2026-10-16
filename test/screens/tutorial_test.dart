@@ -179,6 +179,8 @@ void main() {
     await tester.tap(find.text('Lewati'));
     await tester.pumpAndSettle();
 
+    // Tutup aplikasi (State & router lama dibuang), lalu buka lagi.
+    await tester.pumpWidget(const SizedBox());
     await pumpApp(
       tester,
       location: AppRoutes.levelMap,

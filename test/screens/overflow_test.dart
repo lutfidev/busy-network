@@ -87,6 +87,44 @@ void main() {
     });
   }
 
+  // Hari level 1 dari tutorial: Fase Jalan & Hasil level 1 (bukan potret).
+  for (final (size, textScale) in [
+    (const Size(360, 640), 1.0),
+    (const Size(360, 800), 1.3),
+  ]) {
+    testWidgets('tanpa overflow: hari tutorial level 1 @ '
+        '${size.width}×${size.height}, teks ${textScale * 100}%', (
+      tester,
+    ) async {
+      setScreenSize(tester, size);
+      tester.platformDispatcher.textScaleFactorTestValue = textScale;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      // Font dimuat dulu di Beranda: tata letak sebelum font termuat sudah
+      // dicek test rute di atas.
+      await pumpApp(tester);
+      await loadAppFonts(tester);
+      await tester.pumpWidget(const SizedBox());
+      await pumpApp(
+        tester,
+        location: '${AppRoutes.tutorial}?${AppRoutes.stepParam}=2',
+      );
+      expect(tester.takeException(), isNull);
+      await dragOnMap(tester, const [
+        Offset(105, 315),
+        Offset(165, 255),
+        Offset(255, 165),
+      ]);
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Mulai Hari'));
+      await playFor(tester, 2);
+      expect(find.text('LEVEL 1 · RUMAH PERTAMA'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('Hari beres!'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('galeri bisa di-scroll sampai bawah di 360 px', (tester) async {
     setScreenSize(tester, const Size(360, 740));
     disableAnimations(tester);

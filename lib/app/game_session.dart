@@ -6,8 +6,8 @@ import '../game/result/level_result.dart';
 import 'progress_book.dart';
 
 /// Hari yang sedang dimainkan, dioper antarrute: Fase Rancang & tutorial
-/// menaruhnya saat "Mulai Hari" ([begin]), Fase Jalan & Panel Atur Antrean memakai
-/// hari yang sama ([currentDay]), Fase Jalan menutupnya di 24:00
+/// menaruhnya saat "Mulai Hari" ([begin]), Fase Jalan & Panel Atur Antrean
+/// memakai hari yang sama ([currentDay]), Fase Jalan menutupnya di 24:00
 /// ([finish]) dan layar hasil membaca [result]. Dibuat sekali oleh
 /// aplikasi dan diteruskan router ke layar, bersama [progress].
 ///
