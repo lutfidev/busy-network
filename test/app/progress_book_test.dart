@@ -46,4 +46,24 @@ void main() {
     await book.record(5, 3);
     expect(book.progress.starsOf(5), 3);
   });
+
+  test('completeTutorial: memberi tahu & menyimpan sekali', () async {
+    final store = MemoryProgressStore();
+    final book = ProgressBook(store);
+    var notified = 0;
+    book.addListener(() => notified++);
+    await book.completeTutorial();
+    expect(book.progress.tutorialDone, isTrue);
+    expect(book.progress.totalStars, 9);
+    expect(store.load()!.tutorialDone, isTrue);
+    expect(notified, 1);
+    await book.completeTutorial();
+    expect(notified, 1);
+  });
+
+  test('completeTutorial gagal simpan: tetap selesai di memori', () async {
+    final book = ProgressBook(_BrokenStore());
+    await book.completeTutorial();
+    expect(book.progress.tutorialDone, isTrue);
+  });
 }
