@@ -12,7 +12,8 @@ class TutorialStep {
   final String title;
   final String body;
 
-  /// `null` = tidak ada tombol lanjut (langkah terakhir).
+  /// `null` = tidak ada tombol lanjut (langkah 2 menunggu tarikan,
+  /// langkah 3 menunggu "Mulai Hari").
   final String? nextLabel;
 
   /// Posisi tangan relatif ke pojok kiri-atas sorotan (px desain).
@@ -36,7 +37,8 @@ abstract final class TutorialSteps {
       body:
           'Geser jari dari router ke Rumah 1. Kabel cuma bisa belok lurus '
           'atau miring 45°.',
-      nextLabel: 'Udah, lanjut',
+      // Tanpa tombol: langkah ini selesai saat kabelnya benar-benar
+      // tersambung.
       handOffset: Offset(36, 198),
     ),
     TutorialStep(

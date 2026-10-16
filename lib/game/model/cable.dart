@@ -151,6 +151,20 @@ class CableDraft {
   );
 }
 
+/// Tarikan yang sedang diajarkan tutorial: hanya dari [from] ke [to]. Selama
+/// jari tidak menarik, [guide] digambar sebagai kabel putus-putus dipandu.
+class CableLesson {
+  const CableLesson({
+    required this.from,
+    required this.to,
+    required this.guide,
+  });
+
+  final String from;
+  final String to;
+  final List<Offset> guide;
+}
+
 /// Titik tengah polyline menurut panjangnya.
 Offset _midpoint(List<Offset> points) {
   var total = 0.0;

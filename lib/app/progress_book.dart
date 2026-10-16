@@ -5,8 +5,9 @@ import '../data/progress_store.dart';
 import '../game/progress/progress.dart';
 
 /// Progres pemain selama aplikasi berjalan: dibaca Beranda & Peta Babak,
-/// ditulis saat level selesai ([record]). Belum ada yang tersimpan →
-/// progres awal desain ([DummyData.progress]).
+/// ditulis saat level selesai ([record]) dan tutorial selesai
+/// ([completeTutorial]). Belum ada yang tersimpan → progres awal desain
+/// ([DummyData.progress]).
 class ProgressBook extends ChangeNotifier {
   ProgressBook(this._store) : _progress = _store.load() ?? DummyData.progress;
 
@@ -19,10 +20,16 @@ class ProgressBook extends ChangeNotifier {
   Progress get progress => _progress;
 
   /// Catat [stars] bintang level [level] (yang terbaik dipakai), beri tahu
-  /// pendengar, lalu simpan. Gagal simpan tidak menghentikan permainan:
-  /// progres di memori tetap berlaku.
-  Future<void> record(int level, int stars) async {
-    final next = _progress.record(level, stars);
+  /// pendengar, lalu simpan.
+  Future<void> record(int level, int stars) =>
+      _update(_progress.record(level, stars));
+
+  /// Tandai tutorial selesai, beri tahu pendengar, lalu simpan.
+  Future<void> completeTutorial() => _update(_progress.completeTutorial());
+
+  /// Gagal simpan tidak menghentikan permainan: progres di memori tetap
+  /// berlaku.
+  Future<void> _update(Progress next) async {
     if (identical(next, _progress)) return;
     _progress = next;
     notifyListeners();

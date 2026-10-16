@@ -5,9 +5,9 @@ import '../game/model/model.dart';
 import '../game/result/level_result.dart';
 import 'progress_book.dart';
 
-/// Hari yang sedang dimainkan, dioper antarrute: Fase Rancang menaruhnya
-/// saat "Mulai Hari" ([begin]), Fase Jalan & Panel Atur Antrean memakai
-/// hari yang sama ([currentDay]), Fase Jalan menutupnya di 24:00
+/// Hari yang sedang dimainkan, dioper antarrute: Fase Rancang & tutorial
+/// menaruhnya saat "Mulai Hari" ([begin]), Fase Jalan & Panel Atur Antrean
+/// memakai hari yang sama ([currentDay]), Fase Jalan menutupnya di 24:00
 /// ([finish]) dan layar hasil membaca [result]. Dibuat sekali oleh
 /// aplikasi dan diteruskan router ke layar, bersama [progress].
 ///
@@ -45,9 +45,9 @@ class GameSession {
   }
 
   /// Hari untuk layar Fase Jalan & Panel Antrean: hari yang sedang
-  /// berjalan, atau — bila tidak ada (deep link, tutorial sampai langkah 7,
-  /// hari sebelumnya sudah selesai) — bingkai Fase Jalan di desain, yang
-  /// lalu menjadi hari sekarang. Hari potret tidak dicatat ke progres.
+  /// berjalan, atau — bila tidak ada (deep link, hari sebelumnya sudah
+  /// selesai) — bingkai Fase Jalan di desain, yang lalu menjadi hari
+  /// sekarang. Hari potret tidak dicatat ke progres.
   GameState currentDay() {
     final day = _day;
     if (day != null && day.phase == GamePhase.run) return day;

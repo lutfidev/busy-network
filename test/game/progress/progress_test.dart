@@ -59,4 +59,54 @@ void main() {
       expect(Progress.decode(s), isNull, reason: '$s');
     }
   });
+
+  group('tutorial', () {
+    test('awalnya belum selesai; completeTutorial menandai sekali', () {
+      expect(_design.tutorialDone, isFalse);
+      final done = _design.completeTutorial();
+      expect(done.tutorialDone, isTrue);
+      expect(done.totalStars, 9, reason: 'bintang tetap');
+      expect(done.completeTutorial(), same(done));
+      expect(_design.tutorialDone, isFalse, reason: 'tidak mengubah aslinya');
+    });
+
+    test('record mempertahankan tanda; == membedakannya', () {
+      final done = _design.completeTutorial();
+      expect(done.record(5, 2).tutorialDone, isTrue);
+      expect(done, isNot(_design));
+      expect(
+        done,
+        Progress(const {1: 3, 2: 2, 3: 3, 4: 1}, tutorialDone: true),
+      );
+      expect(done.hashCode, isNot(_design.hashCode));
+    });
+
+    test('JSON: kunci tutorial hanya bila selesai', () {
+      expect(
+        _design.encode(),
+        '{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1}}',
+      );
+      final done = _design.completeTutorial();
+      expect(
+        done.encode(),
+        '{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1},"tutorial":true}',
+      );
+      expect(Progress.decode(done.encode()), done);
+      expect(Progress.decode(_design.encode())!.tutorialDone, isFalse);
+    });
+
+    test('tutorial bukan bool → data rusak', () {
+      for (final s in [
+        '{"versi":1,"bintang":{},"tutorial":"ya"}',
+        '{"versi":1,"bintang":{},"tutorial":1}',
+        '{"versi":1,"bintang":{},"tutorial":null}',
+      ]) {
+        expect(Progress.decode(s), isNull, reason: s);
+      }
+      expect(
+        Progress.decode('{"versi":1,"bintang":{},"tutorial":false}'),
+        Progress(const {}),
+      );
+    });
+  });
 }

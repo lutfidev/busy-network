@@ -4,7 +4,8 @@ import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'tutorial_steps.dart';
 
-/// Scrim gelap dengan lubang sorotan + garis putih 3 px.
+/// Scrim gelap dengan lubang sorotan + garis putih 3 px. Sentuhan di luar
+/// lubang ditahan; di dalam lubang diteruskan ke yang disorot.
 class SpotlightScrim extends StatelessWidget {
   const SpotlightScrim({super.key, required this.spot, required this.radius});
 
@@ -13,15 +14,13 @@ class SpotlightScrim extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: TweenAnimationBuilder<Rect?>(
-        tween: RectTween(end: spot),
-        duration: AppMotion.spotlight,
-        curve: Curves.ease,
-        builder: (context, rect, _) => CustomPaint(
-          size: Size.infinite,
-          painter: _ScrimPainter(rect ?? spot, radius),
-        ),
+    return TweenAnimationBuilder<Rect?>(
+      tween: RectTween(end: spot),
+      duration: AppMotion.spotlight,
+      curve: Curves.ease,
+      builder: (context, rect, _) => CustomPaint(
+        size: Size.infinite,
+        painter: _ScrimPainter(rect ?? spot, radius),
       ),
     );
   }
@@ -33,10 +32,14 @@ class _ScrimPainter extends CustomPainter {
   final Rect spot;
   final double radius;
 
+  RRect get _hole => RRect.fromRectAndRadius(
+    spot,
+    Radius.circular(radius.clamp(0, spot.shortestSide / 2)),
+  );
+
   @override
   void paint(Canvas canvas, Size size) {
-    final r = Radius.circular(radius.clamp(0, spot.shortestSide / 2));
-    final hole = RRect.fromRectAndRadius(spot, r);
+    final hole = _hole;
     final path = Path()
       ..fillType = PathFillType.evenOdd
       ..addRect(Offset.zero & size)
@@ -50,6 +53,10 @@ class _ScrimPainter extends CustomPainter {
         ..color = AppColors.surface,
     );
   }
+
+  /// `true` = sentuhan ditahan scrim.
+  @override
+  bool hitTest(Offset position) => !_hole.contains(position);
 
   @override
   bool shouldRepaint(_ScrimPainter old) =>

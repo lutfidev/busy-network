@@ -37,9 +37,21 @@ abstract final class Levels {
     budget: 200000,
     targetSatisfaction: 60,
     passSatisfaction: 40,
+    // Dua rumah dengan kabel lurus menyisakan Rp 50.000 (dua kabel dari
+    // router) atau Rp 65.000 (rantai lewat Rumah 1); satu segmen terbuang
+    // atau rantai lewat Rumah 2 (Rp 35.000) → 2★.
+    savingsTarget: 50000,
     blockLabels: [
       MapBlockLabel('BLOK A', Offset(255, 112), align: TextAlign.center),
     ],
+  );
+
+  /// Tutorial level 1 langkah 2: tarik kabel Router → Rumah 1 (garis
+  /// panduan dari desain).
+  static const tutorialLesson = CableLesson(
+    from: LevelDef.routerId,
+    to: 'r1',
+    guide: [Offset(105, 315), Offset(255, 165)],
   );
 
   static const _j1 = Offset(195, 150);

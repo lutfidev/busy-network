@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/progress_book.dart';
 import '../../app/routes.dart';
 import '../../core/format.dart';
 import '../../game/levels/levels.dart';
@@ -13,16 +14,26 @@ import 'result_success_data.dart';
 
 /// 7 · Hasil Level – Berhasil (1–3 bintang).
 class ResultSuccessScreen extends StatelessWidget {
-  const ResultSuccessScreen({super.key, required this.result});
+  const ResultSuccessScreen({
+    super.key,
+    required this.result,
+    required this.progress,
+  });
 
   final LevelResult result;
+
+  /// Menentukan level 1 dibuka di tutorial atau Fase Rancang.
+  final ProgressBook progress;
+
+  String _play(int number) =>
+      AppRoutes.play(number, tutorialDone: progress.progress.tutorialDone);
 
   /// Level berikutnya bila datanya ada; selain itu Peta Babak (level baru
   /// sudah terbuka di sana).
   void _next(BuildContext context) {
     final next = result.level.number + 1;
     context.go(
-      Levels.byNumber(next) != null ? AppRoutes.play(next) : AppRoutes.levelMap,
+      Levels.byNumber(next) != null ? _play(next) : AppRoutes.levelMap,
     );
   }
 
@@ -132,8 +143,7 @@ class ResultSuccessScreen extends StatelessWidget {
                           leadingIcon: GameIcons.retry,
                           iconSize: 18,
                           textStyle: AppTypography.titleSmall,
-                          onPressed: () =>
-                              context.go(AppRoutes.play(level.number)),
+                          onPressed: () => context.go(_play(level.number)),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.s10),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/progress_book.dart';
 import '../../app/routes.dart';
 import '../../core/format.dart';
 import '../../game/result/level_result.dart';
@@ -11,9 +12,16 @@ import 'fail_cause.dart';
 
 /// 8 · Hasil Level – Gagal.
 class ResultFailScreen extends StatelessWidget {
-  const ResultFailScreen({super.key, required this.result});
+  const ResultFailScreen({
+    super.key,
+    required this.result,
+    required this.progress,
+  });
 
   final LevelResult result;
+
+  /// Menentukan level 1 dibuka di tutorial atau Fase Rancang.
+  final ProgressBook progress;
 
   @override
   Widget build(BuildContext context) {
@@ -120,8 +128,12 @@ class ResultFailScreen extends StatelessWidget {
                           label: 'Coba Lagi',
                           leadingIcon: GameIcons.retry,
                           height: AppSizes.buttonTall,
-                          onPressed: () =>
-                              context.go(AppRoutes.play(level.number)),
+                          onPressed: () => context.go(
+                            AppRoutes.play(
+                              level.number,
+                              tutorialDone: progress.progress.tutorialDone,
+                            ),
+                          ),
                         ),
                         const SizedBox(
                           height: AppSpacing.s8 - AppElevation.chunky,

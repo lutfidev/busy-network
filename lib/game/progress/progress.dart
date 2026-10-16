@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-/// Progres pemain: bintang terbaik tiap nomor level. Level terbuka & level
-/// sekarang diturunkan dari sini, tidak disimpan.
+/// Progres pemain: bintang terbaik tiap nomor level dan apakah tutorial
+/// sudah selesai. Level terbuka & level sekarang diturunkan dari sini, tidak
+/// disimpan.
 class Progress {
-  Progress(Map<int, int> stars)
+  Progress(Map<int, int> stars, {this.tutorialDone = false})
     : _stars = Map.unmodifiable({
         for (final MapEntry(key: level, value: count) in stars.entries)
           if (_checked(level, count) > 0) level: count,
@@ -12,6 +13,9 @@ class Progress {
   static const version = 1;
 
   final Map<int, int> _stars;
+
+  /// Tutorial level 1 sudah diselesaikan atau dilewati.
+  final bool tutorialDone;
 
   int starsOf(int level) => _stars[level] ?? 0;
 
@@ -43,14 +47,19 @@ class Progress {
   Progress record(int level, int stars) {
     _checked(level, stars);
     if (stars <= starsOf(level)) return this;
-    return Progress({..._stars, level: stars});
+    return Progress({..._stars, level: stars}, tutorialDone: tutorialDone);
   }
+
+  /// Tandai tutorial selesai; `this` bila sudah.
+  Progress completeTutorial() =>
+      tutorialDone ? this : Progress(_stars, tutorialDone: true);
 
   String encode() => jsonEncode({
     'versi': version,
     'bintang': {
       for (final level in _stars.keys.toList()..sort()) '$level': _stars[level],
     },
+    if (tutorialDone) 'tutorial': true,
   });
 
   /// Kebalikan [encode]; `null` bila kosong, rusak, atau versi lain.
@@ -64,7 +73,8 @@ class Progress {
     }
     if (json is! Map || json['versi'] != version) return null;
     final stars = json['bintang'];
-    if (stars is! Map) return null;
+    final tutorial = json.containsKey('tutorial') ? json['tutorial'] : false;
+    if (stars is! Map || tutorial is! bool) return null;
     final parsed = <int, int>{};
     for (final MapEntry(:key, :value) in stars.entries) {
       final level = key is String ? int.tryParse(key) : null;
@@ -77,7 +87,7 @@ class Progress {
       }
       parsed[level] = value;
     }
-    return Progress(parsed);
+    return Progress(parsed, tutorialDone: tutorial);
   }
 
   static int _checked(int level, int stars) {
@@ -91,11 +101,15 @@ class Progress {
   @override
   bool operator ==(Object other) =>
       other is Progress &&
+      other.tutorialDone == tutorialDone &&
       other._stars.length == _stars.length &&
       _stars.entries.every((e) => other._stars[e.key] == e.value);
 
   @override
-  int get hashCode => Object.hashAllUnordered(
-    _stars.entries.map((e) => Object.hash(e.key, e.value)),
+  int get hashCode => Object.hash(
+    tutorialDone,
+    Object.hashAllUnordered(
+      _stars.entries.map((e) => Object.hash(e.key, e.value)),
+    ),
   );
 }

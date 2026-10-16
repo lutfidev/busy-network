@@ -1,40 +1,32 @@
 import 'dart:ui';
 
 import '../game/levels/levels.dart';
-import '../game/map_scene.dart';
 import '../game/model/model.dart';
 import '../game/sim/sim.dart';
 
-/// Snapshot [GameState] dari desain: tutorial (interaktif di langkah 7) dan
+/// Snapshot [GameState] dari desain: tutorial (deep link `?langkah=`) dan
 /// bingkai Fase Jalan (deep link, screenshot). Koordinat persis dari desain.
 /// Fase Rancang & hari yang dimainkan memakai state asli.
 abstract final class DummyStates {
   // ── Tutorial level 1 ──────────────────────────────────────────────────
-  static const _tutorialCable = [Offset(105, 315), Offset(255, 165)];
-
-  /// Langkah 1 polos, 2 kabel dipandu (tanpa jari, tangan tutorial yang
-  /// jadi jarinya), 3 Rumah 1 tersambung. Snapshot belum memotong biaya:
-  /// desain tetap menampilkan Rp 200.000.
+  /// Langkah 1 polos, 2 pelajaran Router → Rumah 1 (kabel panduan tanpa jari,
+  /// tangan tutorial yang jadi jarinya), 3 potret Rumah 1 tersambung. Potret
+  /// langkah 3 belum memotong biaya: desain tetap menampilkan Rp 200.000.
+  /// Tutorial yang dimainkan berjalan dari langkah 1/2 di state yang sama.
   static GameState tutorial(int step) {
     assert(step >= 1 && step <= 3, 'langkah tutorial 1..3');
+    const lesson = Levels.tutorialLesson;
     return switch (step) {
       1 => GameState(Levels.level1),
-      2 => GameState(
-        Levels.level1,
-        draft: const CableDraft(
-          from: LevelDef.routerId,
-          kind: CableKind.lan,
-          points: _tutorialCable,
-        ),
-      ),
+      2 => GameState(Levels.level1, lesson: lesson),
       _ => GameState(
         Levels.level1,
-        cables: const [
+        cables: [
           Cable(
             id: 'c-r1',
-            from: LevelDef.routerId,
-            to: 'r1',
-            points: _tutorialCable,
+            from: lesson.from,
+            to: lesson.to,
+            points: lesson.guide,
           ),
         ],
       ),

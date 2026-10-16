@@ -16,7 +16,7 @@ void main() {
     usePrefs({});
     final store = await PrefsProgressStore.open();
     expect(store.load(), isNull);
-    final p = Progress(const {1: 3, 5: 2});
+    final p = Progress(const {1: 3, 5: 2}, tutorialDone: true);
     await store.save(p);
     final reopened = await PrefsProgressStore.open();
     expect(reopened.load(), p);

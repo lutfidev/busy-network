@@ -9,6 +9,7 @@ import '../../game/map_scene.dart';
 import '../../game/model/model.dart';
 import '../../game/network_game_view.dart';
 import '../../game/render/map_renderer.dart';
+import '../../game/sim/sim.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -68,7 +69,7 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
     _dayStarted = true;
     _game.cancelCable();
     widget.session.begin(_game.planDay());
-    context.go(AppRoutes.run);
+    context.go(AppRoutes.runOf(_game.level.number));
   }
 
   /// Ujung tarikan tempat tooltip menempel: jari, atau rumah/junction yang
@@ -86,6 +87,8 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
     final cost = _game.draftCost;
     final connected = _game.connectedCount;
     final refused = _game.refusedCost;
+    final rushFrom = level.rushHourFrom ?? SimClock.defaultRushFrom;
+    final rushTo = level.rushHourTo ?? SimClock.defaultRushTo;
     return Scaffold(
       backgroundColor: AppColors.groundDay,
       body: SafeArea(
@@ -113,7 +116,7 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                     value: '≥ ${IdFormat.percent(level.targetSatisfaction)}',
                     note:
                         'Jam sibuk '
-                        '${IdFormat.hourRange(level.rushHourFrom!, level.rushHourTo!)}',
+                        '${IdFormat.hourRange(rushFrom, rushTo)}',
                   ),
                 ],
               ),
@@ -192,22 +195,31 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        for (final spec in level.unlockedCables) ...[
-                          if (spec.kind == CableKind.fiber)
-                            const SizedBox(width: AppSpacing.cardGap),
+                        for (final (i, spec) in CableSpec.all.indexed) ...[
+                          if (i > 0) const SizedBox(width: AppSpacing.cardGap),
                           Expanded(
-                            child: CableOptionCard(
-                              kind: spec.kind,
-                              name: spec.name,
-                              price:
-                                  '${IdFormat.rupiah(spec.pricePerSegment)} '
-                                  '/ segmen',
-                              capacity:
-                                  'Kapasitas ${spec.capacityMbps} Mbps · '
-                                  '${spec.tagline}',
-                              selected: _game.selectedCable == spec.kind,
-                              onPressed: () => _game.selectCable(spec.kind),
-                            ),
+                            child: spec.unlockLevel > level.number
+                                ? CableOptionCard(
+                                    kind: spec.kind,
+                                    name: spec.name,
+                                    price: '',
+                                    capacity: '',
+                                    lockedLabel:
+                                        'Terbuka di level ${spec.unlockLevel}',
+                                  )
+                                : CableOptionCard(
+                                    kind: spec.kind,
+                                    name: spec.name,
+                                    price:
+                                        '${IdFormat.rupiah(spec.pricePerSegment)} '
+                                        '/ segmen',
+                                    capacity:
+                                        'Kapasitas ${spec.capacityMbps} Mbps · '
+                                        '${spec.tagline}',
+                                    selected: _game.selectedCable == spec.kind,
+                                    onPressed: () =>
+                                        _game.selectCable(spec.kind),
+                                  ),
                           ),
                         ],
                       ],

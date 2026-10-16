@@ -99,7 +99,7 @@ void main() {
     expect(find.byType(QueuePanelScreen), findsOneWidget);
   });
 
-  testWidgets('level 1 membuka tutorial; 3 langkah lalu Mulai Hari', (
+  testWidgets('level 1 membuka tutorial; tarik kabel lalu Mulai Hari', (
     tester,
   ) async {
     setScreenSize(tester, const Size(390, 844));
@@ -115,13 +115,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Tarik kabel ke rumah'), findsOneWidget);
 
-    await tester.tap(find.text('Udah, lanjut'));
-    await tester.pumpAndSettle();
+    await dragOnMap(tester, const [
+      Offset(105, 315),
+      Offset(165, 255),
+      Offset(255, 165),
+    ]);
     expect(find.text('Mantap, Rumah 1 nyala!'), findsOneWidget);
     expect(find.text('1/2 rumah tersambung'), findsOneWidget);
 
+    // Hari level 1 berjalan sungguhan: jangan menunggu sampai 24:00.
     await tester.tap(find.text('Mulai Hari'));
-    await tester.pumpAndSettle();
+    await playFor(tester, 1);
     expect(find.byType(RunPhaseScreen), findsOneWidget);
   });
 

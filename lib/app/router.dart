@@ -40,6 +40,7 @@ GoRouter createRouter({
               GoRoute(
                 path: 'tutorial',
                 builder: (context, state) => TutorialScreen(
+                  session: play,
                   initialStep: (_intParam(state, AppRoutes.stepParam) ?? 1)
                       .clamp(1, 3),
                 ),
@@ -75,6 +76,7 @@ GoRouter createRouter({
               GoRoute(
                 path: 'hasil/berhasil',
                 builder: (context, state) => ResultSuccessScreen(
+                  progress: play.progress,
                   result: switch (play.result) {
                     final result? when result.passed => result,
                     _ => DummyData.success(
@@ -86,6 +88,7 @@ GoRouter createRouter({
               GoRoute(
                 path: 'hasil/gagal',
                 builder: (context, state) => ResultFailScreen(
+                  progress: play.progress,
                   result: switch (play.result) {
                     final result? when !result.passed => result,
                     _ => DummyData.fail,

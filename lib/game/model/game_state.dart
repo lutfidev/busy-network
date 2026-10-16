@@ -46,6 +46,7 @@ class GameState extends ChangeNotifier {
     List<Cable>? cables,
     CableKind selectedCable = CableKind.lan,
     CableDraft? draft,
+    this._lesson,
   }) : _budget = budget ?? level.budget,
        junctions = List.unmodifiable(junctions ?? level.junctions),
        _cables = List.unmodifiable(cables ?? level.cables),
@@ -78,6 +79,7 @@ class GameState extends ChangeNotifier {
   _Pull? _pull;
   int? _refusedCost;
   Network? _network;
+  CableLesson? _lesson;
 
   GamePhase get phase => _phase;
 
@@ -105,6 +107,23 @@ class GameState extends ChangeNotifier {
   /// pemain melakukan aksi berikutnya.
   int? get refusedCost => _refusedCost;
 
+  /// Tarikan yang diajarkan tutorial (membatasi sumber & tujuan).
+  CableLesson? get lesson => _lesson;
+
+  /// Kabel panduan pelajaran: tampil selama jari tidak menarik dan tujuan
+  /// pelajaran belum tersambung.
+  CableDraft? get guide {
+    final lesson = _lesson;
+    if (lesson == null || _pull != null || isConnected(lesson.to)) {
+      return null;
+    }
+    return CableDraft(
+      from: lesson.from,
+      kind: _selectedCable,
+      points: lesson.guide,
+    );
+  }
+
   Network get network => _network ??= Network(level: level, cables: _cables);
 
   Set<String> get connectedHouses => network.connectedHouses;
@@ -128,12 +147,14 @@ class GameState extends ChangeNotifier {
   bool isConnected(String nodeId) =>
       nodeId == LevelDef.routerId || network.parentOf(nodeId) != null;
 
-  /// Tarikan bisa dimulai dari router, atau junction/rumah yang tersambung.
+  /// Tarikan bisa dimulai dari router, atau junction/rumah yang tersambung;
+  /// selama ada [lesson] hanya dari sumbernya.
   bool canStartCable(String nodeId) =>
       _phase == GamePhase.design &&
       !_erasing &&
       _hasNode(nodeId) &&
-      isConnected(nodeId);
+      isConnected(nodeId) &&
+      (_lesson == null || nodeId == _lesson!.from);
 
   void selectCable(CableKind kind) {
     _checkUnlocked(kind);
@@ -149,6 +170,12 @@ class GameState extends ChangeNotifier {
     _expectPhase(GamePhase.design);
     if (draft != null) _checkUnlocked(draft.kind);
     _draft = draft;
+    notifyListeners();
+  }
+
+  void setLesson(CableLesson? lesson) {
+    if (identical(lesson, _lesson)) return;
+    _lesson = lesson;
     notifyListeners();
   }
 
@@ -354,7 +381,8 @@ class GameState extends ChangeNotifier {
 
   /// Tujuan terdekat dari [finger] dalam [snapRadius]: rumah, atau junction
   /// yang putus (supaya kabel di hilirnya bisa tersambung lagi), yang belum
-  /// tersambung. Sumber tarikan selalu tersambung, jadi tidak ikut.
+  /// tersambung. Sumber tarikan selalu tersambung, jadi tidak ikut. Selama
+  /// ada [lesson] hanya tujuannya.
   (String, Offset)? _snapTarget(Offset finger) {
     (String, Offset)? best;
     var bestDistance = snapRadius;
@@ -363,6 +391,7 @@ class GameState extends ChangeNotifier {
       for (final j in junctions) (j.id, j.position),
     ]) {
       if (isConnected(id)) continue;
+      if (_lesson != null && id != _lesson!.to) continue;
       final d = (finger - position).distance;
       if (d <= bestDistance) {
         best = (id, position);

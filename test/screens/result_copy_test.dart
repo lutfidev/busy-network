@@ -75,6 +75,22 @@ void main() {
       );
     });
 
+    test('2★ di level yang fibernya belum terbuka: tanpa fiber', () {
+      const twoStars = LevelResult(
+        level: Levels.level1,
+        satisfaction: 100,
+        budgetLeft: 35000,
+        complaints: 0,
+        housesLost: 0,
+      );
+      expect(twoStars.stars, 2);
+      expect(
+        SuccessSummary(twoStars).tip,
+        'Tarik kabel lewat jalur terpendek. Sisa anggarannya buat bintang '
+        'ketiga.',
+      );
+    });
+
     test('1★ kabel penuh (teks desain) & tanpa fiber', () {
       expect(
         SuccessSummary(DummyData.success(1)).tip,
