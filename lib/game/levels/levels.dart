@@ -37,6 +37,9 @@ abstract final class Levels {
     budget: 200000,
     targetSatisfaction: 60,
     passSatisfaction: 40,
+    // Dua rumah tersambung rapi menyisakan Rp 35.000 (dua kabel dari router)
+    // atau Rp 50.000 (rantai lewat Rumah 1); satu segmen terbuang → 2★.
+    savingsTarget: 30000,
     blockLabels: [
       MapBlockLabel('BLOK A', Offset(255, 112), align: TextAlign.center),
     ],

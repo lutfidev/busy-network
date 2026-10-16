@@ -243,4 +243,62 @@ void main() {
       );
     });
   });
+
+  group('level 1 (tarikan sungguhan)', () {
+    const router = LevelDef.routerId;
+    const toHouse1 = [Offset(180, 240), Offset(255, 165)];
+    const toHouse2 = [Offset(210, 330), Offset(315, 345)];
+    const house1ToHouse2 = [Offset(285, 255), Offset(315, 345)];
+    // Memutar lewat atas: 7 segmen, satu lebih dari jalur terpendek.
+    const toHouse2Detour = [
+      Offset(165, 255),
+      Offset(255, 255),
+      Offset(315, 345),
+    ];
+
+    /// Level 1 dengan kabel dari tarikan [pulls] (sumber, jalur jari),
+    /// dimainkan sampai 24:00.
+    LevelResult play(List<(String, List<Offset>)> pulls) {
+      final game = GameState(Levels.level1);
+      for (final (from, path) in pulls) {
+        expect(game.beginCable(from), isTrue);
+        for (final p in path) {
+          game.dragCable(p);
+        }
+        expect(game.endCable(), CableDrop.connected);
+      }
+      return LevelResult.of(playDay(game.planDay()));
+    }
+
+    test('target hemat Rp 30.000', () {
+      expect(Levels.level1.savingsTarget, 30000);
+    });
+
+    test('Rumah 1 saja (tutorial): 50% → 1★', () {
+      final r = play([(router, toHouse1)]);
+      expect(r.satisfaction, 50);
+      expect(r.budgetLeft, 125000);
+      expect(r.stars, 1);
+    });
+
+    test('dua kabel dari router: sisa Rp 35.000 → 3★', () {
+      final r = play([(router, toHouse1), (router, toHouse2)]);
+      expect(r.satisfaction, 100);
+      expect(r.budgetLeft, 35000);
+      expect(r.stars, 3);
+    });
+
+    test('rantai lewat Rumah 1: sisa Rp 50.000 → 3★', () {
+      final r = play([(router, toHouse1), ('r1', house1ToHouse2)]);
+      expect(r.budgetLeft, 50000);
+      expect(r.stars, 3);
+    });
+
+    test('satu segmen terbuang: sisa Rp 20.000 → 2★', () {
+      final r = play([(router, toHouse1), (router, toHouse2Detour)]);
+      expect(r.satisfaction, 100);
+      expect(r.budgetLeft, 20000);
+      expect(r.stars, 2);
+    });
+  });
 }
