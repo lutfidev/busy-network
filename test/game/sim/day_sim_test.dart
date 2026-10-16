@@ -301,4 +301,45 @@ void main() {
       );
     });
   });
+
+  group('statistik hari', () {
+    test('jaringan desain: kabel Rumah 4 penuh 258 menit mulai 18:17, '
+        'terparah 19:00; sabar Rumah 4 & 5 sempat habis', () {
+      final sim = _sim(designCables);
+      _playDay(sim);
+      expect(sim.fullMinutes('c-r4'), 258);
+      expect(sim.firstFullMinute('c-r4'), 18 * 60 + 17);
+      expect(sim.peakMinute('c-r4'), 19 * 60);
+      for (final c in designCables.where((c) => c.id != 'c-r4')) {
+        expect(sim.fullMinutes(c.id), 0, reason: c.id);
+        expect(sim.firstFullMinute(c.id), isNull, reason: c.id);
+        expect(sim.peakMinute(c.id), isNull, reason: c.id);
+      }
+      expect(sim.exhausted, {'r4', 'r5'});
+    });
+
+    test('kabel Rumah 4 fiber: tidak ada yang penuh atau habis sabar', () {
+      final sim = _sim(designFiberCables);
+      _playDay(sim);
+      for (final c in designFiberCables) {
+        expect(sim.fullMinutes(c.id), 0, reason: c.id);
+      }
+      expect(sim.exhausted, isEmpty);
+    });
+
+    test('sabar 0% dari potret langsung tercatat habis', () {
+      final sim = _sim(designCables, minute: 20 * 60, patience: {'r7': 0});
+      expect(sim.exhausted, {'r7'});
+    });
+
+    test('tidak bertambah selama hari dijeda komplain', () {
+      final sim = _sim(
+        designCables,
+        minute: 20 * 60,
+        complaint: const Complaint(houseId: 'r4', minute: 20 * 60),
+      );
+      sim.advance(30);
+      expect(sim.fullMinutes('c-r4'), 0);
+    });
+  });
 }
