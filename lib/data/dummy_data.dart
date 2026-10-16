@@ -3,6 +3,8 @@
 /// hari di `lib/game/sim/`; snapshot state ada di `dummy_states.dart`.
 library;
 
+import '../game/progress/progress.dart';
+
 class ChapterInfo {
   const ChapterInfo({
     required this.number,
@@ -25,6 +27,10 @@ class ChapterInfo {
 }
 
 abstract final class DummyData {
+  /// Progres awal seperti Peta Babak di desain: level 1–4 selesai
+  /// (3/2/3/1 bintang), level 5 sekarang. Langkah 8: mulai dari level 1.
+  static final progress = Progress(const {1: 3, 2: 2, 3: 3, 4: 1});
+
   static const chapter = ChapterInfo(
     number: 1,
     name: 'Perumahan Batam',
