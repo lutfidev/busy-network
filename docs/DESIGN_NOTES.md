@@ -38,7 +38,10 @@ Gagal · Design token & komponen.
   12) terkunci seperti desain sampai level 11 selesai **dan** bintang level
   1–11 ≥ 24; lalu gembok hilang, bisa diketuk, keterangan "Satu kompleks
   nobar. Ayo, main!"; setelah selesai bintangnya menggantikan keterangan
-  (dua keadaan ini copy baru). Posisi node/label/chip diturunkan dari
+  (dua keadaan ini copy baru). "Level Berikutnya" di hasil jadi "Balik ke
+  peta" bila tidak ada level yang bisa dimainkan (setelah bos, atau bos
+  masih terkunci). Progres tersimpan versi 1 (bisa berisi bintang potret
+  desain) diabaikan. Posisi node/label/chip diturunkan dari
   pusat node per level, jalur oranye sampai level sekarang.
 - **Level 2–4, 6–12** (rincian & angka di
   `docs/superpowers/specs/2026-10-16-konten-level-design.md`): desain

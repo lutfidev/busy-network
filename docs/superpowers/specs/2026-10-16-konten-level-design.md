@@ -69,13 +69,22 @@ babak 2, tampilan khusus "nobar" di Fase Jalan (badge tetap JAM SIBUK).
    dipakai screenshot & test yang memeriksa layar seperti desain.
    `Progress.canPlay(chapter, n)` = `isOpen(n)` dan, untuk level bos,
    `starsUpTo(11) ≥ 24`; bintang level bos sendiri tidak dihitung.
+   JSON progres naik ke `versi: 2`: data versi 1 bisa berisi bintang potret
+   desain (progres awal lama yang ikut tersimpan saat level selesai), jadi
+   diabaikan dan pemain mulai dari level 1 (belum rilis, tidak ada data
+   asli yang hilang).
 5. **Peta Babak** — kartu bos tiga keadaan: terkunci (desain, gembok,
    "Satu kompleks nobar. Butuh 24 bintang."), terbuka (tanpa gembok, bisa
    diketuk, "Satu kompleks nobar. Ayo, main!"), selesai (bintang terbaik
    menggantikan keterangan). Label aksesibilitas Level 1 menyebut
    ", tutorial" juga saat level 1 masih level sekarang.
-6. **"Level Berikutnya"** membuka level berikut bila ada dan
-   `canPlay`; selain itu (setelah bos, atau bintang belum 24) Peta Babak.
+6. **"Level Berikutnya"** membuka level berikut bila ada; level bos hanya
+   bila `canPlay`. Bila tidak ada level yang bisa dimainkan (setelah bos,
+   atau bintang belum 24) tombolnya jadi "Balik ke peta" (copy baru).
+   Gerbang bintang hanya untuk bos, jadi potret hasil deep link (level 5,
+   tidak dicatat) tetap "Level Berikutnya" seperti desain.
+   Biang kerok "batas antrean terlalu ketat" membandingkan batas dengan
+   pemakaian puncak × lonjakan.
 7. **Fase Jalan** — judul "LEVEL n · NAMA" mengecil (`FittedBox`), bukan
    dipotong elipsis (nama bos panjang). Label jam sibuk di bawah linimasa:
    untuk jam sibuk yang melewati tengah hari (level 7) labelnya di tengah
