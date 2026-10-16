@@ -27,7 +27,7 @@ GameState pullThrough(GameState s, List<Offset> path) {
   return s;
 }
 
-const _toHouse1 = [Offset(180, 240), Offset(255, 165)];
+const _toHouse1 = [Offset(165, 255), Offset(255, 165)];
 const _toHouse2 = [Offset(210, 330), Offset(315, 345)];
 
 void main() {
@@ -70,12 +70,12 @@ void main() {
       expect(s.endCable(), CableDrop.connected);
     });
 
-    test('lepas di Rumah 1 → tersambung, anggaran terpotong 5 segmen', () {
+    test('lepas di Rumah 1 → tersambung, anggaran terpotong 4 segmen', () {
       final s = pullThrough(lessonState(), _toHouse1);
       expect(s.draft?.target, 'r1');
       expect(s.endCable(), CableDrop.connected);
       expect(s.isConnected('r1'), isTrue);
-      expect(s.budget, 125000);
+      expect(s.budget, 140000);
     });
   });
 

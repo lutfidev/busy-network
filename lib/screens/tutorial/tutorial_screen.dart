@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/game_session.dart';
 import '../../app/routes.dart';
 import '../../core/format.dart';
 import '../../data/dummy_states.dart';
+import '../../game/levels/levels.dart';
 import '../../game/map_scene.dart';
 import '../../game/model/model.dart';
 import '../../game/network_game_view.dart';
@@ -12,11 +16,21 @@ import '../../widgets/widgets.dart';
 import 'tutorial_overlay.dart';
 import 'tutorial_steps.dart';
 
-/// 3 · Tutorial Level 1 (3 langkah).
+/// 3 · Tutorial Level 1 (3 langkah), dimainkan di satu [GameState]:
+/// "Lanjut" → langkah 2 menunggu pemain menarik kabel Router → Rumah 1 →
+/// langkah 3 menyorot "Mulai Hari", yang memulai hari level 1 asli lewat
+/// [session]. "Mulai Hari" & "Lewati" menandai tutorial selesai.
 class TutorialScreen extends StatefulWidget {
-  const TutorialScreen({super.key, this.initialStep = 1});
+  const TutorialScreen({
+    super.key,
+    required this.session,
+    this.initialStep = 1,
+  });
 
-  /// 1-based, sesuai label "1 DARI 3".
+  final GameSession session;
+
+  /// 1-based, sesuai label "1 DARI 3". Deep link langkah 2–3 = potret
+  /// desain (`DummyStates.tutorial`).
   final int initialStep;
 
   @override
@@ -34,18 +48,50 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Rect? _spot;
   double _spotScale = 1;
 
-  late GameState _game = DummyStates.tutorial(_step);
+  late final GameState _game = DummyStates.tutorial(_step);
 
-  void _next() => setState(() {
-    _step = (_step + 1).clamp(1, 3);
-    _game.dispose();
-    _game = DummyStates.tutorial(_step);
-  });
+  /// "Mulai Hari" sudah ditekan; ketukan berikutnya diabaikan.
+  bool _dayStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _game.addListener(_onGameChanged);
+  }
 
   @override
   void dispose() {
     _game.dispose();
     super.dispose();
+  }
+
+  /// Rumah 1 tersambung di langkah 2 → langkah 3.
+  void _onGameChanged() => setState(() {
+    final lesson = _game.lesson;
+    if (_step == 2 && lesson != null && _game.isConnected(lesson.to)) {
+      _step = 3;
+    }
+  });
+
+  /// Langkah 1 → 2: pelajaran tarik kabel dimulai.
+  void _next() {
+    setState(() => _step = 2);
+    _game.setLesson(Levels.tutorialLesson);
+  }
+
+  /// Hanya di langkah 3 (scrim menahan sentuhan sebelumnya; ini menahan
+  /// aktivasi pembaca layar).
+  void _startDay() {
+    if (_step != TutorialSteps.count || _dayStarted) return;
+    _dayStarted = true;
+    unawaited(widget.session.progress.completeTutorial());
+    widget.session.begin(_game.planDay());
+    context.go(AppRoutes.runOf(_game.level.number));
+  }
+
+  void _skip() {
+    unawaited(widget.session.progress.completeTutorial());
+    context.go(AppRoutes.levelMap);
   }
 
   void _measure() {
@@ -111,6 +157,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 Expanded(
                   child: NetworkGameView(
                     state: _game,
+                    interactive: _step == 2,
                     semanticLabel: 'Peta level 1: router pusat dan dua rumah',
                     overlays: [
                       Positioned.fromRect(
@@ -185,7 +232,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                         child: ChunkyButton(
                           label: 'Mulai Hari',
                           leadingIcon: GameIcons.play,
-                          onPressed: () => context.go(AppRoutes.run),
+                          onPressed: _startDay,
                         ),
                       ),
                     ],
@@ -226,24 +273,22 @@ class _TutorialScreenState extends State<TutorialScreen> {
       Positioned.fill(
         child: SpotlightScrim(spot: spot, radius: radius),
       ),
-      Positioned(
-        left: hand.dx,
-        top: hand.dy,
-        child: TutorialHand(
-          motion: _step == 2 ? HandMotion.drag : HandMotion.bob,
-          scale: _step == 3 ? 1 : _spotScale,
+      // Jari pemain sedang menarik: tangan contoh disembunyikan.
+      if (!_game.pulling)
+        Positioned(
+          left: hand.dx,
+          top: hand.dy,
+          child: TutorialHand(
+            motion: _step == 2 ? HandMotion.drag : HandMotion.bob,
+            scale: _step == 3 ? 1 : _spotScale,
+          ),
         ),
-      ),
       Positioned(
         left: AppSpacing.s20,
         right: AppSpacing.s20,
         top: below ? spot.bottom + AppSpacing.s18 : null,
         bottom: below ? null : stackSize.height - spot.top + AppSpacing.s10,
-        child: TutorialCard(
-          stepIndex: index,
-          onNext: _next,
-          onSkip: () => context.go(AppRoutes.levelMap),
-        ),
+        child: TutorialCard(stepIndex: index, onNext: _next, onSkip: _skip),
       ),
     ];
   }

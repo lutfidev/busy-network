@@ -163,7 +163,7 @@ void main() {
       );
       await dragOnMap(tester, const [
         Offset(105, 315),
-        Offset(180, 240),
+        Offset(165, 255),
         Offset(255, 165),
       ]);
       expect(find.text('1/2 rumah tersambung'), findsOneWidget);

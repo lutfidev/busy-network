@@ -40,6 +40,7 @@ GoRouter createRouter({
               GoRoute(
                 path: 'tutorial',
                 builder: (context, state) => TutorialScreen(
+                  session: play,
                   initialStep: (_intParam(state, AppRoutes.stepParam) ?? 1)
                       .clamp(1, 3),
                 ),
