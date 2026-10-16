@@ -67,7 +67,7 @@ class LevelNode extends StatelessWidget {
     final locked = state == LevelNodeState.locked;
     return Semantics(
       button: !locked,
-      enabled: !locked,
+      enabled: !locked && onPressed != null,
       label:
           semanticLabel ??
           (locked ? 'Level $number terkunci' : 'Level $number'),

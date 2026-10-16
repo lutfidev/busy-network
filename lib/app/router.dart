@@ -30,11 +30,12 @@ GoRouter createRouter({
     routes: [
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => HomeScreen(progress: play.progress),
         routes: [
           GoRoute(
             path: 'peta',
-            builder: (context, state) => const LevelMapScreen(),
+            builder: (context, state) =>
+                LevelMapScreen(progress: play.progress),
             routes: [
               GoRoute(
                 path: 'tutorial',

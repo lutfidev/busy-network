@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/progress_book.dart';
 import '../../app/routes.dart';
-import '../../data/dummy_data.dart';
+import '../../game/levels/levels.dart';
+import '../../game/model/level_def.dart';
+import '../../game/progress/progress.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'home_painters.dart';
 
-/// 1 · Beranda.
+/// 1 · Beranda, dengan bintang & progres babak dari [progress].
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.progress});
+
+  final ProgressBook progress;
 
   @override
   Widget build(BuildContext context) {
-    const chapter = DummyData.chapter;
+    return ListenableBuilder(
+      listenable: progress,
+      builder: (context, _) => _build(context, progress.progress),
+    );
+  }
+
+  Widget _build(BuildContext context, Progress p) {
+    const chapter = Levels.chapter;
     return Scaffold(
       backgroundColor: AppColors.groundNight,
       body: NightScope(
@@ -36,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           StarCounterPill(
-                            value: chapter.starsEarned,
+                            value: p.totalStars,
                             total: chapter.starsTotal,
                             tone: CounterTone.night,
                           ),
@@ -75,7 +87,7 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(
                             height: AppSpacing.s18 - AppElevation.chunkyLarge,
                           ),
-                          const _ChapterCard(chapter: chapter),
+                          _ChapterCard(chapter: chapter, progress: p),
                         ],
                       ),
                     ),
@@ -143,12 +155,14 @@ class _Hero extends StatelessWidget {
 }
 
 class _ChapterCard extends StatelessWidget {
-  const _ChapterCard({required this.chapter});
+  const _ChapterCard({required this.chapter, required this.progress});
 
-  final ChapterInfo chapter;
+  final ChapterDef chapter;
+  final Progress progress;
 
   @override
   Widget build(BuildContext context) {
+    final done = progress.levelsDone(chapter.levelCount);
     return AppCard(
       tone: CardTone.night,
       radius: AppRadius.button,
@@ -179,7 +193,7 @@ class _ChapterCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${chapter.levelsDone} / ${chapter.levelsTotal} level',
+                '$done / ${chapter.levelCount} level',
                 style: AppTypography.body.copyWith(
                   color: AppColors.inkOnDarkMuted,
                 ),
@@ -188,7 +202,7 @@ class _ChapterCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s10),
           ProgressBar(
-            value: chapter.progress,
+            value: done / chapter.levelCount,
             trackColor: AppColors.surfaceNightLine,
             semanticLabel: 'Progres babak',
           ),
