@@ -141,7 +141,7 @@ yang belum hidup (js-float, js-walk, dll.).
     `finish()` (dipanggil Fase Jalan saat 24:00) membuat `LevelResult`
     sekali per hari, mencatatnya ke progres bila hari asli & lulus, lalu
     Fase Jalan membuka Berhasil/Gagal sesuai `passed`. `result` = hasil
-    hari terakhir yang selesai (menggantikan `last`). Layar Berhasil
+    hari terakhir yang selesai (`last` tetap = hari terakhir yang dimainkan). Layar Berhasil
     memakai `session.result` bila lulus, layar Gagal bila gagal; selain itu
     potret (keputusan 8).
 11. **Tombol hasil.** "Ulangi" / "Coba Lagi" → `AppRoutes.play(level)`:
