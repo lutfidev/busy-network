@@ -246,9 +246,11 @@ void main() {
 
   group('level 1 (tarikan sungguhan)', () {
     const router = LevelDef.routerId;
-    const toHouse1 = [Offset(180, 240), Offset(255, 165)];
+    // Lurus miring: 4 segmen (ujung dipotong di tepi router & rumah).
+    const toHouse1 = [Offset(165, 255), Offset(255, 165)];
     const toHouse2 = [Offset(210, 330), Offset(315, 345)];
     const house1ToHouse2 = [Offset(285, 255), Offset(315, 345)];
+    const house2ToHouse1 = [Offset(285, 255), Offset(255, 165)];
     // Memutar lewat atas: 7 segmen, satu lebih dari jalur terpendek.
     const toHouse2Detour = [
       Offset(165, 255),
@@ -270,34 +272,41 @@ void main() {
       return LevelResult.of(playDay(game.planDay()));
     }
 
-    test('target hemat Rp 30.000', () {
-      expect(Levels.level1.savingsTarget, 30000);
+    test('target hemat Rp 50.000', () {
+      expect(Levels.level1.savingsTarget, 50000);
     });
 
     test('Rumah 1 saja (tutorial): 50% → 1★', () {
       final r = play([(router, toHouse1)]);
       expect(r.satisfaction, 50);
-      expect(r.budgetLeft, 125000);
+      expect(r.budgetLeft, 140000);
       expect(r.stars, 1);
     });
 
-    test('dua kabel dari router: sisa Rp 35.000 → 3★', () {
+    test('dua kabel dari router: sisa Rp 50.000 → 3★', () {
       final r = play([(router, toHouse1), (router, toHouse2)]);
       expect(r.satisfaction, 100);
-      expect(r.budgetLeft, 35000);
-      expect(r.stars, 3);
-    });
-
-    test('rantai lewat Rumah 1: sisa Rp 50.000 → 3★', () {
-      final r = play([(router, toHouse1), ('r1', house1ToHouse2)]);
       expect(r.budgetLeft, 50000);
       expect(r.stars, 3);
     });
 
-    test('satu segmen terbuang: sisa Rp 20.000 → 2★', () {
+    test('rantai lewat Rumah 1: sisa Rp 65.000 → 3★', () {
+      final r = play([(router, toHouse1), ('r1', house1ToHouse2)]);
+      expect(r.budgetLeft, 65000);
+      expect(r.stars, 3);
+    });
+
+    test('rantai lewat Rumah 2: sisa Rp 35.000 → 2★', () {
+      final r = play([(router, toHouse2), ('r2', house2ToHouse1)]);
+      expect(r.satisfaction, 100);
+      expect(r.budgetLeft, 35000);
+      expect(r.stars, 2);
+    });
+
+    test('satu segmen terbuang: sisa Rp 35.000 → 2★', () {
       final r = play([(router, toHouse1), (router, toHouse2Detour)]);
       expect(r.satisfaction, 100);
-      expect(r.budgetLeft, 20000);
+      expect(r.budgetLeft, 35000);
       expect(r.stars, 2);
     });
   });

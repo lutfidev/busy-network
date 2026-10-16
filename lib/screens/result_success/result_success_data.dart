@@ -1,4 +1,5 @@
 import '../../core/format.dart';
+import '../../game/map_scene.dart';
 import '../../game/result/level_result.dart';
 import '../../game/sim/sim.dart';
 
@@ -54,6 +55,10 @@ class SuccessSummary {
   /// Tips; `null` bila sudah 3 bintang atau tidak ada biang kerok.
   String? get tip => switch (result.stars) {
     >= 3 => null,
+    // Fiber belum terbuka (level 1): bintang ketiga = hemat segmen.
+    2 when !_fiberOpen =>
+      'Tarik kabel lewat jalur terpendek. Sisa anggarannya buat bintang '
+          'ketiga.',
     2 =>
       'Pakai LAN di jalur yang sepi. Fiber cukup buat kabel utama, '
           'sisanya buat bintang ketiga.',
@@ -73,6 +78,9 @@ class SuccessSummary {
       null => null,
     },
   };
+
+  bool get _fiberOpen =>
+      result.level.unlockedCables.any((spec) => spec.kind == CableKind.fiber);
 
   int get _rushFrom => result.level.rushHourFrom ?? SimClock.defaultRushFrom;
 }
