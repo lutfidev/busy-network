@@ -131,11 +131,15 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
 - Input peta: logika (snap, rute, biaya, bongkar) di `GameState`, diuji
   tanpa Flutter; komponen Flame hanya uji sentuh lalu memanggil API
   berbasis id. Widget test menyeret peta lewat `dragOnMap`/`mapToScreen`
-  di `test/test_helpers.dart`.
+  di `test/test_helpers.dart`; titik antara jalur seret taruh di titik
+  grid (mis. (165, 255)), bukan di batas sel, supaya jalurnya sama di skala
+  peta mana pun.
 - Progres: `main()` membuka `PrefsProgressStore`; test & `GameSession()`
   default memakai progres di memori (mulai dari progres awal desain).
   Deep link layar hasil (tanpa `session.result`) = potret `DummyData`,
-  jadi screenshot tetap sama dengan referensi.
+  jadi screenshot tetap sama dengan referensi. Test "aplikasi dibuka
+  ulang": `pumpWidget(const SizedBox())` dulu — `pumpApp` kedua tanpa itu
+  tetap memakai State, router, dan sesi lama.
 - Commit kecil per langkah, pesan bahasa Inggris singkat
   (`feat(scope): ...`, `fix: ...`, `test: ...`).
 
