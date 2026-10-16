@@ -61,15 +61,26 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   kepuasan, komplain yang menjeda hari, batas & prioritas antrean,
   `preview`), `SimFrame`/`HouseLive`, `QueuePlan` (isi Panel Atur
   Antrean). `GameState.startDay()` membuat `DaySim`; `planDay()` menyalin
-  rancangan jadi hari baru; `advanceDay(detik)` memajukannya.
+  rancangan jadi hari baru; `advanceDay(detik)` memajukannya. `DaySim`
+  juga mencatat menit kabel penuh, beban terparah, dan sabar yang habis.
+- `lib/game/result/` — `LevelResult.of(state)` (murni): bintang (gagal <
+  `passSatisfaction` ≤ 1★ < `targetSatisfaction` ≤ 2★, 3★ bila juga sisa
+  ≥ `savingsTarget`), rumah pindah, biang kerok `Culprit` (`FullCable`
+  → `Unconnected` → `TightLimit`; fakta saja, teksnya di layar).
+- `lib/game/progress/` — `Progress` (murni): bintang terbaik per level;
+  level terbuka & level sekarang diturunkan; `encode`/`decode` JSON.
 - `lib/screens/<layar>/` — satu folder per layar (8 layar).
 - `lib/app/` — `routes.dart` (path), `router.dart` (go_router, bersarang),
   `app.dart`, `game_session.dart` (`GameSession`: hari dioper dari Rancang
-  ke Jalan & Antrean; tanpa hari → potret desain).
+  ke Jalan & Antrean; tanpa hari → potret desain; `finish()` di 24:00 →
+  `result`, dicatat ke `progress` hanya bila hari dimulai dari Rancang),
+  `progress_book.dart` (`ProgressBook`: progres yang dibaca Beranda/Peta,
+  `record` lalu simpan).
 - `lib/data/` — `dummy_states.dart` (potret `GameState` Tutorial & bingkai
   Fase Jalan desain, yang dihitung `DaySim` dari jam/sabar/komplain
-  potret) dan `dummy_data.dart` (angka yang belum dihitung game: progres,
-  hasil).
+  potret), `dummy_data.dart` (progres awal seperti desain sampai langkah
+  8, potret layar hasil untuk deep link), dan `progress_store.dart`
+  (`PrefsProgressStore` = `shared_preferences`, `MemoryProgressStore`).
 - `lib/core/format.dart` — `IdFormat`: `Rp 850.000`, `8,5 Mbps`, `20:15`.
 - `lib/gallery/` — galeri komponen (rute `/galeri`, tombol pengaturan di
   Beranda).
@@ -115,6 +126,10 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   tanpa Flutter; komponen Flame hanya uji sentuh lalu memanggil API
   berbasis id. Widget test menyeret peta lewat `dragOnMap`/`mapToScreen`
   di `test/test_helpers.dart`.
+- Progres: `main()` membuka `PrefsProgressStore`; test & `GameSession()`
+  default memakai progres di memori (mulai dari progres awal desain).
+  Deep link layar hasil (tanpa `session.result`) = potret `DummyData`,
+  jadi screenshot tetap sama dengan referensi.
 - Commit kecil per langkah, pesan bahasa Inggris singkat
   (`feat(scope): ...`, `fix: ...`, `test: ...`).
 

@@ -30,8 +30,12 @@ Gagal · Design token & komponen.
 ## Asumsi yang diambil (desain ambigu)
 - **Pengaturan** (ikon di Beranda) belum didesain → sementara membuka galeri
   komponen `/galeri`.
-- **Level 2–5** di peta membuka Fase Rancang Gang Melati (satu-satunya level
-  yang didesain); level 1 membuka tutorial; level terkunci & bos nonaktif.
+- **Peta Babak dari progres**: progres awal = desain (level 1–4 selesai
+  3/2/3/1★, level 5 sekarang) sampai langkah 8. Level 1 membuka tutorial,
+  level 5 Fase Rancang Gang Melati; level tanpa data (2–4, 6–11) tampil
+  sesuai progres tapi tidak bisa diketuk ("Level 6, belum tersedia");
+  level terkunci & bos nonaktif. Posisi node/label/chip diturunkan dari
+  pusat node per level, jalur oranye sampai level sekarang.
 - **Rute bersarang** (`/peta/rancang/jalan/antrean`) supaya tombol back
   Android mengikuti alur. Back dari Fase Jalan = hari dibatalkan, rancangan
   tetap utuh.
@@ -42,8 +46,19 @@ Gagal · Design token & komponen.
   ke 30% di 24). Rumah macet bila kabel yang langsung menyambungkannya
   penuh dan ia kekurangan; mulai lambat bila sabar atau layanan < 60%.
   Kepuasan = rata-rata sabar semua rumah (belum tersambung = 0), dibulatkan
-  ke bawah. 24:00 → Hasil Berhasil bila kepuasan ≥ target, selain itu
-  Hasil Gagal (angka hasil masih dummy sampai langkah 6).
+  ke bawah. 24:00 → Hasil Berhasil bila kepuasan ≥ batas lulus, selain itu
+  Hasil Gagal.
+- **Hasil & bintang** (rincian di
+  `docs/superpowers/specs/2026-10-16-hasil-progres-design.md`): desain
+  punya 1★ di 72% (target 80%), jadi gagal = di bawah *batas lulus*
+  (level 5: 60%, level 1: 40%). 1★ lulus, 2★ kepuasan ≥ target, 3★ juga
+  sisa anggaran ≥ Rp 200.000. "Bangkrut" = gagal (anggaran tidak bisa
+  minus). Teks gagal tetap "targetnya 80%". Rumah pindah = sabar sempat
+  habis + rumah tak tersambung. Biang kerok: kabel paling lama penuh
+  ("Kabel ke {blok} kelebihan beban jam {beban terparah}", dua pemakai
+  terbesar), atau rumah belum tersambung, atau jatah terlalu ketat (dua
+  terakhir copy baru). Hanya hari dari Fase Rancang yang dicatat ke
+  progres (`shared_preferences`); bintang hanya naik.
 - **Komplain**: sekali per masa macet tiap rumah, paling sering sekali per
   rumah tiap 2 jam (rumah yang macet bersamaan bergiliran; yang macet saat
   masih jeda menyusul begitu jedanya habis). Komplain menjeda hari sampai
@@ -59,8 +74,10 @@ Gagal · Design token & komponen.
   tiap rumah, Warung prioritas, komplain Bu Sri 20:14. Tutorial "Mulai
   Hari" masih membuka potret ini sampai langkah 7; dengan 1/2 rumah,
   level 1 maksimal 50% (< target 60%).
-- **Hasil Berhasil** menerima `?bintang=1..3`; angka mengikuti logika
-  prototipe (72/86%, Rp 120.000/240.000, komplain 7/3/2).
+- **Deep link layar hasil** (screenshot, tanpa hari yang selesai) memakai
+  potret desain: Berhasil `?bintang=1..3` dengan angka logika prototipe
+  (72/86%, Rp 120.000/240.000, komplain 7/3/2), Gagal 41% / 11 komplain /
+  2 rumah, biang kerok Blok B jam 20:00.
 - **Tutorial**: posisi sorotan diukur dari widget target (bukan koordinat
   absolut) supaya tetap pas di layar mana pun. Scrim tidak memblokir sentuhan
   (sama seperti `pointer-events: none` di prototipe).
