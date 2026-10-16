@@ -17,7 +17,7 @@ abstract final class SceneBuilder {
     // keluar layar saat 24:00), bukan kembali ke siang.
     final run = s.phase != GamePhase.design;
     final frame = run ? s.frame : null;
-    final draft = s.phase == GamePhase.design ? s.draft : null;
+    final draft = s.phase == GamePhase.design ? s.draft ?? s.guide : null;
     final usage = frame?.demand ?? const <String, double>{};
     final net = s.network;
     final overloaded = {

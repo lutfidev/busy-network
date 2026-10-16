@@ -42,6 +42,14 @@ abstract final class Levels {
     ],
   );
 
+  /// Tutorial level 1 langkah 2: tarik kabel Router → Rumah 1 (garis
+  /// panduan dari desain).
+  static const tutorialLesson = CableLesson(
+    from: LevelDef.routerId,
+    to: 'r1',
+    guide: [Offset(105, 315), Offset(255, 165)],
+  );
+
   static const _j1 = Offset(195, 150);
 
   static const level5 = LevelDef(
