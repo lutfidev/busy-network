@@ -31,14 +31,17 @@ Gagal · Design token & komponen.
 - **Pengaturan** (ikon di Beranda) belum didesain → sementara membuka galeri
   komponen `/galeri`.
 - **Peta Babak dari progres**: progres awal = desain (level 1–4 selesai
-  3/2/3/1★, level 5 sekarang) sampai langkah 8. Level 1 membuka tutorial,
-  level 5 Fase Rancang Gang Melati; level tanpa data (2–4, 6–11) tampil
+  3/2/3/1★, level 5 sekarang) sampai langkah 8. Level 1 membuka tutorial
+  (setelah tutorial selesai: Fase Rancang level 1), level 5 Fase Rancang
+  Gang Melati; level tanpa data (2–4, 6–11) tampil
   sesuai progres tapi tidak bisa diketuk ("Level 6, belum tersedia");
   level terkunci & bos nonaktif. Posisi node/label/chip diturunkan dari
   pusat node per level, jalur oranye sampai level sekarang.
 - **Rute bersarang** (`/peta/rancang/jalan/antrean`) supaya tombol back
   Android mengikuti alur. Back dari Fase Jalan = hari dibatalkan, rancangan
-  tetap utuh.
+  tetap utuh. Fase Jalan & Panel Antrean membawa `?level=n`
+  (`AppRoutes.runOf/queueOf`) supaya Fase Rancang di bawahnya level yang
+  benar; back dari hari tutorial membuka Fase Rancang level 1 (kosong).
 - **Simulasi hari** (rincian di
   `docs/superpowers/specs/2026-10-15-simulasi-hari-design.md`): 06→24 dalam
   90 detik; tombol percepat = sakelar ×4 (bukan lompat ke hasil). Pemakaian
@@ -52,7 +55,8 @@ Gagal · Design token & komponen.
   `docs/superpowers/specs/2026-10-16-hasil-progres-design.md`): desain
   punya 1★ di 72% (target 80%), jadi gagal = di bawah *batas lulus*
   (level 5: 60%, level 1: 40%). 1★ lulus, 2★ kepuasan ≥ target, 3★ juga
-  sisa anggaran ≥ Rp 200.000. "Bangkrut" = gagal (anggaran tidak bisa
+  sisa anggaran ≥ Rp 200.000 (level 1: Rp 50.000 = dua rumah dengan kabel
+  lurus; tips 2★ tanpa fiber selama fiber belum terbuka). "Bangkrut" = gagal (anggaran tidak bisa
   minus). Teks gagal tetap "targetnya 80%". Rumah pindah = sabar sempat
   habis + rumah tak tersambung. Biang kerok: kabel paling lama penuh
   ("Kabel ke {blok} kelebihan beban jam {beban terparah}", dua pemakai
@@ -71,16 +75,29 @@ Gagal · Design token & komponen.
   Status kartu adalah pratinjau aturan simulasi (Kak Dewi "mulai lambat"
   karena sabarnya 55%, bukan aturan khusus prototipe).
 - **Bingkai Fase Jalan** (20:15) dihitung simulasi dari potret: jam, sabar
-  tiap rumah, Warung prioritas, komplain Bu Sri 20:14. Tutorial "Mulai
-  Hari" masih membuka potret ini sampai langkah 7; dengan 1/2 rumah,
-  level 1 maksimal 50% (< target 60%).
+  tiap rumah, Warung prioritas, komplain Bu Sri 20:14.
 - **Deep link layar hasil** (screenshot, tanpa hari yang selesai) memakai
   potret desain: Berhasil `?bintang=1..3` dengan angka logika prototipe
   (72/86%, Rp 120.000/240.000, komplain 7/3/2), Gagal 41% / 11 komplain /
   2 rumah, biang kerok Blok B jam 20:00.
-- **Tutorial**: posisi sorotan diukur dari widget target (bukan koordinat
-  absolut) supaya tetap pas di layar mana pun. Scrim tidak memblokir sentuhan
-  (sama seperti `pointer-events: none` di prototipe).
+- **Tutorial** (rincian di
+  `docs/superpowers/specs/2026-10-16-tutorial-interaktif-design.md`):
+  posisi sorotan diukur dari widget target (bukan koordinat absolut)
+  supaya tetap pas di layar mana pun. Scrim **menahan sentuhan di luar
+  lubang sorotan** (prototipe memakai `pointer-events: none`, tapi
+  tutorialnya maju lewat tombol); kartu tutorial tetap bisa diketuk, jadi
+  keluar lewat "Lewati" atau back Android. Satu `GameState` dari langkah
+  1 sampai 3: langkah 2 tanpa tombol "Udah, lanjut" — peta interaktif
+  dengan `CableLesson` (hanya Router → Rumah 1, kabel panduan putus-putus
+  selama jari tidak menarik, tangan contoh hilang saat jari menarik);
+  begitu Rumah 1 tersambung → langkah 3 (anggaran terpotong sungguhan,
+  kabel lurus Rp 60.000). "Mulai Hari" hanya di langkah 3: hari level 1
+  asli (1/2 rumah → 50% → 1★, tercatat). "Mulai Hari" atau "Lewati" =
+  tutorial selesai (`"tutorial": true` di JSON progres). Deep link
+  `?langkah=3` tetap potret desain (Rp 200.000).
+- **Fase Rancang level 1**: kabel yang belum terbuka tampil sebagai kartu
+  terkunci seperti tutorial; "Jam sibuk" memakai jam bawaan simulasi
+  (19–22) bila level tidak menentukan.
 - **Tooltip biaya** di Fase Rancang dibuat satu baris (di desain 390 px
   ia terbungkus karena mepet tepi).
 - **Kartu kabel** tingginya minimal 88 px dan boleh bertambah supaya

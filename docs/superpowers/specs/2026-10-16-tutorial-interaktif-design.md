@@ -39,8 +39,9 @@ dukungan pembaca layar untuk menarik kabel (peta Flame memang belum punya).
    peta tidak interaktif. "Lanjut" → langkah 2: `setLesson(tutorial)`, peta
    interaktif (`NetworkGameView.interactive`). Begitu Rumah 1 tersambung
    (pemain melepas jari di Rumah 1) → langkah 3 otomatis; peta tidak
-   interaktif lagi. Anggaran terpotong sungguhan (5 segmen LAN = Rp 75.000
-   → header Rp 125.000).
+   interaktif lagi. Anggaran terpotong sungguhan (kabel lurus miring = 4
+   segmen LAN = Rp 60.000 → header Rp 140.000; jalur yang berbelok lebih
+   mahal).
 3. **Kartu langkah 2 tanpa tombol.** "Udah, lanjut" dihapus; judul & teks
    tetap copy desain. Tangan tutorial (js-drag) disembunyikan selama jari
    menarik, muncul lagi bila tarikan batal. Tarikan yang dilepas di luar
@@ -93,13 +94,17 @@ dukungan pembaca layar untuk menarik kabel (peta Flame memang belum punya).
     Fase Rancang level 1 (kosong, Rp 200.000), bukan level 5. Deep link
     tanpa query tetap jalan (level 5), dan deep link Fase Jalan tetap
     potret desain level 5 apa pun query-nya.
-11. **`savingsTarget` level 1 = Rp 30.000.** Biaya rancangan level 1
-    (LAN Rp 15.000/segmen): Router → Rumah 1 = 5 segmen, Router → Rumah 2
-    = 6, Rumah 1 → Rumah 2 = 5, Rumah 2 → Rumah 1 = 5. Dua rumah
-    tersambung → kepuasan 100% dengan sisa Rp 35.000 (dua kabel dari
-    router, atau rantai lewat Rumah 2) atau Rp 50.000 (rantai lewat
-    Rumah 1). Sisa hanya bergerak per Rp 15.000, jadi Rp 30.000 = 3★ untuk
-    rancangan rapi mana pun; satu segmen terbuang (Rp 20.000) → 2★.
+11. **`savingsTarget` level 1 = Rp 50.000.** Biaya rancangan level 1
+    (LAN Rp 15.000/segmen, segmen dihitung setelah ujung dipotong di tepi
+    node): Router → Rumah 1 lurus = 4 segmen, Router → Rumah 2 = 6,
+    Rumah 1 ↔ Rumah 2 = 5. Dua rumah tersambung → kepuasan 100% dengan
+    sisa Rp 50.000 (dua kabel dari router) atau Rp 65.000 (rantai lewat
+    Rumah 1) = 3★; rantai lewat Rumah 2, atau satu segmen terbuang
+    (Rp 35.000) → 2★. Sisa hanya bergerak per Rp 15.000. (Rencana awal
+    Rp 30.000 dihitung dari jalur uji yang berbelok, 5 segmen.)
+    Tips 2★ di level yang fibernya belum terbuka (copy baru, karena tips
+    desain menyuruh pakai fiber): "Tarik kabel lewat jalur terpendek. Sisa
+    anggarannya buat bintang ketiga."
 12. **Deep link langkah 2 & 3 tetap potret.** `?langkah=2` = level 1
     dengan pelajaran (kabel panduan sama dengan desain; sekarang bisa
     dimainkan). `?langkah=3` = potret desain (kabel terpasang, anggaran
@@ -110,9 +115,9 @@ dukungan pembaca layar untuk menarik kabel (peta Flame memang belum punya).
       saat diam / menarik / batal / tersambung, `planDay` tanpa pelajaran);
       `Progress` (flag, JSON bolak-balik, data lama, rusak); `ProgressBook.
       completeTutorial`; `AppRoutes.play/runOf/queueOf`; bintang level 1
-      (3★ di sisa Rp 35.000, 2★ dengan satu segmen terbuang, 1★ tutorial).
+      (3★ di sisa Rp 50.000/65.000, 2★ di Rp 35.000, 1★ tutorial).
     - Widget: tarik Router → Rumah 1 di langkah 2 → langkah 3 (1/2 rumah,
-      Rp 125.000); tarik ke Rumah 2 / lepas di luar → tetap langkah 2;
+      Rp 140.000); tarik ke Rumah 2 / lepas di luar → tetap langkah 2;
       langkah 1 peta tidak interaktif & "Mulai Hari" tertahan scrim; tangan
       hilang saat menarik; Mulai Hari → Fase Jalan level 1 → 24:00 →
       Hasil 1★ tercatat & tutorial selesai; back dari hari tutorial → Fase

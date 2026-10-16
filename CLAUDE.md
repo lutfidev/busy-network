@@ -40,8 +40,10 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `HouseDef`, `Cable`/`CableSpec`/`CableDraft`, `CableWalk` +
   `cablePolyline` (jalur tarikan di grid), `Network` topologi & beban,
   `GameState` fase rancang/jalan/hasil, anggaran, tarik kabel
-  `beginCable`/`dragCable`/`endCable`, `removeCable`, mode hapus),
-  `levels/levels.dart` (data level),
+  `beginCable`/`dragCable`/`endCable`, `removeCable`, mode hapus,
+  `CableLesson` = tarikan tutorial (sumber & tujuan dibatasi, kabel
+  panduan `guide`)),
+  `levels/levels.dart` (data level, `tutorialLesson`),
   `scene_builder.dart` (`SceneBuilder.fromState(state)` → `MapScene`),
   `map_scene.dart` (model gambar), `render/map_renderer.dart` (gambar
   rumah/router/kabel/trafik di atas `Canvas`, per lapisan),
@@ -53,7 +55,8 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `JunctionComponent`, `BadgeComponent`, `DragHandleComponent`; semuanya
   menggambar lewat `MapRenderer`), `network_game_view.dart`
   (`NetworkGameView`: `GameWidget` + overlay widget berkoordinat peta;
-  dipakai Tutorial/Rancang/Jalan; hanya Rancang yang `interactive`).
+  dipakai Tutorial/Rancang/Jalan; Rancang & langkah 2 tutorial
+  `interactive`).
 - `lib/game/sim/` — simulasi hari, murni & deterministik (tanpa Flutter):
   `SimClock` (06→24 dalam 90 detik, percepat ×4), `UsageCurve` (puncak jam
   sibuk), `Flow.serve` (aliran per hop, prioritas dulu), `Patience`
@@ -67,16 +70,19 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `passSatisfaction` ≤ 1★ < `targetSatisfaction` ≤ 2★, 3★ bila juga sisa
   ≥ `savingsTarget`), rumah pindah, biang kerok `Culprit` (`FullCable`
   → `Unconnected` → `TightLimit`; fakta saja, teksnya di layar).
-- `lib/game/progress/` — `Progress` (murni): bintang terbaik per level;
-  level terbuka & level sekarang diturunkan; `encode`/`decode` JSON.
+- `lib/game/progress/` — `Progress` (murni): bintang terbaik per level +
+  `tutorialDone`; level terbuka & level sekarang diturunkan;
+  `encode`/`decode` JSON.
 - `lib/screens/<layar>/` — satu folder per layar (8 layar).
-- `lib/app/` — `routes.dart` (path), `router.dart` (go_router, bersarang),
-  `app.dart`, `game_session.dart` (`GameSession`: hari dioper dari Rancang
-  ke Jalan & Antrean; tanpa hari → potret desain; `finish()` di 24:00 →
-  `result`, dicatat ke `progress` hanya bila hari dimulai dari Rancang),
-  `progress_book.dart` (`ProgressBook`: progres yang dibaca Beranda/Peta,
-  `record` lalu simpan).
-- `lib/data/` — `dummy_states.dart` (potret `GameState` Tutorial & bingkai
+- `lib/app/` — `routes.dart` (path; `play(n, tutorialDone:)`,
+  `runOf`/`queueOf` membawa `?level=`), `router.dart` (go_router,
+  bersarang), `app.dart`, `game_session.dart` (`GameSession`: hari dioper
+  dari Rancang/Tutorial ke Jalan & Antrean; tanpa hari → potret desain;
+  `finish()` di 24:00 → `result`, dicatat ke `progress` hanya bila hari
+  dimulai lewat `begin`), `progress_book.dart` (`ProgressBook`: progres
+  yang dibaca Beranda/Peta, `record`/`completeTutorial` lalu simpan).
+- `lib/data/` — `dummy_states.dart` (potret `GameState` Tutorial (deep
+  link `?langkah=`; tutorial yang dimainkan memakai satu state) & bingkai
   Fase Jalan desain, yang dihitung `DaySim` dari jam/sabar/komplain
   potret), `dummy_data.dart` (progres awal seperti desain sampai langkah
   8, potret layar hasil untuk deep link), dan `progress_store.dart`
