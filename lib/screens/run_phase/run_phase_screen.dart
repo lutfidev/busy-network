@@ -95,12 +95,12 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
     }
   }
 
-  /// Hari selesai: berhasil bila kepuasan mencapai target.
+  /// Hari selesai: catat hasilnya, lalu layar berhasil bila lulus.
   void _finish() {
     if (_finished) return;
     _finished = true;
-    final passed = _day.satisfaction >= _game.level.targetSatisfaction;
-    context.go(passed ? AppRoutes.success : AppRoutes.fail);
+    final result = widget.session.finish();
+    context.go(result.passed ? AppRoutes.success : AppRoutes.fail);
   }
 
   /// Buka Panel Atur Antrean; jam berhenti sekarang juga supaya hari tidak

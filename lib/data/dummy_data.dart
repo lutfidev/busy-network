@@ -3,7 +3,9 @@
 /// hari di `lib/game/sim/`; snapshot state ada di `dummy_states.dart`.
 library;
 
+import '../game/levels/levels.dart';
 import '../game/progress/progress.dart';
+import '../game/result/level_result.dart';
 
 class ChapterInfo {
   const ChapterInfo({
@@ -46,4 +48,33 @@ abstract final class DummyData {
   static const failSatisfaction = 41;
   static const failComplaints = 11;
   static const failHousesLost = 2;
+
+  /// Biang kerok di potret hasil desain.
+  static const _blockB = FullCable(
+    area: 'Blok B',
+    minute: 20 * 60,
+    heavyUsers: ['Bu Sri', 'Pak Rudi'],
+    suggestFiber: true,
+  );
+
+  /// Hasil Berhasil di desain (`?bintang=1..3`, angka logika prototipe;
+  /// bintangnya keluar dari aturan).
+  static LevelResult success(int stars) => LevelResult(
+    level: Levels.level5,
+    satisfaction: stars >= 2 ? 86 : 72,
+    budgetLeft: stars >= 3 ? 240000 : 120000,
+    complaints: stars >= 3 ? 2 : (stars == 2 ? 3 : 7),
+    housesLost: 0,
+    culprit: _blockB,
+  );
+
+  /// Hasil Gagal di desain.
+  static const fail = LevelResult(
+    level: Levels.level5,
+    satisfaction: 41,
+    budgetLeft: 120000,
+    complaints: 11,
+    housesLost: 2,
+    culprit: _blockB,
+  );
 }
