@@ -159,9 +159,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(LevelMapScreen), findsOneWidget);
     expect(store.load()!.tutorialDone, isTrue);
-    expect(store.load()!.totalStars, 9, reason: 'bintang tidak berubah');
+    expect(store.load()!.totalStars, 0, reason: 'bintang tidak berubah');
 
-    await tester.tap(find.bySemanticsLabel('Level 1, 3 bintang'));
+    await tester.tap(
+      find.bySemanticsLabel('Level 1, Rumah Pertama, main sekarang'),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(DesignPhaseScreen), findsOneWidget);
   });
@@ -186,7 +188,9 @@ void main() {
       location: AppRoutes.levelMap,
       session: _session(store),
     );
-    await tester.tap(find.bySemanticsLabel('Level 1, 3 bintang'));
+    await tester.tap(
+      find.bySemanticsLabel('Level 1, Rumah Pertama, main sekarang'),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(DesignPhaseScreen), findsOneWidget);
     expect(find.byType(TutorialScreen), findsNothing);

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../game/sim/sim_fixtures.dart';
+import '../game/levels/level_plans.dart';
 import '../test_helpers.dart';
 
 /// Sesi dengan [game] yang sudah dimainkan sampai 24:00 dan ditutup.
@@ -96,13 +97,56 @@ void main() {
     expect(find.text('Rp 850.000'), findsOneWidget);
   });
 
-  testWidgets('Level Berikutnya: level 6 belum ada → Peta', (tester) async {
+  testWidgets('Level Berikutnya: level 6 → Fase Rancang level 6', (
+    tester,
+  ) async {
     setScreenSize(tester, const Size(390, 844));
     final session = _finished(designDay(designCables));
     await pumpApp(tester, location: AppRoutes.success, session: session);
     await tester.tap(find.text('Level Berikutnya'));
     await tester.pumpAndSettle();
-    expect(find.byType(LevelMapScreen), findsOneWidget);
+    expect(find.byType(DesignPhaseScreen), findsOneWidget);
+    expect(find.text('Warisan Pak RT'), findsOneWidget);
+  });
+
+  group('Level Berikutnya dari level 11', () {
+    /// Sesi dengan hari level 11 (rancangan acuan, 3★) yang sudah selesai,
+    /// di atas progres [before].
+    GameSession level11Done(Progress before) {
+      final session = GameSession(
+        progress: ProgressBook(MemoryProgressStore(before)),
+      );
+      final day = design(Levels.level11, referencePlans[11]!).planDay();
+      session.begin(day);
+      playDay(day);
+      session.finish();
+      return session;
+    }
+
+    testWidgets('bintang < 24 → Peta (bos terkunci)', (tester) async {
+      setScreenSize(tester, const Size(390, 844));
+      final session = level11Done(
+        Progress({for (var n = 1; n <= 10; n++) n: 2}),
+      );
+      expect(session.progress.progress.starsUpTo(11), 23);
+      await pumpApp(tester, location: AppRoutes.success, session: session);
+      await tester.tap(find.text('Level Berikutnya'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LevelMapScreen), findsOneWidget);
+    });
+
+    testWidgets('bintang ≥ 24 → Fase Rancang level bos', (tester) async {
+      setScreenSize(tester, const Size(390, 844));
+      final session = level11Done(
+        Progress({for (var n = 1; n <= 10; n++) n: n == 1 ? 3 : 2}),
+      );
+      expect(session.progress.progress.starsUpTo(11), 24);
+      await pumpApp(tester, location: AppRoutes.success, session: session);
+      await tester.tap(find.text('Level Berikutnya'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DesignPhaseScreen), findsOneWidget);
+      expect(find.text('Malam Final Sepak Bola'), findsOneWidget);
+    });
   });
 
   test('play: level 1 tutorial sampai selesai, lainnya Fase Rancang', () {

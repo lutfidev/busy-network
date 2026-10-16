@@ -1,5 +1,7 @@
 import 'package:busy_network/app/game_session.dart';
+import 'package:busy_network/app/progress_book.dart';
 import 'package:busy_network/app/routes.dart';
+import 'package:busy_network/data/dummy_data.dart';
 import 'package:busy_network/screens/design_phase/design_phase_screen.dart';
 import 'package:busy_network/screens/home/home_screen.dart';
 import 'package:busy_network/screens/level_map/level_map_screen.dart';
@@ -22,7 +24,13 @@ void main() {
   testWidgets('alur utama: Beranda → Peta → Rancang → Jalan → Antrean → '
       'Jalan → hari habis → Gagal → Coba Lagi', (tester) async {
     setScreenSize(tester, const Size(390, 844));
-    await pumpApp(tester);
+    // Peta seperti desain: level 1–4 selesai, level 5 sekarang.
+    await pumpApp(
+      tester,
+      session: GameSession(
+        progress: ProgressBook.memory(DummyData.designProgress),
+      ),
+    );
     expect(find.byType(HomeScreen), findsOneWidget);
 
     await tester.tap(find.text('Main'));
@@ -60,7 +68,7 @@ void main() {
     expect(find.text('4/7 rumah tersambung'), findsOneWidget);
   });
 
-  testWidgets('percepat → hasil berhasil → level berikutnya → peta', (
+  testWidgets('percepat → hasil berhasil → level berikutnya (level 6)', (
     tester,
   ) async {
     setScreenSize(tester, const Size(390, 844));
@@ -87,7 +95,8 @@ void main() {
 
     await tester.tap(find.text('Level Berikutnya'));
     await tester.pumpAndSettle();
-    expect(find.byType(LevelMapScreen), findsOneWidget);
+    expect(find.byType(DesignPhaseScreen), findsOneWidget);
+    expect(find.text('Warisan Pak RT'), findsOneWidget);
     semantics.dispose();
   });
 

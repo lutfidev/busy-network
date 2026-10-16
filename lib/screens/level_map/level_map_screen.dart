@@ -13,8 +13,8 @@ import 'level_map_painter.dart';
 
 /// 2 · Peta Babak 1 – Perumahan Batam, dari progres pemain.
 ///
-/// Level yang belum punya data (langkah 8) tampil sesuai progres tapi tidak
-/// bisa diketuk.
+/// Level tanpa data tampil sesuai progres tapi tidak bisa diketuk. Level
+/// bos (kartu di bawah) butuh bintang babak.
 class LevelMapScreen extends StatelessWidget {
   const LevelMapScreen({super.key, required this.progress});
 
@@ -89,18 +89,35 @@ class LevelMapScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
                 AppSpacing.s20,
                 AppSpacing.s4,
                 AppSpacing.s20,
                 AppSpacing.s24 - AppElevation.chunkyLarge,
               ),
-              child: BossLevelCard(),
+              child: _boss(context, p),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  /// Kartu level bos: terbuka bila level sebelumnya selesai dan bintang
+  /// babak cukup ([Progress.canPlay]).
+  Widget _boss(BuildContext context, Progress p) {
+    final n = Levels.chapter.bossLevel;
+    final state = p.isDone(n)
+        ? LevelNodeState.done
+        : p.canPlay(Levels.chapter, n)
+        ? LevelNodeState.current
+        : LevelNodeState.locked;
+    return BossLevelCard(
+      state: state,
+      stars: p.starsOf(n),
+      onPressed: () =>
+          context.go(AppRoutes.play(n, tutorialDone: p.tutorialDone)),
     );
   }
 
@@ -141,6 +158,7 @@ class LevelMapScreen extends StatelessWidget {
     final current = state == LevelNodeState.current;
     final locked = state == LevelNodeState.locked;
     final topLeft = LevelMapLayout.nodeTopLeft(slot, state);
+    final tutorial = n == 1 && !p.tutorialDone ? ', tutorial' : '';
     final node = LevelNode(
       number: n,
       state: state,
@@ -150,11 +168,9 @@ class LevelMapScreen extends StatelessWidget {
       semanticLabel: switch (state) {
         LevelNodeState.locked => 'Level $n terkunci',
         LevelNodeState.current when level != null =>
-          'Level $n, ${level.name}, main sekarang',
+          'Level $n, ${level.name}, main sekarang$tutorial',
         LevelNodeState.current => 'Level $n, belum tersedia',
-        LevelNodeState.done =>
-          'Level $n, ${p.starsOf(n)} bintang'
-              '${n == 1 && !p.tutorialDone ? ', tutorial' : ''}',
+        LevelNodeState.done => 'Level $n, ${p.starsOf(n)} bintang$tutorial',
       },
     );
     return [

@@ -1,18 +1,20 @@
 import 'package:flutter/foundation.dart';
 
-import '../data/dummy_data.dart';
 import '../data/progress_store.dart';
 import '../game/progress/progress.dart';
 
 /// Progres pemain selama aplikasi berjalan: dibaca Beranda & Peta Babak,
 /// ditulis saat level selesai ([record]) dan tutorial selesai
-/// ([completeTutorial]). Belum ada yang tersimpan → progres awal desain
-/// ([DummyData.progress]).
+/// ([completeTutorial]). Belum ada yang tersimpan → [initial] (default
+/// [Progress.empty]: mulai dari level 1).
 class ProgressBook extends ChangeNotifier {
-  ProgressBook(this._store) : _progress = _store.load() ?? DummyData.progress;
+  ProgressBook(this._store, {Progress? initial})
+    : _progress = _store.load() ?? initial ?? Progress.empty;
 
-  /// Progres di memori saja (default aplikasi di test).
-  ProgressBook.memory() : this(MemoryProgressStore());
+  /// Progres di memori saja (default aplikasi di test), mulai dari
+  /// [initial].
+  ProgressBook.memory([Progress? initial])
+    : this(MemoryProgressStore(), initial: initial);
 
   final ProgressStore _store;
   Progress _progress;

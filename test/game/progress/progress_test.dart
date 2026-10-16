@@ -1,3 +1,4 @@
+import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/game/progress/progress.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,6 +11,47 @@ void main() {
     expect(p.isOpen(1), isTrue);
     expect(p.isOpen(2), isFalse);
     expect(p.totalStars, 0);
+  });
+
+  test('empty = progres kosong tanpa tutorial', () {
+    expect(Progress.empty, Progress(const {}));
+    expect(Progress.empty.tutorialDone, isFalse);
+    expect(Progress.empty.current, 1);
+  });
+
+  group('level bos butuh bintang babak', () {
+    const chapter = Levels.chapter;
+
+    test('level biasa: sama dengan isOpen', () {
+      expect(Progress.empty.canPlay(chapter, 1), isTrue);
+      expect(Progress.empty.canPlay(chapter, 2), isFalse);
+      expect(_design.canPlay(chapter, 5), isTrue);
+    });
+
+    test('level 11 selesai tapi bintang < 24 → bos terkunci', () {
+      final p = Progress({for (var n = 1; n <= 11; n++) n: 2});
+      expect(p.starsUpTo(11), 22);
+      expect(p.isOpen(12), isTrue);
+      expect(p.canPlay(chapter, 12), isFalse);
+    });
+
+    test('24 bintang dari level 1–11 → bos terbuka', () {
+      final p = Progress({for (var n = 1; n <= 11; n++) n: n <= 2 ? 3 : 2});
+      expect(p.starsUpTo(11), 24);
+      expect(p.canPlay(chapter, 12), isTrue);
+    });
+
+    test('bintang cukup tapi level 11 belum selesai → terkunci', () {
+      final p = Progress({for (var n = 1; n <= 10; n++) n: 3});
+      expect(p.starsUpTo(11), 30);
+      expect(p.canPlay(chapter, 12), isFalse);
+    });
+
+    test('bintang bos sendiri tidak dihitung', () {
+      final p = Progress({for (var n = 1; n <= 11; n++) n: 1, 12: 3});
+      expect(p.starsUpTo(11), 11);
+      expect(p.totalStars, 14);
+    });
   });
 
   test('progres desain: 9 bintang, 4 level, level 5 sekarang', () {

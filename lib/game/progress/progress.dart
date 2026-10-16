@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../model/level_def.dart';
+
 /// Progres pemain: bintang terbaik tiap nomor level dan apakah tutorial
 /// sudah selesai. Level terbuka & level sekarang diturunkan dari sini, tidak
 /// disimpan.
@@ -9,6 +11,9 @@ class Progress {
         for (final MapEntry(key: level, value: count) in stars.entries)
           if (_checked(level, count) > 0) level: count,
       });
+
+  /// Belum ada level yang selesai, tutorial belum dimainkan: awal permainan.
+  static final empty = Progress(const {});
 
   static const version = 1;
 
@@ -35,6 +40,19 @@ class Progress {
   }
 
   int get totalStars => _stars.values.fold(0, (sum, s) => sum + s);
+
+  /// Bintang level 1..[lastLevel].
+  int starsUpTo(int lastLevel) =>
+      [for (var n = 1; n <= lastLevel; n++) starsOf(n)]
+          .fold(0, (sum, s) => sum + s);
+
+  /// Level [level] di [chapter] bisa dimainkan: terbuka ([isOpen]), dan
+  /// untuk level bos juga bintang level sebelumnya ≥
+  /// [ChapterDef.bossStars].
+  bool canPlay(ChapterDef chapter, int level) =>
+      isOpen(level) &&
+      (level != chapter.bossLevel ||
+          starsUpTo(chapter.bossLevel - 1) >= chapter.bossStars);
 
   /// Level 1..[levelCount] yang sudah selesai.
   int levelsDone(int levelCount) => [

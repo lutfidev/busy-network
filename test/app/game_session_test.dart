@@ -10,7 +10,9 @@ import '../screens/run_fixtures.dart';
 
 void main() {
   test('hari asli lulus → bintang dicatat ke progres', () {
-    final session = GameSession();
+    final session = GameSession(
+      progress: ProgressBook.memory(DummyData.designProgress),
+    );
     final day = winningDay(minute: SimClock.dayStart);
     session.begin(day);
     playDay(day);

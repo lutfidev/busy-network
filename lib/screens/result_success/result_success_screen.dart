@@ -28,13 +28,14 @@ class ResultSuccessScreen extends StatelessWidget {
   String _play(int number) =>
       AppRoutes.play(number, tutorialDone: progress.progress.tutorialDone);
 
-  /// Level berikutnya bila datanya ada; selain itu Peta Babak (level baru
-  /// sudah terbuka di sana).
+  /// Level berikutnya bila ada dan bisa dimainkan; selain itu Peta Babak
+  /// (setelah level bos, atau level bos yang bintangnya belum cukup).
   void _next(BuildContext context) {
     final next = result.level.number + 1;
-    context.go(
-      Levels.byNumber(next) != null ? _play(next) : AppRoutes.levelMap,
-    );
+    final open =
+        Levels.byNumber(next) != null &&
+        progress.progress.canPlay(Levels.chapter, next);
+    context.go(open ? _play(next) : AppRoutes.levelMap);
   }
 
   @override

@@ -21,7 +21,7 @@ const _design = <int, (Offset, Offset)>{
 
 void main() {
   test('progres awal = koordinat & status desain', () {
-    final p = DummyData.progress;
+    final p = DummyData.designProgress;
     for (final slot in LevelMapLayout.slots) {
       final state = LevelMapLayout.stateOf(p, slot.number);
       final (node, label) = _design[slot.number]!;
@@ -73,7 +73,7 @@ void main() {
   });
 
   test('level 5 selesai → level 6 sekarang', () {
-    final p = DummyData.progress.record(5, 2);
+    final p = DummyData.designProgress.record(5, 2);
     final five = LevelMapLayout.slotOf(5)!;
     final six = LevelMapLayout.slotOf(6)!;
     expect(LevelMapLayout.stateOf(p, 5), LevelNodeState.done);
