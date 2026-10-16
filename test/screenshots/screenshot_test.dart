@@ -5,14 +5,19 @@
 // Hasil di build/screenshots/<lebar>x<tinggi>/. Tanpa define di atas, test
 // ini dilewati (tidak ikut `flutter test` biasa).
 import 'package:busy_network/app/app.dart';
+import 'package:busy_network/app/game_session.dart';
+import 'package:busy_network/app/progress_book.dart';
 import 'package:busy_network/app/routes.dart';
+import 'package:busy_network/data/dummy_data.dart';
 import 'package:busy_network/gallery/widget_gallery_screen.dart';
+import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../game/design_pull.dart';
+import '../game/levels/level_plans.dart';
 import '../test_helpers.dart';
 import 'capture.dart';
 
@@ -52,8 +57,16 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         disableAnimations(tester);
+        // Beranda & Peta Babak seperti desain (level 5 sekarang).
         await tester.pumpWidget(
-          capturable(JaringanSibukApp(initialLocation: location)),
+          capturable(
+            JaringanSibukApp(
+              initialLocation: location,
+              session: GameSession(
+                progress: ProgressBook.memory(DummyData.designProgress),
+              ),
+            ),
+          ),
         );
         await tester.pumpAndSettle();
         final gesture = await _before[name]?.call(tester);
@@ -61,6 +74,51 @@ void main() {
         await gesture?.up();
       }, skip: !screenshotsEnabled);
     }
+  }
+
+  // Level 2–12 (desain hanya punya level 1 & 5): Fase Rancang kosong dan
+  // Fase Jalan rancangan acuan pukul 21:00.
+  for (final level in Levels.all.where((l) => l.number != 1 && l.number != 5)) {
+    final n = level.number.toString().padLeft(2, '0');
+    testWidgets('level/$n-rancang', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      disableAnimations(tester);
+      await tester.pumpWidget(
+        capturable(
+          JaringanSibukApp(
+            initialLocation: AppRoutes.play(level.number, tutorialDone: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await capture(tester, 'level/$n-rancang');
+    }, skip: !screenshotsEnabled);
+
+    testWidgets('level/$n-jalan', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      disableAnimations(tester);
+      final day = design(level, referencePlans[level.number]!).planDay();
+      while (day.day!.minute < 21 * 60) {
+        day.dismissComplaint();
+        day.advanceDay(1);
+      }
+      day.dismissComplaint();
+      final session = GameSession()..begin(day);
+      await tester.pumpWidget(
+        capturable(
+          JaringanSibukApp(
+            initialLocation: AppRoutes.runOf(level.number),
+            session: session,
+          ),
+        ),
+      );
+      await tester.pump();
+      await capture(tester, 'level/$n-jalan');
+    }, skip: !screenshotsEnabled);
   }
 
   testWidgets('galeri', (tester) async {
