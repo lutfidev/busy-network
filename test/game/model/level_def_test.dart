@@ -69,4 +69,45 @@ void main() {
   test('label blok malam level 1 = siang', () {
     expect(Levels.level1.nightBlockLabels, same(Levels.level1.blockLabels));
   });
+
+  group('aturan lulus, blok & babak', () {
+    test('batas lulus di bawah target; hemat default Rp 200.000', () {
+      expect(Levels.level5.passSatisfaction, 60);
+      expect(Levels.level5.targetSatisfaction, 80);
+      expect(Levels.level1.passSatisfaction, 40);
+      expect(Levels.level5.savingsTarget, LevelDef.defaultSavingsTarget);
+      expect(LevelDef.defaultSavingsTarget, 200000);
+    });
+
+    test('blok rumah level 5', () {
+      expect(
+        {for (final h in Levels.level5.houses) h.id: h.block},
+        {
+          'r1': 'Blok A',
+          'w': 'Blok A',
+          'r3': 'Blok A',
+          'r4': 'Blok B',
+          'r5': 'Blok B',
+          'r6': 'Blok C',
+          'r7': 'Blok C',
+        },
+      );
+      expect(Levels.level1.house('r1').block, 'Blok A');
+      expect(Levels.level1.house('r2').block, isNull);
+    });
+
+    test('byNumber: hanya level yang ada datanya', () {
+      expect(Levels.byNumber(1), same(Levels.level1));
+      expect(Levels.byNumber(5), same(Levels.level5));
+      expect(Levels.byNumber(6), isNull);
+      expect(Levels.byNumber(0), isNull);
+    });
+
+    test('babak 1: 12 level, 36 bintang', () {
+      expect(Levels.chapter.number, 1);
+      expect(Levels.chapter.name, 'Perumahan Batam');
+      expect(Levels.chapter.levelCount, 12);
+      expect(Levels.chapter.starsTotal, 36);
+    });
+  });
 }

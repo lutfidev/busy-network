@@ -42,6 +42,10 @@ void main() {
   final runCables = [...level.cables, ...extra];
   Cable runCable(String id) => runCables.firstWhere((c) => c.id == id);
 
+  test('cables: semua kabel terpasang, urutan pemasangan', () {
+    expect(Network(level: level, cables: runCables).cables, runCables);
+  });
+
   test('level 5 awal: 4 rumah tersambung', () {
     final net = Network(level: level, cables: level.cables);
     expect(net.connectedHouses, {'r1', 'w', 'r3', 'r4'});
