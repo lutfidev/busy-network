@@ -91,13 +91,15 @@ berkedip, bintang hasil "pop", tangan tutorial bergerak, panel naik.
 ## 7. Tutorial interaktif
 > Ubah tutorial level 1: langkah 2 menunggu pemain benar-benar menarik kabel
 > router → Rumah 1 (bukan tombol "Udah, lanjut"), langkah 3 menyorot
-> "Mulai Hari". Simpan status tutorial selesai.
+> "Mulai Hari". Simpan status tutorial selesai. Setel `savingsTarget`
+> level 1 (anggaran Rp 200.000) supaya 3★ mungkin.
 
 ## 8. Konten level 2–12 & bos
 > Rancang level 2–11 Perumahan Batam berdasarkan pola level 5 (makin banyak
 > rumah, fiber terbuka di level 3, anggaran makin ketat) dan level bos 12
 > "Malam Final Sepak Bola" (butuh 24 bintang, semua rumah lonjakan trafik
-> serentak). Simpan sebagai data `LevelDef`.
+> serentak). Simpan sebagai data `LevelDef`. Ganti progres awal
+> (`DummyData.progress`, level 1–4 sudah selesai) jadi mulai dari level 1.
 
 ## 9. Polish & rilis
 > Layar Pengaturan (suara, getar, reset progres) menggantikan tautan ke galeri;

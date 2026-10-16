@@ -20,7 +20,8 @@ class Hop {
 /// siklus). Rumah yang tidak terjangkau router tidak ikut beban.
 class Network {
   Network({required LevelDef level, required List<Cable> cables})
-    : _houseIds = {for (final h in level.houses) h.id} {
+    : cables = List.unmodifiable(cables),
+      _houseIds = {for (final h in level.houses) h.id} {
     final out = <String, List<Hop>>{};
     for (final c in cables) {
       final stops = c.stops;
@@ -46,6 +47,9 @@ class Network {
         if (_houseIds.contains(id)) id,
     };
   }
+
+  /// Kabel terpasang, urutan pemasangan.
+  final List<Cable> cables;
 
   final Set<String> _houseIds;
   final _parent = <String, Hop>{};

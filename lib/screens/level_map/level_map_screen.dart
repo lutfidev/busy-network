@@ -1,28 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/progress_book.dart';
 import '../../app/routes.dart';
-import '../../data/dummy_data.dart';
 import '../../game/levels/levels.dart';
+import '../../game/progress/progress.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import 'boss_level_card.dart';
 import 'level_map_layout.dart';
 import 'level_map_painter.dart';
 
-/// 2 · Peta Babak 1 – Perumahan Batam.
+/// 2 · Peta Babak 1 – Perumahan Batam, dari progres pemain.
+///
+/// Level yang belum punya data (langkah 8) tampil sesuai progres tapi tidak
+/// bisa diketuk.
 class LevelMapScreen extends StatelessWidget {
-  const LevelMapScreen({super.key});
+  const LevelMapScreen({super.key, required this.progress});
 
-  void _open(BuildContext context, int level) {
-    // Level 1 = tutorial; level lain memakai layar rancang Gang Melati
-    // (data dummy) sampai data level asli tersedia.
-    context.go(level == 1 ? AppRoutes.tutorial : AppRoutes.design);
-  }
+  final ProgressBook progress;
 
   @override
   Widget build(BuildContext context) {
-    const chapter = DummyData.chapter;
+    return ListenableBuilder(
+      listenable: progress,
+      builder: (context, _) => _build(context, progress.progress),
+    );
+  }
+
+  Widget _build(BuildContext context, Progress p) {
+    const chapter = Levels.chapter;
     return Scaffold(
       backgroundColor: AppColors.groundMap,
       body: SafeArea(
@@ -62,7 +69,7 @@ class LevelMapScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.s12),
                   StarCounterPill(
-                    value: chapter.starsEarned,
+                    value: p.totalStars,
                     total: chapter.starsTotal,
                   ),
                 ],
@@ -73,32 +80,12 @@ class LevelMapScreen extends StatelessWidget {
                 size: LevelMapLayout.size,
                 alignment: Alignment.topCenter,
                 children: [
-                  const Positioned.fill(child: LevelMapBackdrop()),
-                  for (final e in LevelMapLayout.entries) ..._entry(context, e),
-                  _at(
-                    LevelMapLayout.currentChipTopLeft,
-                    SizedBox(
-                      width: LevelMapLayout.currentChipWidth,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s10,
-                            vertical: AppSpacing.s4,
-                          ),
-                          decoration: const BoxDecoration(
-                            color: AppColors.ink,
-                            borderRadius: AppRadius.pillAll,
-                          ),
-                          child: Text(
-                            Levels.level5.name,
-                            style: AppTypography.captionStrong.copyWith(
-                              color: AppColors.surface,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  Positioned.fill(child: LevelMapBackdrop(current: p.current)),
+                  for (final slot in LevelMapLayout.slots)
+                    ..._entry(context, slot, p),
+                  if (LevelMapLayout.slotOf(p.current) case final slot?)
+                    if (Levels.byNumber(p.current) case final level?)
+                      _at(LevelMapLayout.chipTopLeft(slot), _chip(level.name)),
                 ],
               ),
             ),
@@ -122,48 +109,78 @@ class LevelMapScreen extends StatelessWidget {
     return Positioned(left: p.dx, top: p.dy, child: child);
   }
 
-  List<Widget> _entry(BuildContext context, LevelMapEntry e) {
-    final current = e.state == LevelNodeState.current;
-    final locked = e.state == LevelNodeState.locked;
+  /// Chip nama di atas level sekarang.
+  Widget _chip(String name) {
+    return SizedBox(
+      width: LevelMapLayout.currentChipWidth,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s10,
+            vertical: AppSpacing.s4,
+          ),
+          decoration: const BoxDecoration(
+            color: AppColors.ink,
+            borderRadius: AppRadius.pillAll,
+          ),
+          child: Text(
+            name,
+            style: AppTypography.captionStrong.copyWith(
+              color: AppColors.surface,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _entry(BuildContext context, LevelSlot slot, Progress p) {
+    final n = slot.number;
+    final state = LevelMapLayout.stateOf(p, n);
+    final level = Levels.byNumber(n);
+    final current = state == LevelNodeState.current;
+    final locked = state == LevelNodeState.locked;
+    final topLeft = LevelMapLayout.nodeTopLeft(slot, state);
     final node = LevelNode(
-      number: e.number,
-      state: e.state,
-      onPressed: () => _open(context, e.number),
-      semanticLabel: switch (e.state) {
-        LevelNodeState.locked => 'Level ${e.number} terkunci',
-        LevelNodeState.current =>
-          'Level ${e.number}, ${Levels.level5.name}, main sekarang',
+      number: n,
+      state: state,
+      onPressed: locked || level == null
+          ? null
+          : () => context.go(AppRoutes.play(n)),
+      semanticLabel: switch (state) {
+        LevelNodeState.locked => 'Level $n terkunci',
+        LevelNodeState.current when level != null =>
+          'Level $n, ${level.name}, main sekarang',
+        LevelNodeState.current => 'Level $n, belum tersedia',
         LevelNodeState.done =>
-          'Level ${e.number}, ${e.stars} bintang'
-              '${e.number == 1 ? ', tutorial' : ''}',
+          'Level $n, ${p.starsOf(n)} bintang${n == 1 ? ', tutorial' : ''}',
       },
     );
     return [
-      if (current) _at(e.topLeft, const IgnorePointer(child: _PulseRing())),
-      _at(e.topLeft, node),
-      if (e.labelTopLeft != null)
-        _at(
-          e.labelTopLeft!,
-          ExcludeSemantics(
-            child: locked
-                ? SizedBox(
-                    width: e.labelBeside ? null : AppSizes.levelNode,
-                    child: Text(
-                      '${e.number}',
-                      textAlign: e.labelBeside
-                          ? TextAlign.left
-                          : TextAlign.center,
-                      style: AppTypography.captionStrong.copyWith(
-                        color: AppColors.inkMuted,
-                      ),
+      if (current) _at(topLeft, const IgnorePointer(child: _PulseRing())),
+      _at(topLeft, node),
+      _at(
+        LevelMapLayout.labelTopLeft(slot, state),
+        ExcludeSemantics(
+          child: locked
+              ? SizedBox(
+                  width: slot.labelBeside ? null : AppSizes.levelNode,
+                  child: Text(
+                    '$n',
+                    textAlign: slot.labelBeside
+                        ? TextAlign.left
+                        : TextAlign.center,
+                    style: AppTypography.captionStrong.copyWith(
+                      color: AppColors.inkMuted,
                     ),
-                  )
-                : SizedBox(
-                    width: AppSizes.levelNode,
-                    child: Center(child: StarRating(earned: e.stars)),
                   ),
-          ),
+                )
+              : SizedBox(
+                  width: AppSizes.levelNode,
+                  child: Center(child: StarRating(earned: p.starsOf(n))),
+                ),
         ),
+      ),
     ];
   }
 }

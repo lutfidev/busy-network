@@ -23,3 +23,24 @@ final designFiberCables = [
 
 /// Pemakaian puncak (jam sibuk) tiap rumah level 5.
 final peakDemand = {for (final h in Levels.level5.houses) h.id: h.peakMbps};
+
+/// Hari level 5 di jaringan [cables] (junction desain), mulai 06:00,
+/// batas antrean [limits].
+GameState designDay(List<Cable> cables, {Map<String, int> limits = const {}}) {
+  final game = GameState(
+    Levels.level5,
+    junctions: DummyStates.run().junctions,
+    cables: cables,
+  )..startDay();
+  if (limits.isNotEmpty) game.setQueue(limits: limits, priority: const {});
+  return game;
+}
+
+/// Mainkan [game] sampai 24:00; komplain langsung dijawab.
+GameState playDay(GameState game) {
+  while (game.phase == GamePhase.run) {
+    game.dismissComplaint();
+    game.advanceDay(1);
+  }
+  return game;
+}

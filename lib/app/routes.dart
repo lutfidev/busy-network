@@ -17,5 +17,13 @@ abstract final class AppRoutes {
   /// Query `?langkah=1..3` di tutorial.
   static const stepParam = 'langkah';
 
+  /// Query `?level=n` di Fase Rancang.
+  static const levelParam = 'level';
+
+  /// Mulai level [number] dari awal: level 1 = tutorial, lainnya Fase
+  /// Rancang level itu.
+  static String play(int number) =>
+      number == 1 ? tutorial : '$design?$levelParam=$number';
+
   static String successWithStars(int stars) => '$success?$starsParam=$stars';
 }

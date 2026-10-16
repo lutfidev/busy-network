@@ -1,6 +1,5 @@
 import 'package:busy_network/app/game_session.dart';
 import 'package:busy_network/app/routes.dart';
-import 'package:busy_network/game/model/model.dart';
 import 'package:busy_network/screens/design_phase/design_phase_screen.dart';
 import 'package:busy_network/screens/home/home_screen.dart';
 import 'package:busy_network/screens/level_map/level_map_screen.dart';
@@ -52,6 +51,8 @@ void main() {
     // Sisa hari berjalan sampai 24:00; 57% < target 80% → gagal.
     await tester.pumpAndSettle();
     expect(find.byType(ResultFailScreen), findsOneWidget);
+    expect(find.text('3 rumah belum tersambung.'), findsOneWidget);
+    expect(find.text('3 rumah'), findsOneWidget);
 
     await tester.tap(find.text('Coba Lagi'));
     await tester.pumpAndSettle();
@@ -82,7 +83,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ResultSuccessScreen), findsOneWidget);
     expect(find.text('Hari beres!'), findsOneWidget);
-    expect(session.last!.phase, GamePhase.result);
+    expect(session.result!.stars, 3);
 
     await tester.tap(find.text('Level Berikutnya'));
     await tester.pumpAndSettle();

@@ -13,6 +13,7 @@ class HouseDef {
     required this.label,
     required this.position,
     required this.customer,
+    this.block,
     this._place,
     required this.packageMbps,
     required this.peakMbps,
@@ -32,6 +33,10 @@ class HouseDef {
 
   /// Nama pelanggan ("Bu Sri").
   final String customer;
+
+  /// Blok tempat rumah ini ("Blok B"): nama area kabel di biang kerok.
+  /// `null` bila desain tidak menaruhnya di blok mana pun.
+  final String? block;
   final String? _place;
 
   /// Paket langganan (Mbps).
@@ -61,6 +66,24 @@ class Junction {
   final Offset position;
 }
 
+/// Satu babak di Peta Babak.
+class ChapterDef {
+  const ChapterDef({
+    required this.number,
+    required this.name,
+    required this.levelCount,
+  });
+
+  final int number;
+  final String name;
+
+  /// Jumlah level termasuk level bos.
+  final int levelCount;
+
+  /// Bintang maksimal: 3 per level.
+  int get starsTotal => levelCount * 3;
+}
+
 /// Definisi satu level (statis). Koordinat dalam ruang peta 390×472.
 class LevelDef {
   const LevelDef({
@@ -74,6 +97,8 @@ class LevelDef {
     this.cables = const [],
     required this.budget,
     required this.targetSatisfaction,
+    required this.passSatisfaction,
+    this.savingsTarget = defaultSavingsTarget,
     this.rushHourFrom,
     this.rushHourTo,
     required this.blockLabels,
@@ -82,6 +107,9 @@ class LevelDef {
 
   static const double cell = gridCell;
   static const routerId = 'router';
+
+  /// Sisa anggaran minimal untuk bintang 3 bila level tidak menentukannya.
+  static const defaultSavingsTarget = 200000;
 
   /// Area peta (px desain), sama dengan `AppSizes.mapArea`.
   static const mapSize = Size(390, 472);
@@ -108,6 +136,12 @@ class LevelDef {
 
   final int budget;
   final int targetSatisfaction;
+
+  /// Kepuasan akhir minimal supaya lulus (1 bintang); di bawahnya gagal.
+  final int passSatisfaction;
+
+  /// Sisa anggaran minimal untuk bintang 3 (selain kepuasan ≥ target).
+  final int savingsTarget;
   final int? rushHourFrom;
   final int? rushHourTo;
 

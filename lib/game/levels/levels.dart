@@ -21,6 +21,7 @@ abstract final class Levels {
         label: 'Rumah 1',
         position: Offset(255, 165),
         customer: 'Pak Joko',
+        block: 'Blok A',
         packageMbps: 10,
         peakMbps: 6,
       ),
@@ -35,6 +36,7 @@ abstract final class Levels {
     ],
     budget: 200000,
     targetSatisfaction: 60,
+    passSatisfaction: 40,
     blockLabels: [
       MapBlockLabel('BLOK A', Offset(255, 112), align: TextAlign.center),
     ],
@@ -53,6 +55,7 @@ abstract final class Levels {
         label: 'Rumah 1',
         position: Offset(75, 90),
         customer: 'Pak Anton',
+        block: 'Blok A',
         packageMbps: 10,
         peakMbps: 4,
         complaint: 'Bang, nonton berita aja patah-patah gini.',
@@ -62,6 +65,7 @@ abstract final class Levels {
         label: 'Warung',
         position: Offset(195, 60),
         customer: 'Warung Bu Ijah',
+        block: 'Blok A',
         place: 'Blok A',
         packageMbps: 20,
         peakMbps: 12,
@@ -74,6 +78,7 @@ abstract final class Levels {
         label: 'Rumah 3',
         position: Offset(315, 90),
         customer: 'Kak Dewi',
+        block: 'Blok A',
         packageMbps: 10,
         peakMbps: 8.5,
         complaint: 'Kok lemot? Aku lagi live jualan nih!',
@@ -83,6 +88,7 @@ abstract final class Levels {
         label: 'Rumah 4',
         position: Offset(315, 240),
         customer: 'Bu Sri',
+        block: 'Blok B',
         packageMbps: 20,
         peakMbps: 16,
         patienceSide: MarkSide.above,
@@ -93,6 +99,7 @@ abstract final class Levels {
         label: 'Rumah 5',
         position: Offset(315, 390),
         customer: 'Pak Rudi',
+        block: 'Blok B',
         packageMbps: 10,
         peakMbps: 9,
         complaint: 'Bang, meeting kantor saya putus-putus terus.',
@@ -102,6 +109,7 @@ abstract final class Levels {
         label: 'Rumah 6',
         position: Offset(195, 420),
         customer: 'Bang Togar',
+        block: 'Blok C',
         packageMbps: 20,
         peakMbps: 11,
         patienceSide: MarkSide.right,
@@ -112,6 +120,7 @@ abstract final class Levels {
         label: 'Rumah 7',
         position: Offset(75, 330),
         customer: 'Mbak Wulan',
+        block: 'Blok C',
         packageMbps: 10,
         peakMbps: 6,
         complaint: 'Drakorku buffering terus, Bang...',
@@ -149,6 +158,7 @@ abstract final class Levels {
     ],
     budget: 850000,
     targetSatisfaction: 80,
+    passSatisfaction: 60,
     rushHourFrom: 19,
     rushHourTo: 22,
     blockLabels: [
@@ -164,4 +174,18 @@ abstract final class Levels {
   );
 
   static const all = [level1, level5];
+
+  static const chapter = ChapterDef(
+    number: 1,
+    name: 'Perumahan Batam',
+    levelCount: 12,
+  );
+
+  /// Level bernomor [number]; `null` bila datanya belum ada (langkah 8).
+  static LevelDef? byNumber(int number) {
+    for (final level in all) {
+      if (level.number == number) return level;
+    }
+    return null;
+  }
 }

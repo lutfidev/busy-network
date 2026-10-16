@@ -38,6 +38,7 @@ class DaySim {
       _complained.add(complaint.houseId);
     }
     _frame = _assess(_limits, _priority);
+    _recordExhausted();
   }
 
   /// Rumah yang sama tidak komplain lagi dalam sekian menit.
@@ -58,6 +59,10 @@ class DaySim {
   int _complaints;
   final _lastComplaint = <String, int>{};
   late SimFrame _frame;
+  final _fullMinutes = <String, int>{};
+  final _firstFull = <String, int>{};
+  final _peak = <String, ({double ratio, int minute})>{};
+  final _exhausted = <String>{};
 
   /// Jam sekarang (menit sejak 00:00).
   int get minute => _minute;
@@ -81,6 +86,19 @@ class DaySim {
 
   /// Rumah yang dilayani dulu saat kabel penuh.
   Set<String> get priority => Set.unmodifiable(_priority);
+
+  /// Menit kabel [cableId] penuh (badge "Penuh!") sepanjang hari.
+  int fullMinutes(String cableId) => _fullMinutes[cableId] ?? 0;
+
+  /// Menit pertama kabel [cableId] penuh; `null` bila tidak pernah.
+  int? firstFullMinute(String cableId) => _firstFull[cableId];
+
+  /// Menit pertama beban kabel [cableId] paling berat (beban/kapasitas)
+  /// selama penuh; `null` bila tidak pernah penuh.
+  int? peakMinute(String cableId) => _peak[cableId]?.minute;
+
+  /// Rumah tersambung yang sabarnya sempat habis (0%).
+  Set<String> get exhausted => Set.unmodifiable(_exhausted);
 
   int get rushFrom => level.rushHourFrom ?? SimClock.defaultRushFrom;
   int get rushTo => level.rushHourTo ?? SimClock.defaultRushTo;
@@ -136,7 +154,30 @@ class DaySim {
     }
     _minute++;
     _frame = _assess(_limits, _priority);
+    _recordStats();
     _raiseComplaint();
+  }
+
+  /// Catat kabel penuh & sabar habis pada menit [_minute].
+  void _recordStats() {
+    final demand = _frame.demand;
+    for (final cable in network.cables) {
+      if (!network.isOverloaded(cable, demand)) continue;
+      _fullMinutes[cable.id] = fullMinutes(cable.id) + 1;
+      _firstFull[cable.id] ??= _minute;
+      final ratio = network.cableLoad(cable, demand) / cable.spec.capacityMbps;
+      final peak = _peak[cable.id];
+      if (peak == null || ratio > peak.ratio + 1e-9) {
+        _peak[cable.id] = (ratio: ratio, minute: _minute);
+      }
+    }
+    _recordExhausted();
+  }
+
+  void _recordExhausted() {
+    for (final MapEntry(key: id, value: patience) in _patience.entries) {
+      if (patience <= 0) _exhausted.add(id);
+    }
   }
 
   /// Satu komplain per masa macet tiap rumah, paling sering sekali per
