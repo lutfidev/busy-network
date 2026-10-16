@@ -43,7 +43,10 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `beginCable`/`dragCable`/`endCable`, `removeCable`, mode hapus,
   `CableLesson` = tarikan tutorial (sumber & tujuan dibatasi, kabel
   panduan `guide`)),
-  `levels/levels.dart` (data level, `tutorialLesson`),
+  `levels/levels.dart` (`Levels.level1..12`, `all`, `byNumber`,
+  `chapter`; isi level 2–4/6–11/12 di `part` `levels_early.dart`,
+  `levels_late.dart`, `level_boss.dart`; `tutorialLesson`; level bos punya
+  `TrafficSurge` = lonjakan pemakaian serentak),
   `scene_builder.dart` (`SceneBuilder.fromState(state)` → `MapScene`),
   `map_scene.dart` (model gambar), `render/map_renderer.dart` (gambar
   rumah/router/kabel/trafik di atas `Canvas`, per lapisan),
@@ -71,8 +74,9 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   ≥ `savingsTarget`), rumah pindah, biang kerok `Culprit` (`FullCable`
   → `Unconnected` → `TightLimit`; fakta saja, teksnya di layar).
 - `lib/game/progress/` — `Progress` (murni): bintang terbaik per level +
-  `tutorialDone`; level terbuka & level sekarang diturunkan;
-  `encode`/`decode` JSON.
+  `tutorialDone`; level terbuka & level sekarang diturunkan; `canPlay`
+  (level bos butuh `ChapterDef.bossStars` bintang level 1–11);
+  `Progress.empty` = awal permainan; `encode`/`decode` JSON.
 - `lib/screens/<layar>/` — satu folder per layar (8 layar).
 - `lib/app/` — `routes.dart` (path; `play(n, tutorialDone:)`,
   `runOf`/`queueOf` membawa `?level=`), `router.dart` (go_router,
@@ -84,8 +88,9 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
 - `lib/data/` — `dummy_states.dart` (potret `GameState` Tutorial (deep
   link `?langkah=`; tutorial yang dimainkan memakai satu state) & bingkai
   Fase Jalan desain, yang dihitung `DaySim` dari jam/sabar/komplain
-  potret), `dummy_data.dart` (progres awal seperti desain sampai langkah
-  8, potret layar hasil untuk deep link), dan `progress_store.dart`
+  potret), `dummy_data.dart` (`designProgress` = progres Beranda/Peta di
+  desain untuk screenshot & test, potret layar hasil untuk deep link), dan
+  `progress_store.dart`
   (`PrefsProgressStore` = `shared_preferences`, `MemoryProgressStore`).
 - `lib/core/format.dart` — `IdFormat`: `Rp 850.000`, `8,5 Mbps`, `20:15`.
 - `lib/gallery/` — galeri komponen (rute `/galeri`, tombol pengaturan di
@@ -124,6 +129,13 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   (`DesignStage`). Gaya gambar hanya di `MapRenderer`;
   `test/game/network_game_test.dart` membandingkan piksel game dengan
   `MapRenderer.drawScene`.
+- Level baru / ubah angka level: tambah rancangan acuan di
+  `test/game/levels/level_plans.dart` (`referencePlans`, ditarik sungguhan
+  lewat `GameState`) yang harus 3★ di `level_balance_test.dart`, plus
+  jebakan (rancangan wajar yang tidak 3★). `level_def_test.dart` menjaga
+  node di grid, muat di peta (label), berjarak ≥ 90 px, dan pemakaian ×
+  lonjakan ≤ paket. Lihat potretnya: `level/NN-rancang` & `level/NN-jalan`
+  di screenshot.
 - Peta digambar dari state: ubah data level / `GameState`, bukan
   `MapScene` atau komponen langsung. `test/game/scene_builder_test.dart` menjaga snapshot
   tetap identik dengan desain (Fase Rancang: tarikan sungguhan
@@ -135,7 +147,9 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   grid (mis. (165, 255)), bukan di batas sel, supaya jalurnya sama di skala
   peta mana pun.
 - Progres: `main()` membuka `PrefsProgressStore`; test & `GameSession()`
-  default memakai progres di memori (mulai dari progres awal desain).
+  default memakai progres di memori yang kosong (mulai level 1). Layar
+  yang harus sama dengan desain (screenshot, alur dari level 5) memakai
+  `GameSession(progress: ProgressBook.memory(DummyData.designProgress))`.
   Deep link layar hasil (tanpa `session.result`) = potret `DummyData`,
   jadi screenshot tetap sama dengan referensi. Test "aplikasi dibuka
   ulang": `pumpWidget(const SizedBox())` dulu — `pumpApp` kedua tanpa itu

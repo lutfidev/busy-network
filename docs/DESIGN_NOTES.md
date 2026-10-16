@@ -30,13 +30,24 @@ Gagal · Design token & komponen.
 ## Asumsi yang diambil (desain ambigu)
 - **Pengaturan** (ikon di Beranda) belum didesain → sementara membuka galeri
   komponen `/galeri`.
-- **Peta Babak dari progres**: progres awal = desain (level 1–4 selesai
-  3/2/3/1★, level 5 sekarang) sampai langkah 8. Level 1 membuka tutorial
-  (setelah tutorial selesai: Fase Rancang level 1), level 5 Fase Rancang
-  Gang Melati; level tanpa data (2–4, 6–11) tampil
-  sesuai progres tapi tidak bisa diketuk ("Level 6, belum tersedia");
-  level terkunci & bos nonaktif. Posisi node/label/chip diturunkan dari
+- **Peta Babak dari progres**: permainan mulai dari progres kosong
+  (`Progress.empty`); potret desain (level 1–4 selesai 3/2/3/1★, level 5
+  sekarang) = `DummyData.designProgress`, hanya untuk screenshot & test.
+  Level 1 membuka tutorial (setelah tutorial selesai: Fase Rancang level
+  1), level lain Fase Rancang. Level terkunci nonaktif. Kartu bos (level
+  12) terkunci seperti desain sampai level 11 selesai **dan** bintang level
+  1–11 ≥ 24; lalu gembok hilang, bisa diketuk, keterangan "Satu kompleks
+  nobar. Ayo, main!"; setelah selesai bintangnya menggantikan keterangan
+  (dua keadaan ini copy baru). Posisi node/label/chip diturunkan dari
   pusat node per level, jalur oranye sampai level sekarang.
+- **Level 2–4, 6–12** (rincian & angka di
+  `docs/superpowers/specs/2026-10-16-konten-level-design.md`): desain
+  hanya punya level 1 & 5, jadi peta, nama, pelanggan, komplain, dan angka
+  level lain copy/rancangan baru, dicek dengan simulasi (tiap level punya
+  rancangan acuan 3★ di test). Level bos: "Nobar" 20–22, pemakaian semua
+  rumah 1,5×; catatan Fase Rancang "Nobar 20–22 · trafik 1,5×". Judul
+  Fase Jalan yang panjang mengecil, tidak dipotong; label jam sibuk yang
+  melewati tengah hari (level 7, 08–17) menggantikan "12" di linimasa.
 - **Rute bersarang** (`/peta/rancang/jalan/antrean`) supaya tombol back
   Android mengikuti alur. Back dari Fase Jalan = hari dibatalkan, rancangan
   tetap utuh. Fase Jalan & Panel Antrean membawa `?level=n`
