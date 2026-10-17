@@ -166,7 +166,9 @@ class NetworkGame extends FlameGame {
   void endPull(int pointerId) {
     if (pointerId != _pullPointer) return;
     _pullPointer = null;
-    onCableDrop?.call(_state.endCable());
+    // Dihitung dulu: `?.call` tidak mengevaluasi argumennya bila null.
+    final drop = _state.endCable();
+    onCableDrop?.call(drop);
   }
 
   void cancelPull(int pointerId) {
