@@ -1,3 +1,7 @@
+import 'package:busy_network/app/game_session.dart';
+import 'package:busy_network/app/progress_book.dart';
+import 'package:busy_network/app/settings_book.dart';
+import 'package:busy_network/feedback/game_feedback.dart';
 import 'package:busy_network/music/music_out.dart';
 import 'package:busy_network/music/track.dart';
 
@@ -18,3 +22,14 @@ class RecordingMusic implements MusicOut {
     Duration delay = Duration.zero,
   }) => calls.add((track: track, fade: fade, delay: delay));
 }
+
+/// Sesi yang musiknya direkam ke [out].
+GameSession musicSession(
+  RecordingMusic out, {
+  SettingsBook? settings,
+  ProgressBook? progress,
+}) => GameSession(
+  progress: progress,
+  feedback: GameFeedback(settings: settings ?? SettingsBook.memory()),
+  music: out,
+);
