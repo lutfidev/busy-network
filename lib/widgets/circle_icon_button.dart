@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../theme/theme.dart';
 import 'icons/game_icons.dart';
+import '../feedback/feedback_scope.dart';
 
 /// Tombol ikon bulat (kembali, pengaturan, jeda, percepat).
 class CircleIconButton extends StatelessWidget {
@@ -42,7 +43,7 @@ class CircleIconButton extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onPressed,
+        onTap: FeedbackScope.tap(context, onPressed),
         child: Container(
           width: size,
           height: size,

@@ -12,6 +12,7 @@ import '../../game/render/map_renderer.dart';
 import '../../game/sim/sim.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../feedback/feedback_scope.dart';
 
 /// 4 · Fase Rancang – Level 5. Seret dari router/junction/rumah tersambung
 /// ke rumah untuk memasang kabel; mode Hapus: ketuk kabel untuk membongkar.
@@ -415,7 +416,7 @@ class _EraseToggle extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onPressed,
+        onTap: FeedbackScope.tap(context, onPressed),
         child: Container(
           width: 96,
           height: AppSizes.buttonLarge,

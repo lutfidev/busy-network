@@ -4,6 +4,7 @@ import '../game/map_scene.dart';
 import '../theme/theme.dart';
 import 'dashed_border.dart';
 import 'icons/game_icons.dart';
+import '../feedback/feedback_scope.dart';
 
 /// Kartu pilihan kabel (LAN / Fiber) di bar bawah fase rancang.
 class CableOptionCard extends StatelessWidget {
@@ -131,7 +132,7 @@ class CableOptionCard extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: locked ? null : onPressed,
+        onTap: FeedbackScope.tap(context, locked ? null : onPressed),
         child: locked
             ? CustomPaint(
                 foregroundPainter: const DashedBorderPainter(

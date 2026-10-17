@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../theme/theme.dart';
 import 'icons/game_icons.dart';
+import '../feedback/feedback_scope.dart';
 
 enum ChunkyVariant {
   /// Kuning + bayangan padat (CTA utama).
@@ -192,7 +193,7 @@ class _ChunkyButtonState extends State<ChunkyButton> {
         onTapDown: enabled ? (_) => _setPressed(true) : null,
         onTapUp: enabled ? (_) => _setPressed(false) : null,
         onTapCancel: enabled ? () => _setPressed(false) : null,
-        onTap: widget.onPressed,
+        onTap: FeedbackScope.tap(context, widget.onPressed),
         child: Padding(
           // Ruang untuk bayangan padat supaya layout tidak bergeser.
           padding: EdgeInsets.only(bottom: depth),
@@ -251,7 +252,7 @@ class TextLinkButton extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onPressed,
+        onTap: FeedbackScope.tap(context, onPressed),
         child: SizedBox(
           height: height,
           child: Center(

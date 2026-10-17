@@ -7,6 +7,7 @@ environment:
   sdk: ^3.13.4
 
 dependencies:
+  audioplayers: ^6.8.1
   flame: ^1.38.2
   flutter:
     sdk: flutter
@@ -20,6 +21,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   shared_preferences_platform_interface: ^2.4.2
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 flutter:
   uses-material-design: true
@@ -28,4 +31,6 @@ flutter:
     # Font Fredoka & Nunito dibundel supaya google_fonts tidak perlu
     # mengunduh saat runtime (offline-friendly, dan test jadi deterministik).
     - assets/google_fonts/
+    # Efek suara, disintesis `tool/make_sounds.py`.
+    - assets/audio/
 

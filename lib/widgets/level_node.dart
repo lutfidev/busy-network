@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../theme/theme.dart';
 import 'icons/game_icons.dart';
 import 'star_rating.dart';
+import '../feedback/feedback_scope.dart';
 
 enum LevelNodeState { done, current, locked }
 
@@ -74,7 +75,7 @@ class LevelNode extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: locked ? null : onPressed,
+        onTap: FeedbackScope.tap(context, locked ? null : onPressed),
         child: circle,
       ),
     );

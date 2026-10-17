@@ -4,6 +4,7 @@ import '../../core/format.dart';
 import '../../game/sim/queue_plan.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../feedback/feedback_scope.dart';
 
 /// Kartu satu pelanggan di panel antrean.
 class QueueHouseCard extends StatelessWidget {
@@ -154,7 +155,7 @@ class _PriorityButton extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onPressed,
+        onTap: FeedbackScope.tap(context, onPressed),
         child: Container(
           width: AppSizes.iconButtonMedium,
           height: AppSizes.iconButtonMedium,
