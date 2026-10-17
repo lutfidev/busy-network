@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/game/model/model.dart';
 import 'package:busy_network/game/sim/sim.dart';
@@ -31,5 +33,15 @@ void main() {
     expect(Track.forDay(_dayAt(level, 7 * 60 + 59)), Track.calm);
     expect(Track.forDay(_dayAt(level, 8 * 60)), Track.tense);
     expect(Track.forDay(_dayAt(level, 17 * 60)), Track.calm);
+  });
+
+  test('tiap lagu punya WAV', () {
+    for (final track in Track.values) {
+      expect(
+        File('assets/audio/${track.file}.wav').existsSync(),
+        isTrue,
+        reason: track.file,
+      );
+    }
   });
 }
