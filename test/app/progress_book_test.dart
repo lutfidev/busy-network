@@ -76,4 +76,19 @@ void main() {
     await book.completeTutorial();
     expect(book.progress.tutorialDone, isTrue);
   });
+
+  test('reset: kembali ke awal, memberi tahu & menyimpan', () async {
+    final store = MemoryProgressStore(DummyData.designProgress);
+    final book = ProgressBook(store);
+    var notified = 0;
+    book.addListener(() => notified++);
+    await book.reset();
+    expect(book.progress, Progress.empty);
+    expect(book.progress.current, 1);
+    expect(book.progress.tutorialDone, isFalse);
+    expect(store.load(), Progress.empty);
+    expect(notified, 1);
+    await book.reset();
+    expect(notified, 1, reason: 'sudah kosong');
+  });
 }

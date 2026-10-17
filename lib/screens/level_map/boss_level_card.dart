@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../feedback/feedback_scope.dart';
 
 /// Kartu level 12 (bos). Terkunci (desain) sampai level 11 selesai dan
 /// bintang babak cukup; terbuka = bisa diketuk, gembok hilang; selesai =
@@ -54,10 +55,10 @@ class BossLevelCard extends StatelessWidget {
             LevelNodeState.done => '$stars bintang',
           }}',
       excludeSemantics: true,
-      onTap: enabled ? onPressed : null,
+      onTap: FeedbackScope.tap(context, enabled ? onPressed : null),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: enabled ? onPressed : null,
+        onTap: FeedbackScope.tap(context, enabled ? onPressed : null),
         child: _card(locked),
       ),
     );

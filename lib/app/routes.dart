@@ -1,5 +1,6 @@
 /// Path semua layar. Rute bersarang supaya tombol back Android mengikuti
-/// alur: Beranda → Peta → (Tutorial | Rancang → Jalan → Antrean) → Hasil.
+/// alur: Beranda → Peta → (Tutorial | Rancang → Jalan → Antrean) → Hasil,
+/// dan Beranda → Pengaturan → Galeri.
 abstract final class AppRoutes {
   static const home = '/';
   static const levelMap = '/peta';
@@ -9,7 +10,8 @@ abstract final class AppRoutes {
   static const queue = '/peta/rancang/jalan/antrean';
   static const success = '/peta/hasil/berhasil';
   static const fail = '/peta/hasil/gagal';
-  static const gallery = '/galeri';
+  static const settings = '/pengaturan';
+  static const gallery = '/pengaturan/galeri';
 
   /// Query `?bintang=1..3` di layar hasil berhasil.
   static const starsParam = 'bintang';

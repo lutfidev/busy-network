@@ -24,7 +24,8 @@ import 'scene_builder.dart';
 /// mesin berhenti sendiri, jadi `pumpAndSettle` di test tidak macet.
 ///
 /// Bila [interactive], menyeret node menarik kabel dan mengetuk kabel di
-/// mode Hapus membongkarnya; semuanya diteruskan ke [state].
+/// mode Hapus membongkarnya; semuanya diteruskan ke [state]. Hasilnya
+/// dilaporkan ke [onCableDrop] / [onCableRemoved] (suara & getar).
 class NetworkGame extends FlameGame {
   NetworkGame({
     required this._state,
@@ -46,6 +47,12 @@ class NetworkGame extends FlameGame {
 
   /// Peta menerima tarik kabel & bongkar (Fase Rancang).
   bool interactive;
+
+  /// Jari dilepas setelah menarik kabel.
+  void Function(CableDrop drop)? onCableDrop;
+
+  /// Kabel dibongkar lewat ketukan.
+  void Function()? onCableRemoved;
 
   /// Jari yang sedang menarik kabel dan posisinya di koordinat peta.
   int? _pullPointer;
@@ -159,7 +166,9 @@ class NetworkGame extends FlameGame {
   void endPull(int pointerId) {
     if (pointerId != _pullPointer) return;
     _pullPointer = null;
-    _state.endCable();
+    // Dihitung dulu: `?.call` tidak mengevaluasi argumennya bila null.
+    final drop = _state.endCable();
+    onCableDrop?.call(drop);
   }
 
   void cancelPull(int pointerId) {
@@ -170,7 +179,9 @@ class NetworkGame extends FlameGame {
 
   /// Kabel [cableId] diketuk: dibongkar bila mode Hapus aktif.
   void tapCable(String cableId) {
-    if (interactive && _state.erasing) _state.removeCable(cableId);
+    if (!interactive || !_state.erasing) return;
+    _state.removeCable(cableId);
+    onCableRemoved?.call();
   }
 
   /// Minta satu bingkai baru; [update] menghentikan mesin lagi bila diam.

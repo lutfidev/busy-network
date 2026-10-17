@@ -117,7 +117,7 @@ class HomeBackdrop extends StatelessWidget {
 class HomeLogoTile extends StatelessWidget {
   const HomeLogoTile({super.key});
 
-  static const _icon = Size(48, 48);
+  static const _icon = LogoGlyph.size;
 
   @override
   Widget build(BuildContext context) {
@@ -133,42 +133,8 @@ class HomeLogoTile extends StatelessWidget {
       child: CustomPaint(
         size: _icon,
         painter: SketchPainter(
-          (canvas) {
-            SvgDraw.stroke(
-              canvas,
-              'M24 30 V44 M24 30 L8 14 M24 30 L40 14',
-              AppColors.nightCableIdle,
-              4,
-            );
-            SvgDraw.stroke(canvas, 'M24 30 L40 14', AppColors.primary, 4);
-            SvgDraw.circle(
-              canvas,
-              const Offset(8, 14),
-              5,
-              fill: AppColors.statusOk,
-            );
-            SvgDraw.circle(
-              canvas,
-              const Offset(40, 14),
-              5,
-              fill: AppColors.statusOk,
-            );
-            SvgDraw.circle(
-              canvas,
-              const Offset(24, 44),
-              4,
-              fill: AppColors.star,
-            );
-            SvgDraw.rrect(
-              canvas,
-              const Rect.fromLTWH(16, 22, 16, 16),
-              5,
-              fill: AppColors.primary,
-              stroke: AppColors.surfaceNightRaised,
-              strokeWidth: 2.5,
-            );
-          },
-          designSize: _icon,
+          LogoGlyph.paint,
+          designSize: LogoGlyph.size,
           id: 'logo',
         ),
       ),

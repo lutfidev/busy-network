@@ -127,6 +127,9 @@ abstract final class AppColors {
   /// Overlay sentuhan pada kontrol berwarna utama (16%).
   static const primaryOverlay = Color(0x29F2A81D);
 
+  /// Lintasan sakelar mati (Pengaturan; tidak ada di desain).
+  static const toggleOff = Color(0xFFC3CDD8);
+
   // ── Scrim & bayangan ───────────────────────────────────────────────────
   static const scrim = Color(0xA30F1726); // rgba(15,23,38,.64)
   static const shadowInk08 = Color(0x141B2333); // rgba(27,35,51,.08)

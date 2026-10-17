@@ -2,23 +2,33 @@ import 'dart:async';
 
 import '../data/dummy_states.dart';
 import '../game/model/model.dart';
+import '../feedback/game_feedback.dart';
 import '../game/result/level_result.dart';
 import 'progress_book.dart';
+import 'settings_book.dart';
 
 /// Hari yang sedang dimainkan, dioper antarrute: Fase Rancang & tutorial
 /// menaruhnya saat "Mulai Hari" ([begin]), Fase Jalan & Panel Atur Antrean
 /// memakai hari yang sama ([currentDay]), Fase Jalan menutupnya di 24:00
 /// ([finish]) dan layar hasil membaca [result]. Dibuat sekali oleh
-/// aplikasi dan diteruskan router ke layar, bersama [progress].
+/// aplikasi dan diteruskan router ke layar, bersama [progress] dan
+/// [feedback] (suara & getar, beserta setelannya).
 ///
 /// Hari milik sesi (dibuat `GameState.planDay`) tidak di-`dispose`: layar
 /// lain bisa masih mendengarkannya saat rutenya keluar; cukup dilepas.
 class GameSession {
-  GameSession({ProgressBook? progress})
-    : progress = progress ?? ProgressBook.memory();
+  GameSession({ProgressBook? progress, GameFeedback? feedback})
+    : progress = progress ?? ProgressBook.memory(),
+      feedback = feedback ?? GameFeedback(settings: SettingsBook.memory());
 
   /// Progres pemain (Beranda, Peta Babak, bintang hasil).
   final ProgressBook progress;
+
+  /// Suara & getar; default diam (test).
+  final GameFeedback feedback;
+
+  /// Setelan pemain (layar Pengaturan).
+  SettingsBook get settings => feedback.settings;
 
   GameState? _day;
 

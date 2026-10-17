@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../feedback/feedback_scope.dart';
 import '../theme/theme.dart';
 import 'game_session.dart';
 import 'router.dart';
@@ -23,9 +24,10 @@ class JaringanSibukApp extends StatefulWidget {
 }
 
 class _JaringanSibukAppState extends State<JaringanSibukApp> {
+  late final GameSession _session = widget.session ?? GameSession();
   late final GoRouter _router = createRouter(
     initialLocation: widget.initialLocation,
-    session: widget.session,
+    session: _session,
   );
 
   @override
@@ -41,6 +43,8 @@ class _JaringanSibukAppState extends State<JaringanSibukApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routerConfig: _router,
+      builder: (context, child) =>
+          FeedbackScope(feedback: _session.feedback, child: child!),
     );
   }
 }

@@ -11,6 +11,7 @@ import '../screens/queue_panel/queue_panel_screen.dart';
 import '../screens/result_fail/result_fail_screen.dart';
 import '../screens/result_success/result_success_screen.dart';
 import '../screens/run_phase/run_phase_screen.dart';
+import '../screens/settings/settings_screen.dart';
 import '../screens/tutorial/tutorial_screen.dart';
 import '../theme/theme.dart';
 import 'game_session.dart';
@@ -98,9 +99,19 @@ GoRouter createRouter({
             ],
           ),
           GoRoute(
-            path: 'galeri',
-            builder: (context, state) =>
-                WidgetGalleryScreen(onBack: () => context.go(AppRoutes.home)),
+            path: 'pengaturan',
+            builder: (context, state) => SettingsScreen(
+              settings: play.settings,
+              progress: play.progress,
+            ),
+            routes: [
+              GoRoute(
+                path: 'galeri',
+                builder: (context, state) => WidgetGalleryScreen(
+                  onBack: () => context.go(AppRoutes.settings),
+                ),
+              ),
+            ],
           ),
         ],
       ),

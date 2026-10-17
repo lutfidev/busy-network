@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/game_session.dart';
 import '../../app/routes.dart';
+import '../../feedback/feedback_scope.dart';
+import '../../feedback/game_feedback.dart';
 import '../../game/map_scene.dart';
 import '../../game/model/model.dart';
 import '../../game/network_game_view.dart';
@@ -39,6 +41,10 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
   bool _fastForward = false;
   bool _finished = false;
 
+  /// Komplain yang sudah berbunyi (yang sudah tampil saat layar dibuka tidak
+  /// berbunyi lagi).
+  Complaint? _heardComplaint;
+
   /// Rute ini paling atas (tidak tertutup panel, tidak sedang di-back).
   bool _onTop = true;
 
@@ -47,6 +53,7 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
   @override
   void initState() {
     super.initState();
+    _heardComplaint = _day.complaint;
     _game.addListener(_onGameChanged);
   }
 
@@ -76,6 +83,11 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
   }
 
   void _onGameChanged() {
+    final complaint = _day.complaint;
+    if (complaint != null && complaint != _heardComplaint) {
+      FeedbackScope.cue(context, Cue.complaint);
+    }
+    _heardComplaint = complaint;
     _syncClock();
     if (_game.phase == GamePhase.result) _finish();
     setState(() {});
@@ -100,6 +112,7 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
     if (_finished) return;
     _finished = true;
     final result = widget.session.finish();
+    FeedbackScope.cue(context, result.passed ? Cue.win : Cue.fail);
     context.go(result.passed ? AppRoutes.success : AppRoutes.fail);
   }
 

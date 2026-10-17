@@ -1,5 +1,7 @@
 import 'package:busy_network/app/game_session.dart';
+import 'package:busy_network/app/progress_book.dart';
 import 'package:busy_network/app/routes.dart';
+import 'package:busy_network/data/dummy_data.dart';
 import 'package:busy_network/gallery/widget_gallery_screen.dart';
 import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/screens/queue_panel/queue_panel_screen.dart';
@@ -27,6 +29,7 @@ final _routes = <String>[
   '${AppRoutes.success}?${AppRoutes.starsParam}=1',
   '${AppRoutes.success}?${AppRoutes.starsParam}=3',
   AppRoutes.fail,
+  AppRoutes.settings,
   AppRoutes.gallery,
 ];
 
@@ -166,6 +169,34 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+  }
+
+  // Dialog reset progres (progres desain, jadi tombolnya aktif).
+  for (final (size, textScale) in [
+    for (final size in _sizes) (size, 1.0),
+    (const Size(360, 640), 1.3),
+  ]) {
+    testWidgets('tanpa overflow: dialog reset progres @ '
+        '${size.width}×${size.height}, teks ${textScale * 100}%', (
+      tester,
+    ) async {
+      setScreenSize(tester, size);
+      tester.platformDispatcher.textScaleFactorTestValue = textScale;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await pumpApp(
+        tester,
+        location: AppRoutes.settings,
+        session: GameSession(
+          progress: ProgressBook.memory(DummyData.designProgress),
+        ),
+      );
+      await tester.ensureVisible(find.text('Reset progres'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reset progres'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reset progres?'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   }
 
   testWidgets('galeri bisa di-scroll sampai bawah di 360 px', (tester) async {
