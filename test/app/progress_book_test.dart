@@ -13,10 +13,20 @@ class _BrokenStore implements ProgressStore {
 }
 
 void main() {
-  test('store kosong → progres awal desain', () {
-    expect(ProgressBook.memory().progress, DummyData.progress);
-    expect(DummyData.progress.current, 5);
-    expect(DummyData.progress.totalStars, 9);
+  test('store kosong → mulai dari level 1', () {
+    expect(ProgressBook.memory().progress, Progress.empty);
+    expect(ProgressBook(MemoryProgressStore()).progress.current, 1);
+  });
+
+  test('progres awal bisa diisi (potret desain)', () {
+    final book = ProgressBook.memory(DummyData.designProgress);
+    expect(book.progress.current, 5);
+    expect(book.progress.totalStars, 9);
+    final saved = ProgressBook(
+      MemoryProgressStore(Progress(const {1: 1})),
+      initial: DummyData.designProgress,
+    );
+    expect(saved.progress, Progress(const {1: 1}), reason: 'tersimpan menang');
   });
 
   test(
@@ -54,7 +64,7 @@ void main() {
     book.addListener(() => notified++);
     await book.completeTutorial();
     expect(book.progress.tutorialDone, isTrue);
-    expect(book.progress.totalStars, 9);
+    expect(book.progress.totalStars, 0);
     expect(store.load()!.tutorialDone, isTrue);
     expect(notified, 1);
     await book.completeTutorial();

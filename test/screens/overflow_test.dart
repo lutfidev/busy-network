@@ -1,22 +1,27 @@
+import 'package:busy_network/app/game_session.dart';
 import 'package:busy_network/app/routes.dart';
 import 'package:busy_network/gallery/widget_gallery_screen.dart';
+import 'package:busy_network/game/levels/levels.dart';
+import 'package:busy_network/screens/queue_panel/queue_panel_screen.dart';
 import 'package:busy_network/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../game/design_pull.dart';
+import '../game/levels/level_plans.dart';
 import '../test_helpers.dart';
 
 /// Setiap layar harus bebas overflow di lebar 360 px (dan ukuran umum
 /// lain). Overflow RenderFlex dilaporkan sebagai exception → test gagal.
-const _routes = <String>[
+final _routes = <String>[
   AppRoutes.home,
   AppRoutes.levelMap,
   '${AppRoutes.tutorial}?${AppRoutes.stepParam}=1',
   '${AppRoutes.tutorial}?${AppRoutes.stepParam}=2',
   '${AppRoutes.tutorial}?${AppRoutes.stepParam}=3',
   AppRoutes.design,
-  '${AppRoutes.design}?${AppRoutes.levelParam}=1',
+  for (final level in Levels.all)
+    if (level.number != 5) AppRoutes.play(level.number, tutorialDone: true),
   AppRoutes.run,
   AppRoutes.queue,
   '${AppRoutes.success}?${AppRoutes.starsParam}=1',
@@ -123,6 +128,44 @@ void main() {
       expect(find.text('Hari beres!'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+  }
+
+  // Hari sungguhan tiap level (rancangan acuan): Fase Jalan saat jam sibuk,
+  // Panel Antrean dengan semua rumahnya, lalu Hasil.
+  for (final level in Levels.all) {
+    for (final (size, textScale) in [
+      (const Size(360, 640), 1.0),
+      (const Size(360, 800), 1.3),
+    ]) {
+      testWidgets('tanpa overflow: hari level ${level.number} @ '
+          '${size.width}×${size.height}, teks ${textScale * 100}%', (
+        tester,
+      ) async {
+        setScreenSize(tester, size);
+        tester.platformDispatcher.textScaleFactorTestValue = textScale;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await pumpApp(tester);
+        await loadAppFonts(tester);
+        await tester.pumpWidget(const SizedBox());
+        final day = design(level, referencePlans[level.number]!).planDay();
+        await pumpApp(
+          tester,
+          location: AppRoutes.runOf(level.number),
+          session: GameSession()..begin(day),
+          settle: false,
+        );
+        await playFor(tester, 70);
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.bySemanticsLabel('Jeda dan atur antrean'));
+        await tester.pumpAndSettle();
+        expect(find.byType(QueuePanelScreen), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.text('Lanjutkan'));
+        await tester.pumpAndSettle();
+        expect(find.text('Hari beres!'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
   }
 
   testWidgets('galeri bisa di-scroll sampai bawah di 360 px', (tester) async {

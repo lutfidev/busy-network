@@ -114,9 +114,15 @@ class _DesignPhaseScreenState extends State<DesignPhaseScreen> {
                   HeaderStat(
                     label: 'Target kepuasan',
                     value: '≥ ${IdFormat.percent(level.targetSatisfaction)}',
-                    note:
+                    note: switch (level.surge) {
+                      final surge? =>
+                        '${surge.name} '
+                            '${IdFormat.hourRange(surge.fromHour, surge.toHour)}'
+                            ' · trafik ${IdFormat.number(surge.factor)}×',
+                      null =>
                         'Jam sibuk '
-                        '${IdFormat.hourRange(rushFrom, rushTo)}',
+                            '${IdFormat.hourRange(rushFrom, rushTo)}',
+                    },
                   ),
                 ],
               ),

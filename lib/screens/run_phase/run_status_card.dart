@@ -47,13 +47,18 @@ class RunStatusCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'LEVEL ${level.number} · ${level.name.toUpperCase()}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.label.copyWith(
-                        color: AppColors.inkOnDarkMuted,
-                        letterSpacing: 0.4,
+                    // Nama level panjang (level bos) mengecil, tidak
+                    // dipotong.
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'LEVEL ${level.number} · ${level.name.toUpperCase()}',
+                        maxLines: 1,
+                        style: AppTypography.label.copyWith(
+                          color: AppColors.inkOnDarkMuted,
+                          letterSpacing: 0.4,
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.s2),
@@ -155,6 +160,8 @@ class _DayTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = _frac(day.minute / 60);
+    final rushLabel = IdFormat.hourRange(day.rushFrom, day.rushTo);
+    final noonInRush = day.rushFrom <= 12 && day.rushTo >= 12;
     final rushFrom = _frac(day.rushFrom.toDouble());
     final rushTo = _frac(day.rushTo.toDouble());
     final labelStyle = AppTypography.micro.copyWith(
@@ -230,14 +237,17 @@ class _DayTimeline extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(IdFormat.hour(_startHour), style: labelStyle),
-              Text(IdFormat.hour(12), style: labelStyle),
-              Padding(
-                padding: const EdgeInsets.only(left: 60),
-                child: Text(
-                  IdFormat.hourRange(day.rushFrom, day.rushTo),
-                  style: labelStyle,
+              // Jam sibuk yang melewati tengah hari (level 7): labelnya di
+              // tengah, menggantikan "12".
+              if (noonInRush)
+                Text(rushLabel, style: labelStyle)
+              else ...[
+                Text(IdFormat.hour(12), style: labelStyle),
+                Padding(
+                  padding: const EdgeInsets.only(left: 60),
+                  child: Text(rushLabel, style: labelStyle),
                 ),
-              ),
+              ],
               Text(IdFormat.hour(_endHour), style: labelStyle),
             ],
           ),

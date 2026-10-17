@@ -66,19 +66,50 @@ class Junction {
   final Offset position;
 }
 
+/// Lonjakan trafik serentak (level bos): selama jam [fromHour]–[toHour]
+/// pemakaian semua rumah dikali [factor], di atas kurva harian.
+class TrafficSurge {
+  const TrafficSurge({
+    required this.fromHour,
+    required this.toHour,
+    required this.factor,
+    required this.name,
+  }) : assert(factor >= 1),
+       assert(fromHour < toHour);
+
+  final int fromHour;
+  final int toHour;
+  final double factor;
+
+  /// Nama acara di catatan Fase Rancang ("Nobar").
+  final String name;
+
+  /// Kali pemakaian pada [minute] (menit sejak 00:00): [factor] di dalam
+  /// jam lonjakan, 1 di luarnya.
+  double factorAt(num minute) =>
+      minute >= fromHour * 60 && minute < toHour * 60 ? factor : 1;
+}
+
 /// Satu babak di Peta Babak.
 class ChapterDef {
   const ChapterDef({
     required this.number,
     required this.name,
     required this.levelCount,
+    required this.bossStars,
   });
 
   final int number;
   final String name;
 
-  /// Jumlah level termasuk level bos.
+  /// Jumlah level termasuk level bos (level terakhir).
   final int levelCount;
+
+  /// Bintang babak minimal supaya level bos terbuka.
+  final int bossStars;
+
+  /// Nomor level bos.
+  int get bossLevel => levelCount;
 
   /// Bintang maksimal: 3 per level.
   int get starsTotal => levelCount * 3;
@@ -101,6 +132,7 @@ class LevelDef {
     this.savingsTarget = defaultSavingsTarget,
     this.rushHourFrom,
     this.rushHourTo,
+    this.surge,
     required this.blockLabels,
     this._nightBlockLabels,
   });
@@ -144,6 +176,9 @@ class LevelDef {
   final int savingsTarget;
   final int? rushHourFrom;
   final int? rushHourTo;
+
+  /// Lonjakan trafik serentak; `null` = hari biasa.
+  final TrafficSurge? surge;
 
   /// Label blok (siang). Fase jalan memakai [nightBlockLabels].
   final List<MapBlockLabel> blockLabels;

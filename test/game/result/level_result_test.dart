@@ -3,6 +3,7 @@ import 'package:busy_network/game/model/model.dart';
 import 'package:busy_network/game/result/level_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../levels/level_plans.dart';
 import '../sim/sim_fixtures.dart';
 
 const _level5 = Levels.level5;
@@ -309,5 +310,16 @@ void main() {
       expect(r.budgetLeft, 35000);
       expect(r.stars, 2);
     });
+  });
+
+  test('batas antrean di bawah pemakaian saat nobar = biang kerok', () {
+    // Pos Ronda 20 Mbps, saat nobar 30 Mbps; batas 25 baru terasa di 20–22.
+    final r = play(Levels.level12, referencePlans[12]!, limits: {'pos': 25});
+    expect(
+      r.culprit,
+      isA<TightLimit>().having((c) => c.customers, 'customers', [
+        'Pos Ronda Pak RT',
+      ]),
+    );
   });
 }

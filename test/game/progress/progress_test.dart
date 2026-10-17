@@ -1,3 +1,4 @@
+import 'package:busy_network/game/levels/levels.dart';
 import 'package:busy_network/game/progress/progress.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,6 +11,47 @@ void main() {
     expect(p.isOpen(1), isTrue);
     expect(p.isOpen(2), isFalse);
     expect(p.totalStars, 0);
+  });
+
+  test('empty = progres kosong tanpa tutorial', () {
+    expect(Progress.empty, Progress(const {}));
+    expect(Progress.empty.tutorialDone, isFalse);
+    expect(Progress.empty.current, 1);
+  });
+
+  group('level bos butuh bintang babak', () {
+    const chapter = Levels.chapter;
+
+    test('level biasa: sama dengan isOpen', () {
+      expect(Progress.empty.canPlay(chapter, 1), isTrue);
+      expect(Progress.empty.canPlay(chapter, 2), isFalse);
+      expect(_design.canPlay(chapter, 5), isTrue);
+    });
+
+    test('level 11 selesai tapi bintang < 24 → bos terkunci', () {
+      final p = Progress({for (var n = 1; n <= 11; n++) n: 2});
+      expect(p.starsUpTo(11), 22);
+      expect(p.isOpen(12), isTrue);
+      expect(p.canPlay(chapter, 12), isFalse);
+    });
+
+    test('24 bintang dari level 1–11 → bos terbuka', () {
+      final p = Progress({for (var n = 1; n <= 11; n++) n: n <= 2 ? 3 : 2});
+      expect(p.starsUpTo(11), 24);
+      expect(p.canPlay(chapter, 12), isTrue);
+    });
+
+    test('bintang cukup tapi level 11 belum selesai → terkunci', () {
+      final p = Progress({for (var n = 1; n <= 10; n++) n: 3});
+      expect(p.starsUpTo(11), 30);
+      expect(p.canPlay(chapter, 12), isFalse);
+    });
+
+    test('bintang bos sendiri tidak dihitung', () {
+      final p = Progress({for (var n = 1; n <= 11; n++) n: 1, 12: 3});
+      expect(p.starsUpTo(11), 11);
+      expect(p.totalStars, 14);
+    });
   });
 
   test('progres desain: 9 bintang, 4 level, level 5 sekarang', () {
@@ -40,8 +82,15 @@ void main() {
 
   test('encode/decode bolak-balik', () {
     final p = _design.record(5, 3);
-    expect(p.encode(), '{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1,"5":3}}');
+    expect(p.encode(), '{"versi":2,"bintang":{"1":3,"2":2,"3":3,"4":1,"5":3}}');
     expect(Progress.decode(p.encode()), p);
+  });
+
+  test('versi 1 (progres awal desain lama) diabaikan', () {
+    expect(
+      Progress.decode('{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1}}'),
+      isNull,
+    );
   });
 
   test('data kosong, rusak, atau versi lain → null', () {
@@ -50,11 +99,11 @@ void main() {
       '',
       'bukan json',
       '[]',
-      '{"versi":2,"bintang":{}}',
-      '{"versi":1}',
-      '{"versi":1,"bintang":{"x":1}}',
-      '{"versi":1,"bintang":{"1":"3"}}',
-      '{"versi":1,"bintang":{"1":9}}',
+      '{"versi":3,"bintang":{}}',
+      '{"versi":2}',
+      '{"versi":2,"bintang":{"x":1}}',
+      '{"versi":2,"bintang":{"1":"3"}}',
+      '{"versi":2,"bintang":{"1":9}}',
     ]) {
       expect(Progress.decode(s), isNull, reason: '$s');
     }
@@ -84,12 +133,12 @@ void main() {
     test('JSON: kunci tutorial hanya bila selesai', () {
       expect(
         _design.encode(),
-        '{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1}}',
+        '{"versi":2,"bintang":{"1":3,"2":2,"3":3,"4":1}}',
       );
       final done = _design.completeTutorial();
       expect(
         done.encode(),
-        '{"versi":1,"bintang":{"1":3,"2":2,"3":3,"4":1},"tutorial":true}',
+        '{"versi":2,"bintang":{"1":3,"2":2,"3":3,"4":1},"tutorial":true}',
       );
       expect(Progress.decode(done.encode()), done);
       expect(Progress.decode(_design.encode())!.tutorialDone, isFalse);
@@ -97,14 +146,14 @@ void main() {
 
     test('tutorial bukan bool → data rusak', () {
       for (final s in [
-        '{"versi":1,"bintang":{},"tutorial":"ya"}',
-        '{"versi":1,"bintang":{},"tutorial":1}',
-        '{"versi":1,"bintang":{},"tutorial":null}',
+        '{"versi":2,"bintang":{},"tutorial":"ya"}',
+        '{"versi":2,"bintang":{},"tutorial":1}',
+        '{"versi":2,"bintang":{},"tutorial":null}',
       ]) {
         expect(Progress.decode(s), isNull, reason: s);
       }
       expect(
-        Progress.decode('{"versi":1,"bintang":{},"tutorial":false}'),
+        Progress.decode('{"versi":2,"bintang":{},"tutorial":false}'),
         Progress(const {}),
       );
     });

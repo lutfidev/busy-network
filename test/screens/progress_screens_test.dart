@@ -1,13 +1,14 @@
 import 'package:busy_network/app/game_session.dart';
 import 'package:busy_network/app/progress_book.dart';
 import 'package:busy_network/app/routes.dart';
+import 'package:busy_network/data/dummy_data.dart';
 import 'package:busy_network/data/progress_store.dart';
 import 'package:busy_network/game/progress/progress.dart';
 import 'package:busy_network/game/sim/sim.dart';
 import 'package:busy_network/screens/design_phase/design_phase_screen.dart';
-import 'package:busy_network/screens/level_map/level_map_screen.dart';
 import 'package:busy_network/screens/queue_panel/queue_panel_screen.dart';
 import 'package:busy_network/screens/run_phase/run_phase_screen.dart';
+import 'package:busy_network/screens/tutorial/tutorial_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ GameSession _with(Progress progress) =>
 void main() {
   setUpFonts();
 
-  testWidgets('Peta: level 5 selesai, level 6 sekarang tapi belum tersedia', (
+  testWidgets('Peta: level 5 selesai, level 6 sekarang & bisa dimainkan', (
     tester,
   ) async {
     setScreenSize(tester, const Size(390, 844));
@@ -37,11 +38,26 @@ void main() {
       findsOneWidget,
     );
     expect(find.bySemanticsLabel('Level 5, 3 bintang'), findsOneWidget);
-    expect(find.text('Gang Melati'), findsNothing);
-    await tester.tap(find.bySemanticsLabel('Level 6, belum tersedia'));
+    expect(find.text('Warisan Pak RT'), findsOneWidget, reason: 'chip');
+    await tester.tap(
+      find.bySemanticsLabel('Level 6, Warisan Pak RT, main sekarang'),
+    );
     await tester.pumpAndSettle();
-    expect(find.byType(LevelMapScreen), findsOneWidget);
-    expect(find.byType(DesignPhaseScreen), findsNothing);
+    expect(find.byType(DesignPhaseScreen), findsOneWidget);
+    expect(find.text('5/6 rumah tersambung'), findsOneWidget);
+    semantics.dispose();
+  });
+
+  testWidgets('progres awal: hanya level 1, lewat tutorial', (tester) async {
+    setScreenSize(tester, const Size(390, 844));
+    final semantics = tester.ensureSemantics();
+    await pumpApp(tester, location: AppRoutes.levelMap);
+    expect(find.bySemanticsLabel('Bintang terkumpul 0 dari 36'), findsOne);
+    await tester.tap(
+      find.bySemanticsLabel('Level 1, Rumah Pertama, main sekarang, tutorial'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(TutorialScreen), findsOneWidget);
     semantics.dispose();
   });
 
@@ -60,12 +76,14 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('menang level 5 → Level Berikutnya → peta berubah', (
+  testWidgets('menang level 5 → Level Berikutnya → level 6 → peta berubah', (
     tester,
   ) async {
     setScreenSize(tester, const Size(390, 844));
     final semantics = tester.ensureSemantics();
-    final session = GameSession()..begin(winningDay(minute: 23 * 60));
+    final session = GameSession(
+      progress: ProgressBook.memory(DummyData.designProgress),
+    )..begin(winningDay(minute: 23 * 60));
     await pumpApp(
       tester,
       location: AppRoutes.run,
@@ -75,8 +93,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Level Berikutnya'));
     await tester.pumpAndSettle();
+    expect(find.text('Warisan Pak RT'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Kembali ke peta'));
+    await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Level 5, 3 bintang'), findsOneWidget);
-    expect(find.bySemanticsLabel('Level 6, belum tersedia'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Level 6, Warisan Pak RT, main sekarang'),
+      findsOneWidget,
+    );
     expect(
       find.bySemanticsLabel('Bintang terkumpul 12 dari 36'),
       findsOneWidget,
@@ -118,6 +142,69 @@ void main() {
     semantics.dispose();
   });
 
+  group('level bos', () {
+    Future<void> map(WidgetTester tester, Progress progress) async {
+      setScreenSize(tester, const Size(390, 844));
+      await pumpApp(
+        tester,
+        location: AppRoutes.levelMap,
+        session: _with(progress),
+      );
+    }
+
+    testWidgets('level 11 selesai, 22 bintang: masih terkunci', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await map(tester, Progress({for (var n = 1; n <= 11; n++) n: 2}));
+      final boss = find.bySemanticsLabel(
+        'Level 12, level bos Malam Final Sepak Bola, terkunci',
+      );
+      expect(boss, findsOneWidget);
+      expect(find.text('Satu kompleks nobar. Butuh 24 bintang.'), findsOne);
+      await tester.tap(boss);
+      await tester.pumpAndSettle();
+      expect(find.byType(DesignPhaseScreen), findsNothing);
+      semantics.dispose();
+    });
+
+    testWidgets('24 bintang: terbuka → Fase Rancang bos dengan nobar', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await map(
+        tester,
+        Progress({for (var n = 1; n <= 11; n++) n: n <= 2 ? 3 : 2}),
+      );
+      expect(find.text('Satu kompleks nobar. Ayo, main!'), findsOneWidget);
+      await tester.tap(
+        find.bySemanticsLabel(
+          'Level 12, level bos Malam Final Sepak Bola, main sekarang',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(DesignPhaseScreen), findsOneWidget);
+      expect(find.text('Malam Final Sepak Bola'), findsOneWidget);
+      expect(find.text('Nobar 20–22 · trafik 1,5×'), findsOneWidget);
+      expect(find.text('0/9 rumah tersambung'), findsOneWidget);
+      semantics.dispose();
+    });
+
+    testWidgets('selesai: bintang bos tampil', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await map(tester, Progress({for (var n = 1; n <= 12; n++) n: 3}));
+      expect(
+        find.bySemanticsLabel(
+          'Level 12, level bos Malam Final Sepak Bola, 3 bintang',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Bintang terkumpul 36 dari 36'),
+        findsOneWidget,
+      );
+      semantics.dispose();
+    });
+  });
+
   group('tutorial selesai', () {
     final done = Progress(const {1: 3, 2: 2, 3: 3, 4: 1}).completeTutorial();
 
@@ -133,7 +220,11 @@ void main() {
     ) async {
       setScreenSize(tester, const Size(390, 844));
       final semantics = tester.ensureSemantics();
-      await pumpApp(tester, location: AppRoutes.levelMap);
+      await pumpApp(
+        tester,
+        location: AppRoutes.levelMap,
+        session: _with(Progress(const {1: 3, 2: 2, 3: 3, 4: 1})),
+      );
       expect(find.bySemanticsLabel('Level 1, 3 bintang, tutorial'), findsOne);
       semantics.dispose();
     });

@@ -4,6 +4,10 @@ import '../map_scene.dart';
 import '../model/cable.dart';
 import '../model/level_def.dart';
 
+part 'level_boss.dart';
+part 'levels_early.dart';
+part 'levels_late.dart';
+
 /// Level Babak 1 · Perumahan Batam. Angka & koordinat dari
 /// `design/Jaringan Sibuk.html`. Teks komplain: hanya milik Bu Sri yang ada
 /// di desain; sisanya copy baru.
@@ -185,15 +189,43 @@ abstract final class Levels {
     ],
   );
 
-  static const all = [level1, level5];
+  static const level2 = _level2;
+  static const level3 = _level3;
+  static const level4 = _level4;
+  static const level6 = _level6;
+  static const level7 = _level7;
+  static const level8 = _level8;
+  static const level9 = _level9;
+  static const level10 = _level10;
+  static const level11 = _level11;
+
+  /// Level bos babak 1.
+  static const level12 = _level12;
+
+  /// Semua level babak 1, urut nomor.
+  static const all = [
+    level1,
+    level2,
+    level3,
+    level4,
+    level5,
+    level6,
+    level7,
+    level8,
+    level9,
+    level10,
+    level11,
+    level12,
+  ];
 
   static const chapter = ChapterDef(
     number: 1,
     name: 'Perumahan Batam',
     levelCount: 12,
+    bossStars: 24,
   );
 
-  /// Level bernomor [number]; `null` bila datanya belum ada (langkah 8).
+  /// Level bernomor [number]; `null` bila tidak ada.
   static LevelDef? byNumber(int number) {
     for (final level in all) {
       if (level.number == number) return level;
