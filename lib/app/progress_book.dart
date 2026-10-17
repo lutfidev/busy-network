@@ -29,6 +29,13 @@ class ProgressBook extends ChangeNotifier {
   /// Tandai tutorial selesai, beri tahu pendengar, lalu simpan.
   Future<void> completeTutorial() => _update(_progress.completeTutorial());
 
+  /// Hapus semua bintang & tutorial (Pengaturan → Reset progres): mulai
+  /// lagi dari level 1.
+  Future<void> reset() async {
+    if (_progress == Progress.empty) return;
+    await _update(Progress.empty);
+  }
+
   /// Gagal simpan tidak menghentikan permainan: progres di memori tetap
   /// berlaku.
   Future<void> _update(Progress next) async {
