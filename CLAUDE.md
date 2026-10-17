@@ -174,6 +174,9 @@ tanpa menyuruh pemilik repo menjalankan perintah:
   kecuali diminta.
 - Kesepakatan baru soal alur kerja langsung dicatat di file ini, jangan
   hanya diucapkan di chat.
+- **Langsung kerja, tanpa sesi tanya-jawab/brainstorming.** Hal yang tidak
+  ada di desain/roadmap diputuskan sendiri dengan pilihan wajar, lalu
+  dicatat di badan PR ("Keputusan sendiri") supaya bisa dikoreksi.
 
 ## Lanjut ke mana
 Lihat `docs/ROADMAP.md` — langkah berurutan beserta prompt siap tempel.
