@@ -65,4 +65,9 @@ abstract final class AppSizes {
   static const double avatar = 38;
   static const double logoTile = 76;
   static const double bossTile = 72;
+
+  /// Sakelar (Pengaturan; tidak ada di desain): pill 52×32, kenop 26.
+  static const double toggleWidth = 52;
+  static const double toggleHeight = 32;
+  static const double toggleKnob = 26;
 }

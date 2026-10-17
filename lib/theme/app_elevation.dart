@@ -37,6 +37,15 @@ abstract final class AppElevation {
     ),
   ];
 
+  /// Kenop sakelar: 0 1 3 rgba(27,35,51,.25) (tidak ada di desain).
+  static const List<BoxShadow> toggleKnob = [
+    BoxShadow(
+      color: AppColors.shadowInk25,
+      offset: Offset(0, 1),
+      blurRadius: 3,
+    ),
+  ];
+
   /// Pop-up di peta malam: 0 10 30 rgba(0,0,0,.4).
   static const List<BoxShadow> popupNight = [
     BoxShadow(

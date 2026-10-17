@@ -102,6 +102,22 @@ abstract final class GameIcons {
     IconShape.circle(Offset(7, 7), 3),
   ], strokeWidth: 2.2);
 
+  /// Pengaturan (tidak ada di desain): pengeras suara.
+  static const sound = GameIconData([
+    IconShape.path('M11 5L6.5 9H3.5v6h3l4.5 4z'),
+    IconShape.path('M15.5 9a4.5 4.5 0 0 1 0 6M18.5 6a8.5 8.5 0 0 1 0 12'),
+  ], strokeWidth: 2.2);
+
+  /// Pengaturan (tidak ada di desain): ponsel bergetar.
+  static const vibrate = GameIconData([
+    IconShape.rect(
+      Rect.fromLTWH(8, 3.5, 8, 17),
+      radius: 2,
+      mode: IconPaintMode.stroke,
+    ),
+    IconShape.path('M4.5 8.5v7M19.5 8.5v7'),
+  ], strokeWidth: 2.2);
+
   static const back = GameIconData([IconShape.path('M15 18l-6-6 6-6')]);
 
   static const chevronRight = GameIconData([

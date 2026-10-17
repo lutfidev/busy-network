@@ -35,13 +35,20 @@ const _screens = <String, String>{
   '07-hasil-berhasil-2': '${AppRoutes.success}?${AppRoutes.starsParam}=2',
   '07-hasil-berhasil-3': '${AppRoutes.success}?${AppRoutes.starsParam}=3',
   '08-hasil-gagal': AppRoutes.fail,
+  '10-pengaturan': AppRoutes.settings,
+  '10-pengaturan-reset': AppRoutes.settings,
 };
 
 /// Aksi sebelum dipotret; gestur yang dikembalikan dilepas sesudahnya.
-final _before = <String, Future<TestGesture> Function(WidgetTester)>{
+final _before = <String, Future<TestGesture?> Function(WidgetTester)>{
   // Bingkai desain: jari masih menarik kabel router → arah Rumah 5.
   '04-fase-rancang': (tester) =>
       dragOnMap(tester, designPullPath, release: false),
+  '10-pengaturan-reset': (tester) async {
+    await tester.tap(find.text('Reset progres'));
+    await tester.pumpAndSettle();
+    return null;
+  },
 };
 
 const _sizes = [Size(390, 844), Size(360, 740)];

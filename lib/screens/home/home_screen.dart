@@ -55,9 +55,7 @@ class HomeScreen extends StatelessWidget {
                           CircleIconButton(
                             icon: GameIcons.settings,
                             semanticLabel: 'Pengaturan',
-                            // Asumsi: pengaturan belum didesain → sementara
-                            // membuka galeri komponen.
-                            onPressed: () => context.go(AppRoutes.gallery),
+                            onPressed: () => context.go(AppRoutes.settings),
                             background: AppColors.surfaceNightRaised,
                             borderColor: AppColors.surfaceNightRaisedLine,
                             iconColor: AppColors.inkOnDarkSoft,

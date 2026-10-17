@@ -28,8 +28,16 @@ Rancang · 5 Fase Jalan · 6 Panel Atur Antrean · 7 Hasil Berhasil · 8 Hasil
 Gagal · Design token & komponen.
 
 ## Asumsi yang diambil (desain ambigu)
-- **Pengaturan** (ikon di Beranda) belum didesain → sementara membuka galeri
-  komponen `/galeri`.
+- **Pengaturan** (ikon di Beranda; rincian di
+  `docs/superpowers/specs/2026-10-17-polish-rilis-design.md`) tidak ada di
+  desain → layar `/pengaturan` bergaya Peta Babak: sakelar "Efek suara" &
+  "Getar" (komponen baru `ToggleSwitch`), kartu progres dengan "Reset
+  progres" (dialog konfirmasi, tombol merah `ChunkyVariant.danger`), dan
+  di luar build release tautan galeri komponen `/pengaturan/galeri`.
+  Ikon pengeras suara & ponsel bergetar digambar baru. Semua copy-nya baru.
+- **Suara & getar** tidak ada di desain: efek suara disintesis
+  (`tool/make_sounds.py`), dipicu tombol, kabel terpasang/ditolak/dibongkar,
+  komplain baru, dan akhir hari (lulus/gagal).
 - **Peta Babak dari progres**: permainan mulai dari progres kosong
   (`Progress.empty`); potret desain (level 1–4 selesai 3/2/3/1★, level 5
   sekarang) = `DummyData.designProgress`, hanya untuk screenshot & test.

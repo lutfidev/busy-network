@@ -16,6 +16,10 @@ enum ChunkyVariant {
 
   /// Abu lembut + teks Nunito ("Abaikan").
   soft,
+
+  /// Merah + teks putih: aksi yang menghapus ("Reset" di Pengaturan; tidak
+  /// ada di desain).
+  danger,
 }
 
 enum ChunkySize {
@@ -143,6 +147,12 @@ class _ChunkyButtonState extends State<ChunkyButton> {
       ),
       ChunkyVariant.dark => (AppColors.ink, AppColors.surface, null, null),
       ChunkyVariant.soft => (AppColors.bubble, AppColors.ink, null, null),
+      ChunkyVariant.danger => (
+        AppColors.statusJam,
+        AppColors.surface,
+        AppColors.statusJamDark,
+        null,
+      ),
     };
     final depth = shadow == null ? 0.0 : s.depth;
     final pressedShift = depth == 0

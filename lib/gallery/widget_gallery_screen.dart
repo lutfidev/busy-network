@@ -19,6 +19,7 @@ class WidgetGalleryScreen extends StatefulWidget {
 class _WidgetGalleryScreenState extends State<WidgetGalleryScreen> {
   CableKind _cable = CableKind.lan;
   int _taps = 0;
+  bool _toggle = true;
 
   void _tap() => setState(() => _taps++);
 
@@ -162,6 +163,28 @@ class _WidgetGalleryScreenState extends State<WidgetGalleryScreen> {
                           onPressed: _tap,
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.s10),
+                  // Pengaturan (tidak ada di desain).
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ChunkyButton(
+                          label: 'Reset',
+                          variant: ChunkyVariant.danger,
+                          size: ChunkySize.small,
+                          onPressed: _tap,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.s12),
+                      ToggleSwitch(
+                        value: _toggle,
+                        semanticLabel: 'Sakelar',
+                        onChanged: (v) => setState(() => _toggle = v),
+                      ),
+                      const SizedBox(width: AppSpacing.s8),
+                      const ToggleTrack(value: false),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.s10),

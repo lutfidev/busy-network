@@ -20,3 +20,4 @@ export 'night_scope.dart';
 export 'progress_bar.dart';
 export 'star_rating.dart';
 export 'status_dot.dart';
+export 'toggle_switch.dart';
