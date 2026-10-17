@@ -105,3 +105,27 @@ berkedip, bintang hasil "pop", tangan tutorial bergerak, panel naik.
 > Layar Pengaturan (suara, getar, reset progres) menggantikan tautan ke galeri;
 > efek suara & haptic; ikon launcher & splash dari palet; `applicationId`
 > final (bukan `com.example`); signing release; `flutter build appbundle`.
+
+## 10. Persiapan Play Store
+> Siapkan materi listing Play Store, dirender dari app sendiri (bukan
+> diambil manual): 6 screenshot ponsel 1080×1920 (layar app 390×844 di
+> bingkai + judul singkat Bahasa Indonesia), feature graphic 1024×500,
+> ikon 512×512, semua PNG 24-bit tanpa alpha kecuali ikon. Tulis judul,
+> deskripsi singkat (≤ 80) & lengkap (≤ 4000), kebijakan privasi (app tidak
+> mengumpulkan data), jawaban Keamanan Data & kuesioner rating konten, dan
+> checklist Play Console di `docs/RELEASE.md`.
+
+## 11. Musik latar
+> Musik latar disintesis seperti `tool/make_sounds.py` (tanpa aset
+> berlisensi), berulang mulus: satu lagu santai untuk Beranda/Peta/Rancang
+> dan satu lebih tegang untuk Fase Jalan saat jam sibuk. Sakelar "Musik"
+> baru di Pengaturan (tersimpan di `Settings`), musik berhenti saat app ke
+> latar belakang dan lanjut saat kembali, efek suara tetap terdengar di
+> atasnya. Keluaran disuntik (default diam) supaya test senyap.
+
+## 12. Babak 2
+> Babak kedua setelah Perumahan Batam: `ChapterDef` kedua dengan tema
+> lokasi baru, level 13–24 dengan satu mekanik baru (pilih sendiri, catat
+> di PR), bos di level 24. Peta Babak bisa berpindah babak; babak 2
+> terbuka setelah bos babak 1 selesai. Ikuti aturan level di `CLAUDE.md`
+> (rancangan acuan 3★ + jebakan, `level_def_test.dart`, screenshot).

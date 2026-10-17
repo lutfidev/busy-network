@@ -10,38 +10,23 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:busy_network/theme/theme.dart';
-import 'package:busy_network/widgets/widgets.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'logo_render.dart';
+
 const bool _enabled = bool.fromEnvironment('BRAND');
 
-/// Glyph ditengahkan di kanvas [canvasSize] px dengan lebar [glyphWidth]
-/// px, di atas [background] (`null` = transparan).
 Future<void> _render(
   String name, {
   required double canvasSize,
   required double glyphWidth,
   Color? background,
 }) async {
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder);
-  if (background != null) {
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, canvasSize, canvasSize),
-      Paint()..color = background,
-    );
-  }
-  const bounds = LogoGlyph.bounds;
-  final scale = glyphWidth / bounds.width;
-  canvas
-    ..translate(canvasSize / 2, canvasSize / 2)
-    ..scale(scale)
-    ..translate(-bounds.center.dx, -bounds.center.dy);
-  LogoGlyph.paint(canvas, cutout: background ?? AppColors.groundNight);
-  final image = await recorder.endRecording().toImage(
-    canvasSize.toInt(),
-    canvasSize.toInt(),
+  final image = await renderLogo(
+    canvasSize: canvasSize,
+    glyphWidth: glyphWidth,
+    background: background,
   );
   final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
   final file = File('assets/brand/$name.png');

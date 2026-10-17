@@ -20,6 +20,8 @@ flutter test test/screenshots --dart-define=SCREENSHOTS=true
                                 # → build/screenshots/{390x844,360x740}/*.png
 flutter run                     # perangkat/emulator Android
 flutter build appbundle         # rilis; signing & ikon: docs/RELEASE.md
+flutter test test/tool/store_test.dart --dart-define=STORE=true
+                                # → store/*.png (materi Play Store)
 ```
 Belum ada Flutter? `source scripts/setup_flutter.sh`.
 
@@ -112,6 +114,11 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   Pengaturan hanya di build non-release).
 - Android: `applicationId` `dev.lutfidev.jaringansibuk`, signing lewat
   `android/key.properties` (tidak di git). Lihat `docs/RELEASE.md`.
+- `store/` — materi Play Store: `listing.md` (judul, deskripsi, daftar
+  gambar), `privacy-policy.md`, dan PNG yang dirender
+  `test/tool/store_test.dart` (layar app asli dalam bingkai; render ulang
+  bila tampilan berubah). `test/tool/` juga berisi `brand_test.dart`
+  (ikon & splash), `logo_render.dart`, `png_rgb.dart` (PNG tanpa alfa).
 
 ## Aturan
 - **Jangan hardcode warna/ukuran di widget.** Tambah token di `lib/theme/`
@@ -194,9 +201,20 @@ tanpa menyuruh pemilik repo menjalankan perintah:
   kecuali diminta.
 - Kesepakatan baru soal alur kerja langsung dicatat di file ini, jangan
   hanya diucapkan di chat.
-- **Langsung kerja, tanpa sesi tanya-jawab/brainstorming.** Hal yang tidak
-  ada di desain/roadmap diputuskan sendiri dengan pilihan wajar, lalu
-  dicatat di badan PR ("Keputusan sendiri") supaya bisa dikoreksi.
+- **Tanya hanya lewat brainstorming, dan hanya untuk hal yang belum
+  diputuskan prompt roadmap atau desain** (lihat "Skill dan effort"). Hal
+  kecil lainnya diputuskan sendiri dengan pilihan wajar, lalu dicatat di
+  badan PR ("Keputusan sendiri") supaya bisa dikoreksi.
+
+## Skill dan effort
+
+Pemilik repo nyaman dengan skill superpowers: selalu pakai skill yang cocok. Effort sesi utama diatur pemilik repo lewat `/effort`; effort subagent ditulis di sini dan berlaku sebagai permintaan pemilik repo.
+
+- **Planning:** `superpowers:brainstorming` lalu `superpowers:writing-plans` di sesi utama (high; xhigh untuk langkah dengan banyak keputusan, mis. 12 Babak 2). Brainstorming hanya untuk hal yang belum diputuskan prompt roadmap atau desain, dan pertanyaan yang diminta prompt roadmap diajukan di sini. Jalankan rencana dengan `superpowers:executing-plans` di sesi utama, bukan `subagent-driven-development`.
+- **Cari bug:** `superpowers:systematic-debugging` di sesi utama (high). Kalau penyebabnya bisa di banyak tempat, sebar pencarian ke subagent `Explore` effort low; analisis akar masalah tetap di sesi utama.
+- **Cari kode yang lebar:** subagent `Explore` effort low, hanya kalau bagian "Struktur" di atas dan `grep` langsung tidak cukup.
+- **Review sebelum PR:** `superpowers:requesting-code-review` dengan satu subagent effort high, lalu `superpowers:receiving-code-review` untuk menimbang temuannya sebelum diperbaiki. Sesudah itu `superpowers:verification-before-completion` sebelum push.
+- **Desain, logo, ikon, dan gambar lain:** di sesi utama (high), bukan subagent, karena butuh konteks desain lengkap. Yang ada di `design/` disalin persis; yang belum ada desainnya (mis. layar atau ikon baru di Babak 2) mulai dengan `superpowers:brainstorming`, pakai palet dan gaya desain, cek hasilnya lewat potret layar `test/screenshots/`, lalu catat di `docs/DESIGN_NOTES.md`.
 
 ## Lanjut ke mana
 Lihat `docs/ROADMAP.md` — langkah berurutan beserta prompt siap tempel.

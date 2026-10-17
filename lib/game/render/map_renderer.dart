@@ -452,8 +452,15 @@ abstract final class MapRenderer {
       node.position + offset,
       style,
       align: node.labelAlign,
+      within: labelBounds,
     );
   }
+
+  /// Label node digeser seperlunya supaya tetap di dalam peta (mis. label
+  /// "Rumah 7 · sabar 44%" rumah dekat tepi kiri).
+  static final labelBounds = (Offset.zero & AppSizes.mapArea).deflate(
+    AppSpacing.s4,
+  );
 
   static void drawBadge(Canvas canvas, MapBadge badge) {
     final rect = Rect.fromLTWH(
@@ -488,13 +495,15 @@ abstract final class MapRenderer {
     canvas.drawCircle(c, dragHandleDot, Paint()..color = AppColors.ink);
   }
 
-  /// Teks dengan [baseline] di titik [anchor] (seperti `<text x y>` SVG).
+  /// Teks dengan [baseline] di titik [anchor] (seperti `<text x y>` SVG),
+  /// digeser mendatar seperlunya supaya tidak keluar dari [within].
   static void drawText(
     Canvas canvas,
     String text,
     Offset anchor,
     TextStyle style, {
     TextAlign align = TextAlign.center,
+    Rect? within,
   }) {
     final tp = TextPainter(
       text: TextSpan(text: text, style: style),
@@ -503,11 +512,14 @@ abstract final class MapRenderer {
     final baseline = tp.computeDistanceToActualBaseline(
       TextBaseline.alphabetic,
     );
-    final dx = switch (align) {
+    var dx = switch (align) {
       TextAlign.center => anchor.dx - tp.width / 2,
       TextAlign.right || TextAlign.end => anchor.dx - tp.width,
       _ => anchor.dx,
     };
+    if (within != null) {
+      dx = math.max(within.left, math.min(dx, within.right - tp.width));
+    }
     tp.paint(canvas, Offset(dx, anchor.dy - baseline));
     tp.dispose();
   }
