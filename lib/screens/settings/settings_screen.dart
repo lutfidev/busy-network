@@ -196,6 +196,7 @@ class _SwitchRow extends StatelessWidget {
     final onTap = ToggleSwitch.toggle(context, value, onChanged);
     return Semantics(
       container: true,
+      button: true,
       toggled: value,
       label: title,
       hint: subtitle,

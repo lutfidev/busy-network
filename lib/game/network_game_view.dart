@@ -47,7 +47,7 @@ class _NetworkGameViewState extends State<NetworkGameView> {
   late final NetworkGame _game =
       NetworkGame(state: widget.state, interactive: widget.interactive)
         ..onCableDrop = _onCableDrop
-        ..onCableRemoved = (() => FeedbackScope.cue(context, Cue.remove));
+        ..onCableRemoved = _onCableRemoved;
 
   void _onCableDrop(CableDrop drop) {
     final cue = switch (drop) {
@@ -56,6 +56,10 @@ class _NetworkGameViewState extends State<NetworkGameView> {
       CableDrop.missed => null,
     };
     if (cue != null && mounted) FeedbackScope.cue(context, cue);
+  }
+
+  void _onCableRemoved() {
+    if (mounted) FeedbackScope.cue(context, Cue.remove);
   }
 
   @override

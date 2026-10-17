@@ -43,7 +43,7 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
 
   /// Komplain yang sudah berbunyi (yang sudah tampil saat layar dibuka tidak
   /// berbunyi lagi).
-  late Complaint? _heardComplaint = _day.complaint;
+  Complaint? _heardComplaint;
 
   /// Rute ini paling atas (tidak tertutup panel, tidak sedang di-back).
   bool _onTop = true;
@@ -53,6 +53,7 @@ class _RunPhaseScreenState extends State<RunPhaseScreen>
   @override
   void initState() {
     super.initState();
+    _heardComplaint = _day.complaint;
     _game.addListener(_onGameChanged);
   }
 

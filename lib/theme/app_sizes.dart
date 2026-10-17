@@ -66,6 +66,9 @@ abstract final class AppSizes {
   static const double logoTile = 76;
   static const double bossTile = 72;
 
+  /// Lebar maksimum kartu dialog (Pengaturan; tidak ada di desain).
+  static const double dialogMaxWidth = 360;
+
   /// Sakelar (Pengaturan; tidak ada di desain): pill 52×32, kenop 26.
   static const double toggleWidth = 52;
   static const double toggleHeight = 32;

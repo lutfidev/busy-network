@@ -38,6 +38,7 @@ class ToggleSwitch extends StatelessWidget {
     final onTap = toggle(context, value, onChanged);
     return Semantics(
       container: true,
+      button: true,
       toggled: value,
       enabled: onChanged != null,
       label: semanticLabel,

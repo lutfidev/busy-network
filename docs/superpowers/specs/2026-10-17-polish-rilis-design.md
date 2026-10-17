@@ -32,13 +32,14 @@ tanya-jawab), memakai token & komponen yang sudah ada.
   (hari selesai, sebelum pindah ke layar hasil).
 - `GameFeedback.cue(Cue)`: suara bila `settings.sound`, getar bila
   `settings.vibration`. Keluaran disuntik: `SoundOut` (`AudioSoundOut` =
-  `audioplayers` `AudioPool` per cue, mode campur dengan musik lain; default
+  `audioplayers` mode `lowLatency`/SoundPool, dua pemain bergiliran per cue,
+  dimuat paralel di latar belakang, campur dengan musik lain; default
   diam) dan `HapticOut` (`SystemHaptics` = `HapticFeedback`: tap →
   selectionClick, connect/remove → light, complaint/win → medium,
   refuse/fail → heavy). Test memakai perekam.
 - Disediakan `GameSession.feedback`; widget membacanya lewat
   `FeedbackScope.of(context)` (tanpa scope = diam). `NetworkGame` menerima
-  callback `onCue` dari `NetworkGameView`.
+  callback `onCableDrop` / `onCableRemoved` dari `NetworkGameView`.
 - Suara disintesis `tool/make_sounds.py` (sinus + envelope, WAV 16-bit mono
   22,05 kHz) → `assets/audio/*.wav`. Tanpa aset berlisensi.
 

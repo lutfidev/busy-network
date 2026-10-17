@@ -129,6 +129,34 @@ void main() {
     expect(out.sounds, [Cue.complaint]);
   });
 
+  testWidgets('komplain di perubahan pertama setelah layar dibuka berbunyi', (
+    tester,
+  ) async {
+    setScreenSize(tester, const Size(390, 844));
+    // Hari sama persis (deterministik): cari menit komplain pertama setelah
+    // 17:00, lalu buka layar semenit sebelumnya.
+    final probe = _playUntil(designDay(_failingCables), 17 * 60);
+    while (probe.day!.complaint == null) {
+      probe.advanceDay(0.05);
+    }
+    final minute = probe.day!.complaint!.minute;
+    final out = RecordingFeedback();
+    final day = _playUntil(designDay(_failingCables), minute - 1);
+    expect(day.day!.complaint, isNull);
+    final session = recordingSession(out)..begin(day);
+    await pumpApp(
+      tester,
+      location: AppRoutes.runOf(5),
+      session: session,
+      settle: false,
+    );
+    for (var i = 0; i < 20 && day.day!.complaint == null; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(day.day!.complaint?.minute, minute);
+    expect(out.sounds, [Cue.complaint]);
+  });
+
   for (final (name, cables, cue, screen) in [
     ('lulus', designFiberCables, Cue.win, ResultSuccessScreen),
     (

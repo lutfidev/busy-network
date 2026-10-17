@@ -44,7 +44,9 @@ class ResetProgressDialog extends StatelessWidget {
               explicitChildNodes: true,
               label: 'Reset progres?',
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 360),
+                constraints: const BoxConstraints(
+                  maxWidth: AppSizes.dialogMaxWidth,
+                ),
                 padding: const EdgeInsets.all(AppSpacing.s20),
                 decoration: const BoxDecoration(
                   color: AppColors.surface,

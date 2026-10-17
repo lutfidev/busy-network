@@ -40,26 +40,31 @@ android {
     signingConfigs {
         if (hasReleaseKey) {
             create("release") {
-                storeFile = file(keystoreProperties.getProperty("storeFile"))
-                storePassword = keystoreProperties.getProperty("storePassword")
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
+                fun key(name: String): String =
+                    keystoreProperties.getProperty(name)
+                        ?: error("android/key.properties: '$name' belum diisi")
+                storeFile = file(key("storeFile"))
+                storePassword = key("storePassword")
+                keyAlias = key("keyAlias")
+                keyPassword = key("keyPassword")
             }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = if (hasReleaseKey) {
-                signingConfigs.getByName("release")
-            } else {
-                logger.warn(
-                    "android/key.properties tidak ada: release ditandatangani kunci debug.",
-                )
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName(
+                if (hasReleaseKey) "release" else "debug",
+            )
         }
     }
+}
+
+// Peringatan hanya saat yang dibangun memang release.
+if (!hasReleaseKey &&
+    gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }
+) {
+    logger.warn("android/key.properties tidak ada: release ditandatangani kunci debug.")
 }
 
 kotlin {

@@ -82,6 +82,7 @@ void main() {
       matchesSemantics(
         label: 'Efek suara',
         hint: 'Bunyi saat kabel tersambung, ada komplain, dan hari selesai.',
+        isButton: true,
         isToggled: true,
         hasToggledState: true,
         hasTapAction: true,
@@ -92,6 +93,7 @@ void main() {
       matchesSemantics(
         label: 'Getar',
         hint: 'Getar halus saat kabel dipasang, ditolak, atau ada komplain.',
+        isButton: true,
         hasToggledState: true,
         hasTapAction: true,
       ),
