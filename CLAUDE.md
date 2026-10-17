@@ -20,6 +20,8 @@ flutter test test/screenshots --dart-define=SCREENSHOTS=true
                                 # → build/screenshots/{390x844,360x740}/*.png
 flutter run                     # perangkat/emulator Android
 flutter build appbundle         # rilis; signing & ikon: docs/RELEASE.md
+flutter test test/tool/store_test.dart --dart-define=STORE=true
+                                # → store/*.png (materi Play Store)
 ```
 Belum ada Flutter? `source scripts/setup_flutter.sh`.
 
@@ -112,6 +114,11 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   Pengaturan hanya di build non-release).
 - Android: `applicationId` `dev.lutfidev.jaringansibuk`, signing lewat
   `android/key.properties` (tidak di git). Lihat `docs/RELEASE.md`.
+- `store/` — materi Play Store: `listing.md` (judul, deskripsi, daftar
+  gambar), `privacy-policy.md`, dan PNG yang dirender
+  `test/tool/store_test.dart` (layar app asli dalam bingkai; render ulang
+  bila tampilan berubah). `test/tool/` juga berisi `brand_test.dart`
+  (ikon & splash), `logo_render.dart`, `png_rgb.dart` (PNG tanpa alfa).
 
 ## Aturan
 - **Jangan hardcode warna/ukuran di widget.** Tambah token di `lib/theme/`
