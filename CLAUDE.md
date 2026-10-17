@@ -19,6 +19,7 @@ flutter test                    # harus hijau (test screenshot di-skip)
 flutter test test/screenshots --dart-define=SCREENSHOTS=true
                                 # → build/screenshots/{390x844,360x740}/*.png
 flutter run                     # perangkat/emulator Android
+flutter build appbundle         # rilis; signing & ikon: docs/RELEASE.md
 ```
 Belum ada Flutter? `source scripts/setup_flutter.sh`.
 
@@ -31,7 +32,8 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `StatTile`, `ProgressBar`, `LevelNode`, `CableOptionCard`,
   `LevelHeaderCard`, `BottomPanel`, `DesignStage`,
   `GameIcon` (path SVG asli dari desain), `FillScrollView`, `LoopClock`
-  (jam animasi berulang).
+  (jam animasi berulang), `ToggleSwitch`, `LogoGlyph` (logo Beranda; juga
+  sumber ikon launcher & splash).
 - Animasi: `@keyframes` desain disalin jadi token `Keyframes` di
   `AppMotion` (persen + easing per segmen, persis CSS), digerakkan
   `LoopClock` (detik berjalan → pose). Pose peta di
@@ -77,24 +79,39 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   `tutorialDone`; level terbuka & level sekarang diturunkan; `canPlay`
   (level bos butuh `ChapterDef.bossStars` bintang level 1–11);
   `Progress.empty` = awal permainan; `encode`/`decode` JSON.
-- `lib/screens/<layar>/` — satu folder per layar (8 layar).
+- `lib/screens/<layar>/` — satu folder per layar (8 layar desain +
+  `settings/` Pengaturan, yang tidak ada di desain).
 - `lib/app/` — `routes.dart` (path; `play(n, tutorialDone:)`,
   `runOf`/`queueOf` membawa `?level=`), `router.dart` (go_router,
   bersarang), `app.dart`, `game_session.dart` (`GameSession`: hari dioper
   dari Rancang/Tutorial ke Jalan & Antrean; tanpa hari → potret desain;
   `finish()` di 24:00 → `result`, dicatat ke `progress` hanya bila hari
-  dimulai lewat `begin`), `progress_book.dart` (`ProgressBook`: progres
-  yang dibaca Beranda/Peta, `record`/`completeTutorial` lalu simpan).
+  dimulai lewat `begin`; juga membawa `feedback` & `settings`),
+  `progress_book.dart` (`ProgressBook`: progres yang dibaca Beranda/Peta,
+  `record`/`completeTutorial`/`reset` lalu simpan), `settings_book.dart`
+  (`SettingsBook`: setelan suara & getar, ubah lalu simpan).
+- `lib/settings/` — `Settings` (murni): `sound`, `vibration`,
+  `encode`/`decode` JSON.
+- `lib/feedback/` — `Cue` (tap, connect, refuse, remove, complaint, win,
+  fail), `GameFeedback.cue` (suara/getar sesuai setelan; keluaran
+  disuntik: `AudioSoundOut` = `audioplayers` + `assets/audio/*.wav` hasil
+  `tool/make_sounds.py`, `SystemHaptics`; default diam),
+  `FeedbackScope.of/cue/tap` (dipasang `JaringanSibukApp`; tanpa scope =
+  diam). `NetworkGame.onCableDrop`/`onCableRemoved` → cue di
+  `NetworkGameView`.
 - `lib/data/` — `dummy_states.dart` (potret `GameState` Tutorial (deep
   link `?langkah=`; tutorial yang dimainkan memakai satu state) & bingkai
   Fase Jalan desain, yang dihitung `DaySim` dari jam/sabar/komplain
   potret), `dummy_data.dart` (`designProgress` = progres Beranda/Peta di
   desain untuk screenshot & test, potret layar hasil untuk deep link), dan
   `progress_store.dart`
-  (`PrefsProgressStore` = `shared_preferences`, `MemoryProgressStore`).
+  (`PrefsProgressStore` = `shared_preferences`, `MemoryProgressStore`),
+  `settings_store.dart` (sama, untuk setelan).
 - `lib/core/format.dart` — `IdFormat`: `Rp 850.000`, `8,5 Mbps`, `20:15`.
-- `lib/gallery/` — galeri komponen (rute `/galeri`, tombol pengaturan di
-  Beranda).
+- `lib/gallery/` — galeri komponen (rute `/pengaturan/galeri`, baris di
+  Pengaturan hanya di build non-release).
+- Android: `applicationId` `dev.lutfidev.jaringansibuk`, signing lewat
+  `android/key.properties` (tidak di git). Lihat `docs/RELEASE.md`.
 
 ## Aturan
 - **Jangan hardcode warna/ukuran di widget.** Tambah token di `lib/theme/`
@@ -107,7 +124,10 @@ Belum ada Flutter? `source scripts/setup_flutter.sh`.
   mengecek semua rute di 360×640 s.d. 412×915 dan teks 130%. Rute baru →
   tambahkan ke daftar di test itu dan di `test/screenshots/`.
 - Tombol/kontrol kustom: bungkus `Semantics(container: true, button: true,
-  label: ...)`.
+  label: ...)`, dan ketukannya lewat `FeedbackScope.tap(context, onPressed)`
+  supaya berbunyi. Kejadian game baru yang perlu terdengar → tambah `Cue`
+  + berkas di `tool/make_sounds.py`; test memakai `RecordingFeedback`
+  (`test/feedback/recording_feedback.dart`).
 - Animasi tak berujung membuat `pumpAndSettle` macet. Animasi berulang
   wajib lewat `LoopClock` (berhenti di pose `still` bila
   `MediaQuery.disableAnimations`); animasi sekali jalan langsung ke akhir.

@@ -1,7 +1,7 @@
 name: busy_network
 description: "Jaringan Sibuk — game puzzle jaringan RT/RW Net (Flutter + Flame)."
 publish_to: 'none'
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: ^3.13.4
@@ -34,3 +34,27 @@ flutter:
     # Efek suara, disintesis `tool/make_sounds.py`.
     - assets/audio/
 
+# Ikon launcher & splash dari glyph logo (gambar: test/tool/brand_test.dart).
+#   dart run flutter_launcher_icons
+#   dart run flutter_native_splash:create
+#   git checkout android/app/src/main/AndroidManifest.xml
+# (generator splash menulis ulang manifest & membuang screenOrientation
+# portrait). Latar = AppColors.groundNight.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/brand/icon.png
+  adaptive_icon_background: "#0F1726"
+  adaptive_icon_foreground: assets/brand/icon_foreground.png
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#0F1726"
+  image: assets/brand/splash.png
+  android_12:
+    color: "#0F1726"
+    image: assets/brand/splash_android12.png
+    icon_background_color: "#0F1726"
+  ios: false
+  web: false
+  fullscreen: false
