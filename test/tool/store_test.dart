@@ -69,10 +69,22 @@ class _Shot {
   final Future<TestGesture?> Function(WidgetTester)? before;
 }
 
-/// Hari level bos dengan rancangan acuan, pukul 21:00 (puncak nobar).
+/// Hari level bos pukul 21:00 (puncak nobar) dengan rancangan yang aman di
+/// jam biasa tapi rantai Rumah 7 → Rumah 6 penuh saat nobar (jebakan di
+/// `level_balance_test.dart`), supaya tegangnya terlihat.
 GameSession _bossNight() {
-  final level = Levels.byNumber(12)!;
-  final day = design(level, referencePlans[level.number]!).planDay();
+  const plan = Plan([
+    Pull.fiber('router', 'pos'),
+    Pull('router', 'r2'),
+    Pull('router', 'r1'),
+    Pull('router', 'r3'),
+    Pull('router', 'r4'),
+    Pull('router', 'r5'),
+    Pull('router', 'r7'),
+    Pull('router', 'r8'),
+    Pull('r7', 'r6'),
+  ]);
+  final day = design(Levels.byNumber(12)!, plan).planDay();
   while (day.day!.minute < 21 * 60) {
     day.dismissComplaint();
     day.advanceDay(1);
@@ -151,16 +163,23 @@ class _Night extends StatelessWidget {
 
 /// Judul dua baris ala Beranda: [head] putih, [accent] oranye.
 class _Title extends StatelessWidget {
-  const _Title(this.head, this.accent, {required this.style});
+  const _Title(
+    this.head,
+    this.accent, {
+    required this.style,
+    this.align = CrossAxisAlignment.center,
+  });
 
   final String head;
   final String accent;
   final TextStyle style;
+  final CrossAxisAlignment align;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: align,
       children: [
         Text(head, style: style.copyWith(color: AppColors.inkOnDark)),
         Text(accent, style: style.copyWith(color: AppColors.primary)),
@@ -184,8 +203,7 @@ class _Phone extends StatelessWidget {
       viewPadding: EdgeInsets.zero,
       viewInsets: EdgeInsets.zero,
     );
-    return AspectRatio(
-      aspectRatio: screen.aspectRatio,
+    return IntrinsicWidth(
       child: Container(
         padding: const EdgeInsets.all(_phoneBezel),
         decoration: BoxDecoration(
@@ -193,12 +211,16 @@ class _Phone extends StatelessWidget {
           borderRadius: BorderRadius.circular(_phoneRadius + _phoneBezel),
           border: Border.all(color: AppColors.surfaceNightRaisedLine, width: 2),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(_phoneRadius),
-          child: FittedBox(
-            child: SizedBox.fromSize(
-              size: screen,
-              child: MediaQuery(data: media, child: app),
+        // Rasio di dalam bezel, supaya layar tidak ber-letterbox.
+        child: AspectRatio(
+          aspectRatio: screen.aspectRatio,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(_phoneRadius),
+            child: FittedBox(
+              child: SizedBox.fromSize(
+                size: screen,
+                child: MediaQuery(data: media, child: app),
+              ),
             ),
           ),
         ),
@@ -233,8 +255,9 @@ void _canvas(WidgetTester tester, Size size) {
 
 /// Font bundel (Nunito/Fredoka) tidak punya "→" (Antrean: "Kabel Router →
 /// Rumah 4"). Di ponsel glyph itu jatuh ke font sistem; test tidak punya
-/// font sistem, jadi muat font sistem mesin ini sebagai
-/// [AppTypography.systemFallback].
+/// font sistem. google_fonts memberi tiap gaya Nunito cadangan bernama
+/// keluarga dasar ("Nunito") yang tidak pernah dimuat, jadi font sistem mesin
+/// ini dimuat dengan nama itu.
 const _systemFonts = [
   ['C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/arialbd.ttf'],
   [
@@ -255,7 +278,7 @@ Future<void> _loadSystemFallback() async {
       '_systemFonts.',
     ),
   );
-  final loader = FontLoader(AppTypography.systemFallback);
+  final loader = FontLoader(GoogleFonts.nunito().fontFamilyFallback!.single);
   for (final f in files) {
     loader.addFont(File(f).readAsBytes().then(ByteData.sublistView));
   }
@@ -308,11 +331,14 @@ void main() {
           ),
         ),
       );
-      // Hari yang berjalan (bos) tidak pernah "settle"; cukup satu bingkai.
+      // Hari yang berjalan (bos) tidak pernah "settle"; beri beberapa
+      // bingkai tanpa memajukan jam.
       if (shot.session == null) {
         await tester.pumpAndSettle();
       } else {
-        await tester.pump();
+        for (var i = 0; i < 3; i++) {
+          await tester.pump();
+        }
       }
       final gesture = await shot.before?.call(tester);
       await _save(tester, 'screenshot-${shot.file}', _shotScale);
@@ -347,7 +373,12 @@ void main() {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Title('Jaringan', 'Sibuk', style: AppTypography.display),
+                    _Title(
+                      'Jaringan',
+                      'Sibuk',
+                      style: AppTypography.display,
+                      align: CrossAxisAlignment.start,
+                    ),
                     const SizedBox(height: AppSpacing.s8),
                     SizedBox(
                       width: 260,
@@ -380,8 +411,9 @@ void main() {
         background: AppColors.groundNight,
       );
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      await File('store/icon-512.png')
-          .writeAsBytes(bytes!.buffer.asUint8List());
+      final file = File('store/icon-512.png');
+      await file.parent.create(recursive: true);
+      await file.writeAsBytes(bytes!.buffer.asUint8List());
     });
   }, skip: !_enabled);
 }
