@@ -14,6 +14,7 @@ export 'icons/game_icons.dart';
 export 'icons/svg_draw.dart';
 export 'level_header_card.dart';
 export 'level_node.dart';
+export 'logo_glyph.dart';
 export 'loop_clock.dart';
 export 'map_glyphs.dart';
 export 'night_scope.dart';
