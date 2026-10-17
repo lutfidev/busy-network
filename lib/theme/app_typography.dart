@@ -12,13 +12,6 @@ import 'package:google_fonts/google_fonts.dart';
 abstract final class AppTypography {
   static const List<FontFeature> _tabular = [FontFeature.tabularFigures()];
 
-  /// Cadangan terakhir: font sistem, untuk glyph yang tidak ada di Fredoka
-  /// maupun Nunito ("→" di Panel Atur Antrean). Di ponsel glyph itu memang
-  /// jatuh ke font sistem; nama ini membuat potret Play Store
-  /// (`test/tool/store_test.dart`, yang memuat font sistem dengan nama ini)
-  /// ikut menggambarnya.
-  static const systemFallback = 'sans-serif';
-
   static TextStyle _fredoka(
     double size, {
     FontWeight weight = FontWeight.w600,
@@ -33,10 +26,7 @@ abstract final class AppTypography {
       fontFeatures: _tabular,
     ).copyWith(
       // Fredoka tidak punya glyph seperti "≥"; pakai Nunito sebagai cadangan.
-      fontFamilyFallback: [
-        GoogleFonts.nunito(fontWeight: weight).fontFamily!,
-        systemFallback,
-      ],
+      fontFamilyFallback: [GoogleFonts.nunito(fontWeight: weight).fontFamily!],
     );
   }
 
@@ -52,7 +42,7 @@ abstract final class AppTypography {
       height: height,
       letterSpacing: letterSpacing,
       fontFeatures: _tabular,
-    ).copyWith(fontFamilyFallback: const [systemFallback]);
+    );
   }
 
   // ── Fredoka ────────────────────────────────────────────────────────────
