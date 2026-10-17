@@ -42,7 +42,8 @@ class AudioMusicOut implements MusicOut {
 
   Map<Track, MusicVoice>? _voices;
   final _levels = {for (final t in Track.values) t: 0.0};
-  Timer? _timer;
+  Timer? _delay;
+  Timer? _fade;
   ({Track? track, Duration fade, Duration delay})? _pending;
 
   static Future<Map<Track, MusicVoice>> _openVoices() async {
@@ -74,20 +75,24 @@ class AudioMusicOut implements MusicOut {
     Duration fade = Duration.zero,
     Duration delay = Duration.zero,
   }) {
-    _timer?.cancel();
-    _timer = null;
+    _delay?.cancel();
+    _delay = null;
     if (_voices == null) {
       _pending = (track: track, fade: fade, delay: delay);
       return;
     }
+    // Fade yang sedang jalan (mis. redup 24:00) dibiarkan selesai selama
+    // menunggu; baru dibatalkan saat fade baru dimulai.
     if (delay > Duration.zero) {
-      _timer = Timer(delay, () => _fadeTo(track, fade));
+      _delay = Timer(delay, () => _fadeTo(track, fade));
     } else {
       _fadeTo(track, fade);
     }
   }
 
   void _fadeTo(Track? track, Duration fade) {
+    _fade?.cancel();
+    _fade = null;
     final from = Map.of(_levels);
     final to = {for (final t in Track.values) t: t == track ? volume : 0.0};
     if (track != null && from[track] == 0) _call(track, (v) => v.resume());
@@ -96,12 +101,12 @@ class AudioMusicOut implements MusicOut {
       return;
     }
     final steps = fade.inMicroseconds / _step.inMicroseconds;
-    _timer = Timer.periodic(_step, (timer) {
+    _fade = Timer.periodic(_step, (timer) {
       final t = (timer.tick / steps).clamp(0.0, 1.0);
       _setLevels(from, to, t);
       if (t >= 1) {
         timer.cancel();
-        if (identical(_timer, timer)) _timer = null;
+        if (identical(_fade, timer)) _fade = null;
       }
     });
   }

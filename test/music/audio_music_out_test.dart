@@ -1,4 +1,6 @@
+import 'package:busy_network/app/settings_book.dart';
 import 'package:busy_network/music/audio_music_out.dart';
+import 'package:busy_network/music/background_music.dart';
 import 'package:busy_network/music/track.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -95,4 +97,27 @@ void main() {
     broken.play(Track.calm, fade: _second);
     await tester.pump(_second);
   });
+
+  for (final last in Track.values) {
+    testWidgets('24:00 dari ${last.name}: redup dulu, lalu santai tertunda', (
+      tester,
+    ) async {
+      final music = BackgroundMusic(settings: SettingsBook.memory(), out: out);
+      await tester.pump();
+      music.request(last);
+      await tester.pump(_second);
+      music
+        ..endDay()
+        ..request(Track.calm);
+      await tester.pump(const Duration(milliseconds: 500));
+      for (final voice in voices.values) {
+        expect(voice.volume, 0);
+        expect(voice.playing, isFalse);
+      }
+      await tester.pump(const Duration(milliseconds: 2100));
+      expect(calm().playing, isTrue);
+      expect(calm().volume, AudioMusicOut.volume);
+      expect(tense().volume, 0);
+    });
+  }
 }
