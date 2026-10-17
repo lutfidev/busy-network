@@ -40,7 +40,7 @@ ISI GAME
 TANPA RIBET
 • Bisa dimainkan offline, tanpa akun
 • Tanpa iklan dan tanpa pembelian dalam aplikasi
-• Tidak mengumpulkan data apa pun; progres hanya tersimpan di ponselmu
+• Tidak mengumpulkan data apa pun; progres tersimpan di ponselmu sendiri
 
 Siap jadi pahlawan sinyal satu gang?
 ```

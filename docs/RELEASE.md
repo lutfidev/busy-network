@@ -66,10 +66,9 @@ flutter test test/tool/store_test.dart --dart-define=STORE=true
 Hasilnya: 6 screenshot 1080×1920 (layar app 390×844 dalam bingkai ponsel,
 judul dua baris di atasnya), `feature-graphic.png` 1024×500, dan
 `icon-512.png`. Screenshot & feature graphic ditulis sebagai PNG 24-bit
-tanpa alfa (syarat Play Console). Font bundel tidak punya "→", jadi tool
-ini memuat font sistem mesin (Arial/DejaVu) sebagai
-`AppTypography.systemFallback`, seperti ponsel yang jatuh ke font
-sistemnya.
+tanpa alfa (syarat Play Console). Font bundel tidak punya "→" (Panel Atur
+Antrean); ponsel menggambarnya dengan font sistem, jadi tool ini memuat font
+sistem mesin (Arial/DejaVu) sebagai cadangan Nunito.
 
 ## Checklist Play Console
 1. **Buat aplikasi**: nama "Jaringan Sibuk", bahasa default Indonesia
@@ -101,7 +100,10 @@ sistemnya.
     - Mengumpulkan atau membagikan data pengguna? **Tidak.** Release tidak
       meminta izin `INTERNET` (cek `uses-permission` di manifest gabungan
       `build/app/intermediates/merged_manifests/release/`); progres &
-      setelan hanya di `shared_preferences` perangkat.
+      setelan hanya di `shared_preferences` perangkat. Cadangan otomatis
+      Android (`allowBackup` default) bisa menyalinnya ke akun Google
+      pengguna sendiri; itu fitur sistem, bukan dikirim ke pengembang, dan
+      disebut di kebijakan privasi.
     - Karena tidak ada data yang dikumpulkan, pertanyaan enkripsi &
       penghapusan data tidak muncul.
 11. **Aplikasi berita / pemerintah / keuangan / kesehatan / COVID-19**:
