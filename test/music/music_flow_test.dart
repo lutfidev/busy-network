@@ -107,4 +107,21 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     expect(out.current, Track.calm);
   });
+
+  testWidgets('sakelar Musik: mati diam, nyala santai lagi', (tester) async {
+    setScreenSize(tester, const Size(390, 844));
+    final out = RecordingMusic();
+    await pumpApp(
+      tester,
+      location: AppRoutes.settings,
+      session: musicSession(out),
+    );
+    expect(out.current, Track.calm);
+    await tester.tap(find.text('Musik'));
+    await tester.pumpAndSettle();
+    expect(out.current, isNull);
+    await tester.tap(find.text('Musik'));
+    await tester.pumpAndSettle();
+    expect(out.current, Track.calm);
+  });
 }
